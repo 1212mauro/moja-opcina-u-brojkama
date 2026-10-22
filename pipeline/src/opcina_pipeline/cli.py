@@ -26,7 +26,9 @@ def contract_schema() -> dict:
 def write_schema(path: Path = SCHEMA_PATH) -> None:
     schema = contract_schema()
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(schema, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(schema, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
+    )
     print(f"wrote {path.relative_to(REPO_ROOT)}")
 
 
