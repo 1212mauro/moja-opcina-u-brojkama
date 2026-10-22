@@ -1,0 +1,6 @@
+[
+  {"Naziv": "Dječji vrtić \"Sunce\"", "Adresa": "Dravska 1", "Mjesto": "Alfa", "ePosta": "osoba@example.org", "Telefon": "042/111-111", "Zupanija": "Varaždinska županija ", "PostanskiBroj": "42000"},
+  {"Naziv": "Dječji vrtić \"Mjesec\"", "Adresa": "Cesta 2", "Mjesto": "Beta", "Zupanija": "Varaždinska županija ", "PostanskiBroj": "42001"},
+  {"Naziv": "Udruga Igra", "Adresa": "Ul. A. Šenoe 4", "Mjesto": "Alfa", "Zupanija": "Varaždinska županija ", "PostanskiBroj": "42000"},
+  {"Naziv": "Dječji vrtić \"Drugdje\"", "Adresa": "Ulica 1", "Mjesto": "Našice", "Zupanija": "Osječko-baranjska županija ", "PostanskiBroj": "31500"}
+]

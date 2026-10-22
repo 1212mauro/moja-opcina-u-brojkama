@@ -1,0 +1,5 @@
+{"type": "FeatureCollection", "features": [
+  {"type": "Feature", "properties": {"dzs_code": "00001", "name": "Alfa"}, "geometry": {"type": "MultiPolygon", "coordinates": [[[[16.0, 46.0], [16.1, 46.0], [16.1, 46.1], [16.0, 46.1], [16.0, 46.0]]]]}},
+  {"type": "Feature", "properties": {"dzs_code": "00002", "name": "Beta"}, "geometry": {"type": "Polygon", "coordinates": [[[16.1, 46.0], [16.2, 46.0], [16.2, 46.1], [16.1, 46.1], [16.1, 46.0]]]}},
+  {"type": "Feature", "properties": {"dzs_code": "99999", "name": "Elsewhere"}, "geometry": {"type": "Polygon", "coordinates": [[[15.0, 45.0], [15.1, 45.0], [15.1, 45.1], [15.0, 45.1], [15.0, 45.0]]]}}
+]}

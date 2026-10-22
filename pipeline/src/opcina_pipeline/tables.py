@@ -85,7 +85,7 @@ FACILITY = {
     "settlement": pl.Utf8,  # nullable
     "lat": pl.Float64,
     "lon": pl.Float64,
-    "location_source": pl.Utf8,  # "osm" | "geocoded" | "settlement_centroid"
+    "location_source": pl.Utf8,  # "osm" | "geocoded" | "municipality_point"
     "source_run_id": pl.Utf8,
 }
 
