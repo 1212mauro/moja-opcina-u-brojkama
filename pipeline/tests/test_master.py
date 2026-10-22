@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import polars as pl
 import pytest
 
@@ -49,6 +51,6 @@ def test_fails_when_code_join_pairs_different_names(register, lau, scope):
 
 
 def test_fails_when_a_pilot_is_out_of_scope(register, lau, scope):
-    scope = scope.__class__(**{**scope.__dict__, "pilot_lau_codes": ("99999",)})
+    scope = replace(scope, pilot_lau_codes=("99999",))
     with pytest.raises(ValueError, match="pilot"):
         build_master(register, lau, scope)

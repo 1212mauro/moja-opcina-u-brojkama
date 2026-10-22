@@ -7,11 +7,11 @@ from pathlib import Path
 import polars as pl
 
 from opcina_pipeline import master, postcodes
-from opcina_pipeline.config import CONFIG_DIR, REPO_ROOT, SCHEMA_PATH, load_scope, load_sources
+from opcina_pipeline.config import config_path, load_scope, load_sources, repo_root, schema_path
 from opcina_pipeline.contract import Contract
 
-MASTER_PATH = CONFIG_DIR / "municipalities.csv"
-POSTCODES_PATH = CONFIG_DIR / "postcodes.csv"
+MASTER_CSV = "municipalities.csv"
+POSTCODES_CSV = "postcodes.csv"
 
 
 def contract_schema() -> dict:
@@ -27,19 +27,20 @@ def contract_schema() -> dict:
     return schema
 
 
-def write_schema(path: Path = SCHEMA_PATH) -> None:
+def write_schema(path: Path | None = None) -> None:
+    path = path or schema_path()
     schema = contract_schema()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(schema, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
     )
-    print(f"wrote {path.relative_to(REPO_ROOT)}")
+    print(f"wrote {path.relative_to(repo_root())}")
 
 
 def write_csv(df: pl.DataFrame, path: Path) -> None:
     # polars writes "\n" line endings on every platform, so the file is stable in git.
     df.write_csv(path)
-    print(f"wrote {path.relative_to(REPO_ROOT)} ({df.height} rows)")
+    print(f"wrote {path.relative_to(repo_root())} ({df.height} rows)")
 
 
 def build_master() -> pl.DataFrame:
@@ -49,7 +50,7 @@ def build_master() -> pl.DataFrame:
         master.read_lau(sources["lau_codes"].path),
         load_scope(),
     )
-    write_csv(df, MASTER_PATH)
+    write_csv(df, config_path(MASTER_CSV))
     return df
 
 
@@ -58,11 +59,11 @@ def build_postcodes() -> None:
     df = postcodes.build_postcodes(
         postcodes.read_posta(sources["postcodes"].path),
         postcodes.read_census_settlements(sources["dzs_settlements"].path),
-        pl.read_csv(MASTER_PATH, infer_schema_length=0),
+        pl.read_csv(config_path(MASTER_CSV), infer_schema_length=0),
         load_scope(),
         postcodes.read_overrides(),
     )
-    write_csv(df, POSTCODES_PATH)
+    write_csv(df, config_path(POSTCODES_CSV))
 
 
 def main() -> None:

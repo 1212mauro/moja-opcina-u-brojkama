@@ -17,10 +17,18 @@ def find_repo_root(start: Path) -> Path:
     raise SystemExit("opcina: run this from inside the repository checkout")
 
 
-REPO_ROOT = find_repo_root(Path.cwd().resolve())
-CONFIG_DIR = REPO_ROOT / "pipeline" / "config"
-RAW_DIR = REPO_ROOT / "data" / "raw"
-SCHEMA_PATH = REPO_ROOT / "contract" / "schema.json"
+@cache
+def repo_root() -> Path:
+    """Resolved on first use, not at import, so importing helpers works from anywhere."""
+    return find_repo_root(Path.cwd().resolve())
+
+
+def config_path(name: str) -> Path:
+    return repo_root() / "pipeline" / "config" / name
+
+
+def schema_path() -> Path:
+    return repo_root() / "contract" / "schema.json"
 
 
 @dataclass(frozen=True)
@@ -45,11 +53,11 @@ class Source:
 
     @property
     def path(self) -> Path:
-        return RAW_DIR / self.file
+        return repo_root() / "data" / "raw" / self.file
 
 
 def _read_toml(name: str) -> dict:
-    return tomllib.loads((CONFIG_DIR / name).read_text(encoding="utf-8"))
+    return tomllib.loads(config_path(name).read_text(encoding="utf-8"))
 
 
 @cache
