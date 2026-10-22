@@ -1,6 +1,7 @@
 import json
 
-from opcina_pipeline.cli import REPO_ROOT, SCHEMA_PATH, contract_schema
+from opcina_pipeline.cli import contract_schema
+from opcina_pipeline.config import REPO_ROOT, SCHEMA_PATH
 from opcina_pipeline.contract import MunicipalityPage
 
 EXAMPLE = REPO_ROOT / "contract" / "examples" / "municipality-page.json"
