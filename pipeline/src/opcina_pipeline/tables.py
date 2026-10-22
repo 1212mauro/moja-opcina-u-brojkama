@@ -30,7 +30,9 @@ BUDGET_LINE = {
     "period": pl.Utf8,  # "FY" (I-XII)
     "classification": pl.Utf8,  # "economic" | "function" | "derived"
     "code": pl.Utf8,  # account ("611"), COFOG ("091") or derived position ("X067")
-    "level": pl.Int8,  # digits of the code (1-4); 0 for derived positions
+    # Parents and children both appear (6 -> 61 -> 611): sum one level only. Derived rows
+    # include non-euro figures (Z006-Z009 employee counts, 11P/11K cash balances).
+    "level": pl.Int8,  # digits of the code (1-5); 0 for derived positions
     "label": pl.Utf8,
     "amount_eur": pl.Float64,
     "source_run_id": pl.Utf8,

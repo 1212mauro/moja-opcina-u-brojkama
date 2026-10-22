@@ -13,6 +13,7 @@ table is missing for a municipality is ``null`` and the site says so.
 """
 
 import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -88,6 +89,14 @@ def source_run(run: dict, row_count: int) -> SourceRun:
     )
 
 
+FORM_NOTE = re.compile(r"\s*\((?:šifr[ae]|za)\b[^()]*\)\s*$", re.IGNORECASE)
+
+
+def clean_label(label: str) -> str:
+    """Drop MinFin's form notes: "Prihodi od poreza (šifre 611+612+613)" -> "Prihodi od poreza"."""
+    return FORM_NOTE.sub("", label).strip()
+
+
 def budget_section(lines: pl.DataFrame, population: int) -> Budget | None:
     if lines.is_empty():
         return None
@@ -106,7 +115,7 @@ def budget_section(lines: pl.DataFrame, population: int) -> Budget | None:
         return [
             BudgetItem(
                 code=r["code"],
-                label=r["label"],
+                label=clean_label(r["label"]),
                 amount_eur=round(r["amount_eur"], 2),
                 per_resident_eur=round(r["amount_eur"] / population, 2),
             )
