@@ -59,6 +59,7 @@ import polars as pl
 from openpyxl import load_workbook
 
 from opcina_pipeline.buyers import read_scope_buyers
+from opcina_pipeline.config import load_sources
 from opcina_pipeline.fetch.base import FetchContext, Outcome, fetcher
 from opcina_pipeline.fetch.http import Download, PoliteClient, file_sha256
 
@@ -69,20 +70,11 @@ from opcina_pipeline.fetch.http import Download, PoliteClient, file_sha256
 BLOCKED_STATUSES = {403, 429}
 
 
-def register_path(raw_dir: Path) -> Path:
-    """The RKP register used to find budget users; the newest export if not yet renamed."""
-    folder = raw_dir / "minfin_budget_users"
-    path = folder / "rkp_register.xlsx"
-    if path.exists():
-        return path
-    candidates = sorted(folder.glob("*.xlsx"), key=lambda p: p.stat().st_mtime)
-    if not candidates:
-        raise FileNotFoundError(f"no RKP register in {folder}; fetch minfin_budget_users first")
-    return candidates[-1]
-
-
 def scope_buyers(ctx: FetchContext) -> pl.DataFrame:
-    return read_scope_buyers(ctx.master(), register_path(ctx.raw_dir))
+    register = load_sources()["minfin_budget_users"].path
+    if not register.exists():
+        raise FileNotFoundError(f"{register} missing; fetch minfin_budget_users first")
+    return read_scope_buyers(ctx.master(), register)
 
 
 def _write_if_changed(path: Path, text: str) -> Download:
@@ -329,14 +321,17 @@ def fetch_legacy_registers(client: PoliteClient, buyers: pl.DataFrame, out_dir: 
 
     for oib, name in buyers.select("oib", "name").iter_rows():
         try:
-            if oib not in partners:
-                found = session.find_partners(oib)
-                partners[oib] = [{"id": p.id, "name": p.name} for p in found]
-                cache_path.write_text(
-                    json.dumps(partners, ensure_ascii=False, indent=2, sort_keys=True),
-                    encoding="utf-8",
-                )
-            records = partners[oib]
+            # Only found partners are cached: an empty answer is looked up again next
+            # run, so a transient page error never hides a buyer for good.
+            records = partners.get(oib)
+            if not records:
+                records = [{"id": p.id, "name": p.name} for p in session.find_partners(oib)]
+                if records:
+                    partners[oib] = records
+                    cache_path.write_text(
+                        json.dumps(partners, ensure_ascii=False, indent=2, sort_keys=True),
+                        encoding="utf-8",
+                    )
             if not records:
                 missing.append(oib)
                 continue
@@ -389,6 +384,10 @@ WINDOW = timedelta(days=7)
 # Windows are computed in UTC while the server works in Croatian time; re-reading the
 # last day of the previous run covers the offset (records merge by id).
 OVERLAP = timedelta(days=1)
+# At most this many windows per run (~half a year, ~5 minutes at eojn.hr's pace): the
+# first backfill from 2024 then completes over a few nightly runs instead of
+# outlasting the job timeout, which would lose its progress.
+MAX_WINDOWS_PER_RUN = 26
 
 CONTRACTS_FILE = "contracts.jsonl"
 STATE_FILE = "state.json"
@@ -531,8 +530,11 @@ def sync_contracts(
     start = max(API_START, last_to - OVERLAP) if last_to else API_START
 
     refreshed = 0
+    processed_to = start
     try:
-        for window_start, window_end in windows(start, end):
+        for index, (window_start, window_end) in enumerate(windows(start, end)):
+            if index == MAX_WINDOWS_PER_RUN:
+                break
             published = set()
             for record in api.contracts_published(window_start, window_end):
                 if buyer_oib(record) in scope:
@@ -547,6 +549,7 @@ def sync_contracts(
             # Saved per window, so an interrupted backfill resumes where it stopped.
             _write_if_changed(contracts_path, contracts_text(contracts))
             _write_state(state_path, window_end)
+            processed_to = window_end
     except ApiKeyRejected as error:
         return Outcome("failed", message=str(error))
 
@@ -555,8 +558,10 @@ def sync_contracts(
     download = Download(download.path, text != original, download.sha256, download.bytes)
     message = (
         f"{len(contracts)} contracts in scope ({len(contracts) - before} new, "
-        f"{refreshed} refreshed from events) up to {end:%Y-%m-%d %H:%M} UTC"
+        f"{refreshed} refreshed from events) up to {processed_to:%Y-%m-%d %H:%M} UTC"
     )
+    if processed_to < end:
+        message += "; backfill continues next run"
     return Outcome.from_downloads([download], message)
 
 

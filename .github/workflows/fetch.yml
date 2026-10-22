@@ -22,7 +22,8 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Weekly old-EOJN crawl ~20 min + EOJN API (capped per run) ~5 min + the rest.
+    timeout-minutes: 75
     defaults:
       run:
         working-directory: pipeline

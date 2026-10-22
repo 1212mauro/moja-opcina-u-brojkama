@@ -20,6 +20,7 @@ import httpx
 
 USER_AGENT = "moja-opcina-u-brojkama/0.1 (+https://github.com/1212mauro/moja-opcina-u-brojkama)"
 RETRY_STATUSES = {429, 500, 502, 503, 504}
+MAX_RETRY_AFTER = 120.0  # seconds
 
 
 @dataclass(frozen=True)
@@ -146,13 +147,27 @@ class PoliteClient:
                     raise
                 time.sleep(self.backoff * 2**attempt)
                 continue
-            if response.status_code in RETRY_STATUSES and attempt < self.retries:
-                time.sleep(_retry_after(response) or self.backoff * 2**attempt * 5)
+            delay = self._retry_delay(response, attempt)
+            if delay is not None:
+                time.sleep(delay)
                 continue
             if response.status_code != 304:
                 response.raise_for_status()
             return response
         raise AssertionError("unreachable")
+
+    def _retry_delay(self, response: httpx.Response, attempt: int) -> float | None:
+        """Seconds to wait before retrying, or None to stop and raise.
+
+        A server asking for a long pause (Retry-After above MAX_RETRY_AFTER) has
+        blocked us: give up at once rather than sleep through the nightly job.
+        """
+        if response.status_code not in RETRY_STATUSES or attempt >= self.retries:
+            return None
+        asked = _retry_after(response)
+        if asked is not None and asked > MAX_RETRY_AFTER:
+            return None
+        return asked or self.backoff * 2**attempt * 5
 
     def get(self, url: str, **kwargs) -> httpx.Response:
         return self.request("GET", url, **kwargs)
@@ -189,8 +204,9 @@ class PoliteClient:
                 with self._http.stream(method, url, headers=headers, **kwargs) as response:
                     if response.status_code == 304:
                         return Download(dest, False, file_sha256(dest), dest.stat().st_size)
-                    if response.status_code in RETRY_STATUSES and attempt < self.retries:
-                        time.sleep(_retry_after(response) or self.backoff * 2**attempt * 5)
+                    delay = self._retry_delay(response, attempt)
+                    if delay is not None:
+                        time.sleep(delay)
                         continue
                     response.raise_for_status()
                     with tmp.open("wb") as f:

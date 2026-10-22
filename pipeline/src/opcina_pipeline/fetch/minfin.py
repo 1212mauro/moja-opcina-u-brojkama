@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 from opcina_pipeline.fetch.base import FetchContext, Outcome, fetcher
-from opcina_pipeline.fetch.http import Download, file_sha256
+from opcina_pipeline.fetch.http import Download, content_fingerprint, file_sha256
 from opcina_pipeline.fetch.links import find_links
 
 TOKEN_PATTERN = r'name="__RequestVerificationToken"[^>]*value="([^"]+)"'
@@ -32,11 +32,12 @@ def fetch_budget(ctx: FetchContext) -> Outcome:
     archive = ctx.client.download(zips[0], ctx.out_dir / "lokalci_euro.zip")
 
     county = ctx.source.path
+    changed = False
     if archive.changed or not county.exists():
+        # The zip changes when any county is corrected; ours changed only if its data did.
+        previous = content_fingerprint(county) if county.exists() else None
         extract_county_workbook(archive.path, ctx.scope.register_code, county)
-        changed = True
-    else:
-        changed = False
+        changed = content_fingerprint(county) != previous
     workbook = Download(county, changed, file_sha256(county), county.stat().st_size)
     return Outcome.from_downloads([archive, workbook], f"period ending {last_year}: {zips[0]}")
 

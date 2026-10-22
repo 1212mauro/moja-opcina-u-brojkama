@@ -96,3 +96,16 @@ def test_find_links_resolves_and_encodes():
         "https://mfin.gov.hr/docs/Lokalci%20FINALI%202019%202024%20EURO.zip"
     ]
     assert safe_url("https://a.hr/x/Ž b.ods") == "https://a.hr/x/%C5%BD%20b.ods"
+
+
+def test_long_retry_after_gives_up_instead_of_sleeping():
+    calls = []
+
+    def handler(request):
+        calls.append(1)
+        return httpx.Response(429, headers={"Retry-After": "3600"})
+
+    with client_for(handler) as client:
+        with pytest.raises(httpx.HTTPStatusError):
+            client.get("https://example.org/")
+    assert len(calls) == 1

@@ -171,10 +171,8 @@ def test_fetch_legacy_registers_exports_each_known_buyer(tmp_path):
     rows = eojn.sheet_values(tmp_path / f"{BREZNICKI_HUM}.xlsx")
     assert ("1/2018", "Ceste") in [tuple(v for v in r if v) for r in rows]
     partners = json.loads((tmp_path / "partners.json").read_text(encoding="utf-8"))
-    assert partners == {
-        BREZNICKI_HUM: [{"id": "107710", "name": "Općina Breznički Hum"}],
-        "00000000005": [],
-    }
+    # Only found partners are cached; the unknown buyer is looked up again next run.
+    assert partners == {BREZNICKI_HUM: [{"id": "107710", "name": "Općina Breznički Hum"}]}
     generate = [
         form for m, p, form in server.requests if (m, p) == ("POST", "RptRegistarUgovora.aspx")
     ]
@@ -190,8 +188,9 @@ def test_fetch_legacy_registers_reuses_partner_ids_and_keeps_unchanged_files(tmp
     outcome = eojn.fetch_legacy_registers(mock_client(server), BUYERS, tmp_path)
 
     assert outcome.status == "unchanged"
-    assert server.count("GET", "SearchFrm.aspx") == 0
-    assert server.count("POST", "SearchFrm.aspx") == 0
+    # The cached buyer needs no lookup; the one unknown to the old EOJN is asked again.
+    assert server.count("GET", "SearchFrm.aspx") == 1
+    assert server.count("POST", "SearchFrm.aspx") == 1
     assert server.count("POST", "RptRegistarUgovora.aspx") == 1
 
     server = FakeLegacyServer(register_xlsx(("1/2018", "Ceste"), ("3/2019", "Vrtić")))
@@ -214,17 +213,6 @@ def test_fetch_legacy_registers_rejects_non_xlsx_export(tmp_path):
     assert outcome.status == "failed"
     assert "not an XLSX" in outcome.message
     assert not (tmp_path / f"{BREZNICKI_HUM}.xlsx").exists()
-
-
-def test_register_path_falls_back_to_newest_export(tmp_path):
-    folder = tmp_path / "minfin_budget_users"
-    folder.mkdir()
-    (folder / "registar_2025.xlsx").write_bytes(b"old")
-    with pytest.raises(FileNotFoundError):
-        eojn.register_path(tmp_path / "missing")
-    assert eojn.register_path(tmp_path).name == "registar_2025.xlsx"
-    (folder / "rkp_register.xlsx").write_bytes(b"new")
-    assert eojn.register_path(tmp_path).name == "rkp_register.xlsx"
 
 
 # ---------------------------------------------------------------------------
@@ -342,3 +330,29 @@ def test_contracts_eojn_is_skipped_without_key(tmp_path, scope, monkeypatch):
     outcome = eojn.contracts_eojn(ctx)
     assert outcome.status == "skipped"
     assert "eojn@nn.hr" in outcome.message
+
+
+def test_sync_contracts_caps_windows_per_run(tmp_path, monkeypatch):
+    class CountingApi:
+        def __init__(self):
+            self.windows = 0
+
+        def contracts_published(self, start, end):
+            self.windows += 1
+            return []
+
+        def changed_contract_ids(self, start, end):
+            return set()
+
+        def contract(self, cid):
+            return None
+
+    monkeypatch.setattr(eojn, "MAX_WINDOWS_PER_RUN", 3)
+    api = CountingApi()
+    now = eojn.API_START + 10 * eojn.WINDOW
+    outcome = eojn.sync_contracts(api, [], tmp_path, now=now)
+
+    assert api.windows == 3
+    assert "backfill continues next run" in outcome.message
+    state = json.loads((tmp_path / eojn.STATE_FILE).read_text(encoding="utf-8"))
+    assert state["last_to"] == (eojn.API_START + 3 * eojn.WINDOW).isoformat()

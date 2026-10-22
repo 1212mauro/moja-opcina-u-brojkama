@@ -38,7 +38,13 @@ def scope_buyers(master: pl.DataFrame, register: pl.DataFrame) -> pl.DataFrame:
             pl.lit("budget_user").alias("kind"),
         )
     )
-    return pl.concat([units, users]).unique("oib", keep="first").sort("dzs_code", "kind", "name")
+    # A newly registered budget user can lack an OIB; it cannot be matched to anything yet.
+    return (
+        pl.concat([units, users])
+        .filter(pl.col("oib").str.strip_chars().str.len_chars() > 0)
+        .unique("oib", keep="first")
+        .sort("dzs_code", "kind", "name")
+    )
 
 
 def read_scope_buyers(master: pl.DataFrame, register_path: Path) -> pl.DataFrame:

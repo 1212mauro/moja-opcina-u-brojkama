@@ -192,3 +192,62 @@ def test_simplify_boundaries_rejects_units_missing_from_master():
     features = [boundary_feature("99999", jagged_square(16.0, 46.0))]
     with pytest.raises(ValueError, match="disagree"):
         simplify_boundaries(features, MASTER)
+
+
+# --- Payments connectors -------------------------------------------------------------------
+
+
+class FakeCtx:
+    """Just enough of FetchContext for one connector."""
+
+    def __init__(self, handler, months=3):
+        import httpx
+
+        from opcina_pipeline.fetch.http import PoliteClient
+
+        self.client = PoliteClient(
+            min_interval=0, backoff=0, transport=httpx.MockTransport(handler)
+        )
+        self.source = type("S", (), {"options": {"months": months}})()
+
+
+def test_empty_months_are_asked_again(tmp_path, monkeypatch):
+    import httpx
+
+    from opcina_pipeline.fetch import payments
+
+    monkeypatch.setattr(payments, "_today", lambda: date(2026, 12, 5))
+    (tmp_path / "2026-10.csv").write_bytes(b"")  # nothing was published in October yet
+    (tmp_path / "2026-09.csv").write_bytes(b'"Naziv isplatitelja";"Datum"\n')
+    asked = []
+
+    def handler(request):
+        asked.append(request.url.params["filters"])
+        return httpx.Response(200, content=b'"Naziv isplatitelja";"Datum"\n')
+
+    payments.fetch_otvorenigrad(FakeCtx(handler, months=4), {"tenant": "grad-x"}, tmp_path)
+
+    assert any('"2026-10-01"' in f for f in asked)  # empty month asked again
+    assert not any('"2026-09-01"' in f for f in asked)  # finished month kept
+
+
+def test_html_links_removes_files_no_longer_linked(tmp_path):
+    import httpx
+
+    from opcina_pipeline.fetch import payments
+
+    (tmp_path / "Isplate_04-26.ods").write_bytes(b"old upload")
+    page = '<a href="/f/Isplate_04-26_ispravak.ods">x</a><a href="/f/Isplate_03-26.ods">y</a>'
+
+    def handler(request):
+        if request.url.path == "/page":
+            return httpx.Response(200, text=page)
+        return httpx.Response(200, content=b"ods")
+
+    entry = {"page": "https://hum.hr/page", "pattern": r"/f/[^\"]+\.ods"}
+    payments.fetch_html_links(FakeCtx(handler), entry, tmp_path)
+
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        "Isplate_03-26.ods",
+        "Isplate_04-26_ispravak.ods",
+    ]

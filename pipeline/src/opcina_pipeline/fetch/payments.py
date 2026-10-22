@@ -29,6 +29,10 @@ def load_platforms() -> dict[str, dict]:
     return tomllib.loads(config_path("payments.toml").read_text(encoding="utf-8"))
 
 
+def _today() -> date:
+    return date.today()  # patched in tests
+
+
 def month_starts(today: date, count: int) -> list[date]:
     """First days of the last ``count`` months, oldest first, including the current month."""
     starts = []
@@ -45,12 +49,13 @@ def next_month(start: date) -> date:
 
 def fetch_otvorenigrad(ctx: FetchContext, entry: dict, dest: Path) -> list[Download]:
     """iTransparentnost API: one CSV per month. The upper date bound is exclusive."""
-    starts = month_starts(date.today(), ctx.source.options["months"])
+    starts = month_starts(_today(), ctx.source.options["months"])
     refresh_from = starts[-REFRESH_MONTHS]
     files = []
     for start in starts:
         target = dest / f"{start:%Y-%m}.csv"
-        if target.exists() and start < refresh_from:
+        # Empty months (nothing published yet) are always asked again: late publishing.
+        if target.exists() and target.stat().st_size and start < refresh_from:
             continue
         filters = {
             "datum": {"values": [start.isoformat(), next_month(start).isoformat()], "op": "BETWEEN"}
@@ -93,12 +98,22 @@ def fetch_kipos(ctx: FetchContext, entry: dict, dest: Path) -> list[Download]:
 
 
 def fetch_html_links(ctx: FetchContext, entry: dict, dest: Path) -> list[Download]:
-    """Files linked from one page; files already on disk are kept, the newest refreshed."""
+    """Files linked from one page; files already on disk are kept, the newest refreshed.
+
+    Local files the page no longer links (a renamed or corrected upload) are removed,
+    so the folder always mirrors what the municipality currently publishes.
+    """
     page_url = entry["page"]
     links = find_links(ctx.client.get(page_url).text, entry["pattern"], page_url)
     if not links:
         raise ValueError(f"no links matching {entry['pattern']!r} on {page_url}")
     names = [unquote(PurePosixPath(urlsplit(url).path).name) for url in links]
+    if len(set(names)) != len(names):
+        raise ValueError(f"two linked files share a name on {page_url}: {names}")
+    if dest.exists():
+        for stale in dest.iterdir():
+            if stale.is_file() and stale.name not in names:
+                stale.unlink()
     refresh = set(sorted(names, key=_month_key)[-REFRESH_FILES:])
     files = []
     for url, name in zip(links, names, strict=True):
