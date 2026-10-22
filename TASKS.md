@@ -36,13 +36,13 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 ### A. Project setup — week 1 (~16 h)
 
-- [ ] A1 Agree on repo layout: `pipeline/` (Python), `web/` (Next.js), `data/raw/` (git-ignored downloads), `web/public/data/` (generated JSON) (~1h)
-- [ ] A2 Add `LICENSE` (EUPL-1.2) and a `README.md` with the goal and how to run the pipeline and the site (~1h)
-- [ ] A3 Set up the Python 3.12 project in `pipeline/`: polars, openpyxl, httpx, pytest, ruff (~2h)
-- [ ] A4 Set up the Next.js + TypeScript app in `web/` with static export (`output: 'export'`) and ESLint (~3h)
-- [ ] A5 GitHub Actions CI on every PR: ruff + pytest for `pipeline/`, lint + build for `web/` (~3h, needs A3, A4)
-- [ ] A6 Define the JSON data contract between pipeline and frontend (per-municipality file, search index, boundaries) as TypeScript types + an example file (~4h)
-- [ ] A7 Agree on team roles, a weekly check-in, and the branch/PR convention (~2h)
+- [x] A1 Agree on repo layout: `pipeline/` (Python), `web/` (Next.js), `data/raw/` (git-ignored downloads), `web/public/data/` (generated JSON) (~1h)
+- [x] A2 Add `LICENSE` (EUPL-1.2) and a `README.md` with the goal and how to run the pipeline and the site (~1h)
+- [x] A3 Set up the Python 3.12 project in `pipeline/`: polars, openpyxl, httpx, pytest, ruff (~2h)
+- [x] A4 Set up the Next.js + TypeScript app in `web/` with static export (`output: 'export'`) and ESLint (~3h)
+- [x] A5 GitHub Actions CI on every PR: ruff + pytest for `pipeline/`, lint + build for `web/` (~3h, needs A3, A4)
+- [x] A6 Define the JSON data contract between pipeline and frontend (per-municipality file, search index, boundaries) as TypeScript types + an example file (~4h)
+- [ ] A7 Agree on team roles, a weekly check-in, and the branch/PR convention (~2h) — conventions in CONTRIBUTING.md; roles and check-in time still to fill in
 
 ### B. Pilot selection and raw data — week 1 (~41 h)
 
