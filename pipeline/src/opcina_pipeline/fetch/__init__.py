@@ -1,16 +1,18 @@
 """Automatic download of every source (task C1): ``opcina fetch``."""
 
 import importlib
+import json
 import os
 import traceback
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from opcina_pipeline.config import load_scope, load_sources, repo_root
 from opcina_pipeline.fetch.base import FETCHERS, FetchContext, Outcome, append_run, run_record
 from opcina_pipeline.fetch.http import ConditionalCache, PoliteClient
 
 # Modules that register fetchers with @fetcher; importing them fills FETCHERS.
-FETCHER_MODULES = ["minfin", "stats", "dgu", "ckan", "osm", "payments"]
+FETCHER_MODULES = ["minfin", "stats", "dgu", "ckan", "osm", "payments", "eojn"]
 
 # Hosts that rate-limit aggressively get a longer pause between requests.
 HOST_INTERVALS = {
@@ -44,8 +46,13 @@ def run_fetch(only: list[str] | None = None) -> dict[str, Outcome]:
         for key in keys:
             started = datetime.now(UTC)
             fetch = FETCHERS.get(key)
+            recent = recently_fetched(log_path, key, sources[key].options.get("refresh_days"))
             if fetch is None:
                 outcome = Outcome("failed", message="no fetcher registered for this source")
+            elif recent and not only:
+                outcome = Outcome(
+                    "skipped", message=f"last fetched {recent}; refresh_days not reached"
+                )
             else:
                 ctx = FetchContext(sources[key], client, load_scope(), raw_dir)
                 try:
@@ -61,6 +68,25 @@ def run_fetch(only: list[str] | None = None) -> dict[str, Outcome]:
 
     write_step_summary(outcomes)
     return outcomes
+
+
+def recently_fetched(log_path: Path, key: str, refresh_days: int | None) -> str | None:
+    """Finish time of the last successful run if it is newer than ``refresh_days``.
+
+    Slow sources that rarely change (the old EOJN register: ~20 minutes of polite
+    requests) set ``refresh_days`` so the nightly run fetches them only weekly.
+    Naming the source explicitly (``opcina fetch <key>``) always fetches it.
+    """
+    if not refresh_days or not log_path.exists():
+        return None
+    last = None
+    for line in log_path.read_text(encoding="utf-8").splitlines():
+        record = json.loads(line)
+        if record["source"] == key and record["status"] in ("ok", "unchanged"):
+            last = record["finished_at"]
+    if last and datetime.now(UTC) - datetime.fromisoformat(last) < timedelta(days=refresh_days):
+        return last
+    return None
 
 
 def write_step_summary(outcomes: dict[str, Outcome]) -> None:

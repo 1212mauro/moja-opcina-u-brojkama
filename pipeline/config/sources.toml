@@ -148,6 +148,8 @@ page = "https://eojn.nn.hr/Oglasnik/"
 url = "https://eojn.nn.hr/Spin/application/ipn/JavniReporti/RptRegistarUgovora.aspx"
 licence = "Javno objavljeni podaci (licence not stated)"
 file = "contracts_eojn_legacy"
+# 2 polite requests per buyer (~20 min for a county); the old system rarely changes.
+refresh_days = 7
 
 [contracts_eojn]
 title = "Registar ugovora, EOJN RH (od 2024)"
