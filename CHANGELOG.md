@@ -19,6 +19,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Automatic fetching of every source (`opcina fetch`): MinFin budget and RKP register, DZS census and estimates, Eurostat LAU codes, Pošta postcodes, DGU boundaries, school and kindergarten registries, OpenStreetMap facilities, monthly payments for 4 of 5 pilots, and EOJN contracts (old register for all buyers; new register via the official API once a key is configured). Polite HTTP with conditional downloads, data-only change detection and a run log (`data/raw/source_runs.jsonl`).
 - Nightly fetch workflow on GitHub Actions with cached raw data and a per-source status table.
 - Simplified municipality boundaries for the website (`opcina boundaries`).
+- Data pipeline (`opcina build`): parsers for population, budget execution, procurement contracts (with kuna conversion and deduplication), monthly payments (natural persons never named) and facilities (with geocoding); peer groups and per-resident ranks; quality gate between staged and published tables; export of one JSON page per municipality, search index, source status and boundaries. Documented in `docs/pipeline.md`.
+- Known publisher refusals are reported as "pending access" instead of failing the nightly job.
 
 ### Changed
 
