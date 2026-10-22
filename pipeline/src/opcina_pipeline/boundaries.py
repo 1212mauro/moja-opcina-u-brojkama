@@ -20,8 +20,12 @@ COORDINATE_DECIMALS = 5  # ~1 m
 
 
 def simplify_boundaries(
-    features: list[dict], master: pl.DataFrame, tolerance: float = DEFAULT_TOLERANCE
+    features: list[dict],
+    master: pl.DataFrame,
+    tolerance: float = DEFAULT_TOLERANCE,
+    has_data: set[str] | None = None,
 ) -> Boundaries:
+    """``has_data``: DZS codes with a municipality page (default: the pilots)."""
     units = {row["dzs_code"]: row for row in master.iter_rows(named=True)}
     missing = {f["properties"]["dzs_code"] for f in features} ^ set(units)
     if missing:
@@ -43,7 +47,11 @@ def simplify_boundaries(
                     "slug": unit["slug"],
                     "name": unit["name"],
                     "type": unit["type"],
-                    "hasData": unit["pilot"] == "true",
+                    "hasData": (
+                        unit["dzs_code"] in has_data
+                        if has_data is not None
+                        else unit["pilot"] == "true"
+                    ),
                 },
                 "geometry": mapping(geometry),
             }
@@ -51,9 +59,11 @@ def simplify_boundaries(
     return Boundaries.model_validate({"type": "FeatureCollection", "features": out})
 
 
-def write_boundaries(source: Path, master: pl.DataFrame, dest: Path) -> Boundaries:
+def write_boundaries(
+    source: Path, master: pl.DataFrame, dest: Path, has_data: set[str] | None = None
+) -> Boundaries:
     features = json.loads(source.read_text(encoding="utf-8"))["features"]
-    boundaries = simplify_boundaries(features, master)
+    boundaries = simplify_boundaries(features, master, has_data=has_data)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(
         json.dumps(boundaries.model_dump(mode="json"), ensure_ascii=False, separators=(",", ":")),

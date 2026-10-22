@@ -196,14 +196,7 @@ export interface Facility {
  */
 export interface SourceRun {
   id: string;
-  source:
-    | "minfin_budget"
-    | "minfin_budget_users"
-    | "eojn_contracts"
-    | "dzs_population"
-    | "dgu_boundaries"
-    | "facilities"
-    | "payments";
+  source: string;
   title: string;
   publisher: string;
   url: string;

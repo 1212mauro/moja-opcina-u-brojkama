@@ -711,15 +711,6 @@
           "type": "string"
         },
         "source": {
-          "enum": [
-            "minfin_budget",
-            "minfin_budget_users",
-            "eojn_contracts",
-            "dzs_population",
-            "dgu_boundaries",
-            "facilities",
-            "payments"
-          ],
           "type": "string"
         },
         "title": {
