@@ -1,8 +1,11 @@
-name: Fetch sources
+name: Fetch and build data
 
-# Downloads every source nightly (task C1). data/raw/ is carried between runs in
-# the Actions cache so unchanged files are not downloaded again. A failed source
-# fails the job, which emails the maintainer; the last good files stay in place.
+# Nightly: download every source (C1), parse, run the quality gate (C10) and export
+# the website's JSON (C11). data/raw/ and data/interim/ are carried between runs in
+# the Actions cache: unchanged files are not downloaded again, the gate compares
+# with the last published tables, and geocoding answers are reused. A failed source
+# or a table that fails the gate fails the job, which emails the maintainer; the
+# last good data stays in place.
 
 on:
   schedule:
@@ -13,6 +16,10 @@ on:
       - "pipeline/src/opcina_pipeline/fetch/**"
       - "pipeline/config/sources.toml"
       - "pipeline/config/payments.toml"
+      - "pipeline/config/budget_layout.toml"
+      - "pipeline/src/opcina_pipeline/parse/**"
+      - "pipeline/src/opcina_pipeline/export.py"
+      - "pipeline/src/opcina_pipeline/quality.py"
       - ".github/workflows/fetch.yml"
 
 concurrency:
@@ -36,12 +43,14 @@ jobs:
           cache-dependency-path: pipeline/requirements.lock
       - run: pip install -c requirements.lock -e .
 
-      - name: Restore raw data from the previous run
+      - name: Restore data from the previous run
         uses: actions/cache/restore@v4
         with:
-          path: data/raw
-          key: raw-${{ github.run_id }}
-          restore-keys: raw-
+          path: |
+            data/raw
+            data/interim
+          key: data-${{ github.run_id }}
+          restore-keys: data-
 
       - name: Fetch all sources
         id: fetch
@@ -49,29 +58,35 @@ jobs:
         env:
           EOJN_API_KEY: ${{ secrets.EOJN_API_KEY }}
 
-      - name: Rebuild derived tables
+      - name: Rebuild reference tables
         if: always()
         run: |
           opcina master
           opcina postcodes
-          opcina boundaries
           git diff --stat -- config/ || true
 
-      - name: Save raw data for the next run
+      - name: Parse, quality gate, export
+        if: always()
+        run: opcina build
+
+      - name: Save data for the next run
         if: always()
         uses: actions/cache/save@v4
         with:
-          path: data/raw
-          key: raw-${{ github.run_id }}
+          path: |
+            data/raw
+            data/interim
+          key: data-${{ github.run_id }}
 
-      - name: Upload run log and derived files
+      - name: Upload reports and website data
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: fetch-${{ github.run_id }}
+          name: data-${{ github.run_id }}
           path: |
             data/raw/source_runs.jsonl
+            data/interim/quality_report.json
             pipeline/config/municipalities.csv
             pipeline/config/postcodes.csv
-            web/public/data/boundaries.geojson
+            web/public/data/
           retention-days: 30
