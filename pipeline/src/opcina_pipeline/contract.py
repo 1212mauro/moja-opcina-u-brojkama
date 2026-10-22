@@ -105,8 +105,8 @@ class ContractAward(ContractModel):
     supplier_name: str
     supplier_oib: str | None
     cpv: str | None
-    value_eur: float
-    signed_on: date
+    value_eur: float | None  # None: the register publishes no amount
+    signed_on: date | None
 
 
 class SupplierTotal(ContractModel):

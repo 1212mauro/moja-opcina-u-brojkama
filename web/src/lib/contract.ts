@@ -125,8 +125,8 @@ export interface ContractAward {
   supplierName: string;
   supplierOib: string | null;
   cpv: string | null;
-  valueEur: number;
-  signedOn: string;
+  valueEur: number | null;
+  signedOn: string | null;
 }
 /**
  * This interface was referenced by `Contract`'s JSON-Schema

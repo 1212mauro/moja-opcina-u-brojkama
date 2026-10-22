@@ -77,14 +77,6 @@ def in_croatia(df: pl.DataFrame) -> list[str]:
     return [f"{outside.height} facilities outside Croatia"] if outside.height else []
 
 
-def non_negative(column: str) -> Check:
-    def check(df: pl.DataFrame) -> list[str]:
-        negative = df.filter(pl.col(column) < 0).height
-        return [f"{negative} rows with negative {column}"] if negative else []
-
-    return check
-
-
 TABLE_CHECKS: dict[str, list[Check]] = {
     "population": [
         unique("dzs_code", "year", "kind"),
@@ -98,8 +90,9 @@ TABLE_CHECKS: dict[str, list[Check]] = {
     ],
     "contract": [
         unique("contract_key"),
-        no_nulls("dzs_code", "buyer_oib", "value_eur"),
-        non_negative("value_eur"),
+        # Some old-register contracts publish no amount, and annexes ("Dodatak") can
+        # lower a contract, so value_eur may be empty or negative.
+        no_nulls("dzs_code", "buyer_oib"),
     ],
     "payment": [
         no_nulls("dzs_code", "paid_on", "amount_eur"),

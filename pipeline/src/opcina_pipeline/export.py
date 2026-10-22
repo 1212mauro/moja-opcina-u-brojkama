@@ -196,7 +196,7 @@ def procurement_section(contracts: pl.DataFrame) -> Procurement | None:
                 supplier_name=r["supplier_name"] or "",
                 supplier_oib=r["supplier_oib"],
                 cpv=r["cpv"],
-                value_eur=round(r["value_eur"], 2),
+                value_eur=None if r["value_eur"] is None else round(r["value_eur"], 2),
                 signed_on=r["signed_on"],
             )
             for r in recent.iter_rows(named=True)
