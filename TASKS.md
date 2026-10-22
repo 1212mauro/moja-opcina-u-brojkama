@@ -18,7 +18,7 @@ Task breakdown derived from [SPEC.md](SPEC.md). This file is the single place wh
 
 | Milestone | Target | Done when | Status |
 | --- | --- | --- | --- |
-| MVP-1 Data in hand | End of week 1 | Pilots chosen, master table built, all raw files downloaded and documented (A, B) | ⬜ |
+| MVP-1 Data in hand | End of week 1 | Pilots chosen, master table built, all raw files downloaded and documented (A, B) | 🟨 |
 | MVP-2 First complete page | End of week 2 | One pilot municipality has a full page from real data (C, D1–D5) | ⬜ |
 | MVP-3 All pilots, all features | End of week 3 | 5 pilots live with every MVP feature (C, D, F1–F2) | ⬜ |
 | MVP-4 Submission | End of week 4 | Accessible, bilingual, deployed, tested with residents, video recorded (E, F, G) | ⬜ |
@@ -46,16 +46,16 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 ### B. Pilot selection and raw data — week 1 (~41 h)
 
-- [ ] B1 Pick 5 pilot municipalities of different sizes, ideally in one county so peer comparison works; include at least one city and cover several population bands; write down why (~3h)
-- [ ] B2 Build the master table for the pilots (and their county peers): OIB, RKP, DZS code, LAU code, name, county, type → `pipeline/config/municipalities.csv` (~6h, needs B1)
-- [ ] B3 Download the latest Ministry of Finance budget execution XLSX (plus the previous year for context) (~2h)
-- [ ] B4 Download the EOJN contract register 2018–2023 XLSX; find out how to export 2024+ contracts from the new EOJN (~5h)
-- [ ] B5 Download DZS Census 2021 and the latest population estimates; check settlement → municipality roll-up (~5h)
-- [ ] B6 Get DGU administrative boundaries (WFS/GeoJSON) for the pilot county and simplify the polygons for the browser (~5h)
-- [ ] B7 Collect school, kindergarten and health facility lists for the pilots from data.gov.hr; use OpenStreetMap (Overpass) where none exist (~6h)
-- [ ] B8 Find 1–2 pilots that publish monthly payment disclosures as CSV/XLSX and download the last 12 months (~4h, needs B1)
-- [ ] B9 Build a postcode → municipality lookup for the pilots (~2h, needs B2)
-- [ ] B10 Document every source in `docs/sources.md`: URL, publisher, licence, date fetched, known quirks (~3h)
+- [x] B1 Pick 5 pilot municipalities of different sizes, ideally in one county so peer comparison works; include at least one city and cover several population bands; write down why (~3h)
+- [x] B2 Build the master table for the pilots (and their county peers): OIB, RKP, DZS code, LAU code, name, county, type → `pipeline/config/municipalities.csv` (~6h, needs B1)
+- [x] B3 Download the latest Ministry of Finance budget execution XLSX (plus the previous year for context) (~2h)
+- [ ] B4 Download the EOJN contract register 2018–2023 XLSX; find out how to export 2024+ contracts from the new EOJN (~5h) — Ivanec 2018–2026 done; the data.gov.hr "national" file is really Ivanec's own register. Other pilots need eojn.hr access (API key or manual export)
+- [x] B5 Download DZS Census 2021 and the latest population estimates; check settlement → municipality roll-up (~5h)
+- [ ] B6 Get DGU administrative boundaries (WFS/GeoJSON) for the pilot county and simplify the polygons for the browser (~5h) — downloaded via DGU ATOM feed; reprojection with pyproj and simplification still to do
+- [x] B7 Collect school, kindergarten and health facility lists for the pilots from data.gov.hr; use OpenStreetMap (Overpass) where none exist (~6h)
+- [x] B8 Find 1–2 pilots that publish monthly payment disclosures as CSV/XLSX and download the last 12 months (~4h, needs B1) — 4 of 5 pilots (Varaždin is behind reCAPTCHA)
+- [x] B9 Build a postcode → municipality lookup for the pilots (~2h, needs B2)
+- [x] B10 Document every source in `docs/sources.md`: URL, publisher, licence, date fetched, known quirks (~3h)
 
 ### C. Data pipeline — weeks 1–2 (~82 h)
 

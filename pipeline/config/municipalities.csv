@@ -1,0 +1,29 @@
+slug,name,official_name,type,oib,rkp,dzs_code,lau_code,county,pilot
+bednja,Bednja,OPĆINA BEDNJA,opcina,48874522780,31796,00124,HR_00124,Varaždinska,false
+beretinec,Beretinec,OPĆINA BERETINEC,opcina,43667904961,31788,00191,HR_00191,Varaždinska,false
+breznica,Breznica,OPĆINA BREZNICA,opcina,59573646857,31770,00361,HR_00361,Varaždinska,false
+breznicki-hum,Breznički Hum,OPĆINA BREZNIČKI HUM,opcina,35774913576,31761,01511,HR_01511,Varaždinska,true
+cestica,Cestica,OPĆINA CESTICA,opcina,92031563169,31753,00485,HR_00485,Varaždinska,false
+donja-voca,Donja Voća,OPĆINA DONJA VOĆA,opcina,07707519145,31737,00809,HR_00809,Varaždinska,false
+gornji-kneginec,Gornji Kneginec,OPĆINA GORNJI KNEGINEC,opcina,60823665184,31657,01295,HR_01295,Varaždinska,false
+ivanec,Ivanec,GRAD IVANEC,grad,84121580205,31681,01562,HR_01562,Varaždinska,true
+jalzabet,Jalžabet,OPĆINA JALŽABET,opcina,59790184195,31632,01651,HR_01651,Varaždinska,true
+klenovnik,Klenovnik,OPĆINA KLENOVNIK,opcina,80034270503,31616,01899,HR_01899,Varaždinska,false
+lepoglava,Lepoglava,GRAD LEPOGLAVA,grad,79368224789,31544,02291,HR_02291,Varaždinska,false
+ljubescica,Ljubešćica,OPĆINA LJUBEŠĆICA,opcina,42311210067,31536,02470,HR_02470,Varaždinska,false
+ludbreg,Ludbreg,GRAD LUDBREG,grad,84947290034,31585,02445,HR_02445,Varaždinska,true
+mali-bukovec,Mali Bukovec,OPĆINA MALI BUKOVEC,opcina,26328529354,31510,02518,HR_02518,Varaždinska,false
+martijanec,Martijanec,OPĆINA MARTIJANEC,opcina,67582103920,31729,00850,HR_00850,Varaždinska,false
+marusevec,Maruševec,OPĆINA MARUŠEVEC,opcina,26670454549,31497,02607,HR_02607,Varaždinska,false
+novi-marof,Novi Marof,GRAD NOVI MAROF,grad,71070402969,31464,02895,HR_02895,Varaždinska,false
+petrijanec,Petrijanec,OPĆINA PETRIJANEC,opcina,59042118698,31456,03263,HR_03263,Varaždinska,false
+sracinec,Sračinec,OPĆINA SRAČINEC,opcina,01126367431,31448,04103,HR_04103,Varaždinska,false
+sveti-durd,Sveti Đurđ,OPĆINA SVETI ĐURĐ,opcina,43894275599,31430,04375,HR_04375,Varaždinska,false
+sveti-ilija,Sveti Ilija,OPĆINA SVETI ILIJA,opcina,10443118219,31421,04383,HR_04383,Varaždinska,false
+trnovec-bartolovecki,Trnovec Bartolovečki,OPĆINA TRNOVEC BARTOLOVEČKI,opcina,06955881275,31413,04626,HR_04626,Varaždinska,false
+varazdin,Varaždin,GRAD VARAŽDIN,grad,13269011531,31350,04723,HR_04723,Varaždinska,true
+varazdinske-toplice,Varaždinske Toplice,GRAD VARAŽDINSKE TOPLICE,grad,54177232254,31325,04731,HR_04731,Varaždinska,false
+veliki-bukovec,Veliki Bukovec,OPĆINA VELIKI BUKOVEC,opcina,09571757651,31317,05584,HR_05584,Varaždinska,false
+vidovec,Vidovec,OPĆINA VIDOVEC,opcina,73261610446,31294,04847,HR_04847,Varaždinska,false
+vinica,Vinica,OPĆINA VINICA,opcina,19913793314,31286,04863,HR_04863,Varaždinska,false
+visoko,Visoko,OPĆINA VISOKO,opcina,91710475046,31278,04936,HR_04936,Varaždinska,false
