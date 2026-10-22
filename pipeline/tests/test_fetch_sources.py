@@ -251,3 +251,29 @@ def test_html_links_removes_files_no_longer_linked(tmp_path):
         "Isplate_03-26.ods",
         "Isplate_04-26_ispravak.ods",
     ]
+
+
+def test_known_refusal_is_reported_as_pending_access(tmp_path, monkeypatch):
+    import httpx
+
+    from opcina_pipeline.fetch import payments
+
+    platforms = {
+        "02445": {"platform": "otvorenigrad", "tenant": "grad-ludbreg", "pending_access": "asked"},
+        "01562": {"platform": "otvorenigrad", "tenant": "grad-ivanec"},
+    }
+    monkeypatch.setattr(payments, "load_platforms", lambda: platforms)
+
+    class Ctx(FakeCtx):
+        out_dir = tmp_path
+
+        def master(self):
+            return pl.DataFrame({"dzs_code": ["02445", "01562"]})
+
+    ctx = Ctx(lambda request: httpx.Response(403), months=1)
+    outcome = payments.fetch_payments(ctx)
+
+    # Ludbreg's refusal is known and pending; Ivanec's is new and still fails the source.
+    assert outcome.status == "failed"
+    assert "02445 pending access (asked)" in outcome.message
+    assert "01562 otvorenigrad: HTTPStatusError" in outcome.message
