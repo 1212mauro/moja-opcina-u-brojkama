@@ -1,6 +1,19 @@
 # Data sources (task B10)
 
-Every source the pipeline reads, how it was obtained, and what to watch out for. Machine-readable entries (URL, licence, local file) are in `pipeline/config/sources.toml`. Raw files go to `data/raw/<source>/` and are not committed. All sources were fetched on **22 October 2026** for Varaždin County.
+Every source the pipeline reads, how it is fetched, and what to watch out for. Machine-readable entries (URL, licence, fetch options) are in `pipeline/config/sources.toml`. Raw files go to `data/raw/<source>/` and are not committed. Layouts below were checked on **22 October 2026** for Varaždin County.
+
+## How fetching works
+
+Every source is fetched automatically; there are no manual steps.
+
+- `opcina fetch` downloads all sources (`opcina fetch <key> …` for some). Each fetcher lives in `pipeline/src/opcina_pipeline/fetch/`.
+- Where a publisher puts the year in file names (MinFin, Eurostat, DGU), the fetcher follows links from a stable page instead of storing a dated URL, so new yearly files are picked up without config edits.
+- Downloads are polite: a project User-Agent, a pause between requests to the same host (6 s for eojn.hr, 3 s for eojn.nn.hr), retries with backoff on 429/5xx, and ETag/Last-Modified so unchanged files are not downloaded again.
+- A file is "changed" only if its data changed: xlsx packaging parts (creation times, relationship ids) and per-source volatile parts (`ignore_parts`) are ignored.
+- A failed download never replaces the last good file.
+- Every run appends one line per source to `data/raw/source_runs.jsonl`: status (`ok`, `unchanged`, `skipped`, `unavailable`, `failed`), file hashes and a note. This is the provenance every figure links back to.
+- `.github/workflows/fetch.yml` runs this nightly at 03:30 UTC, keeps `data/raw/` in the Actions cache between runs, shows a status table on the run page and fails (emailing the maintainer) when a source fails.
+- Credentials come only from environment variables / repository secrets: `EOJN_API_KEY` for the new EOJN API.
 
 ## Budget execution
 
@@ -89,7 +102,9 @@ Columns `BrojPu | NazivPu | Naselje | Zupanija`: settlement → postcode, no mun
 
 The zip is 209 MB with one 601 MB GML in **EPSG:3035** covering all 50,192 units at every level. Filtered to Varaždin County: 28 municipalities (820 KB GeoJSON, 1,000–3,000 vertices each) and 303 settlements. Properties: `name` (no Grad/Općina prefix), `national_code` (= DZS code), `local_id`, `level`, `upper_name`. No OIB.
 
-**Still to do:** the current GeoJSON was reprojected with a hand-written formula in a scratch script. Replace it with pipeline code using pyproj and simplify the polygons for the browser (task B6 / C11).
+The fetcher streams the GML out of the zip (no 600 MB file on disk), keeps the 2nd-order unit whose national code is the MinFin county number (`05`) and the 3rd-order units pointing to it, and reprojects with pyproj (`posList` is northing, easting). Output: `dgu_boundaries/municipalities.geojson`, full resolution, WGS84.
+
+`opcina boundaries` simplifies them for the browser with `shapely.coverage_simplify` (tolerance 0.0004°, about 40 m), which simplifies each shared border once so neighbours never overlap or gap: 34k → 7.3k vertices, 146 KB, written to `web/public/data/boundaries.geojson` in the contract's `Boundaries` shape.
 
 ## Facilities
 
@@ -98,9 +113,9 @@ The zip is 209 MB with one 601 MB GML in **EPSG:3035** covering all 50,192 units
 | `osnovne-skole`, `srednje-skole`, `djecji-vrtici` on data.gov.hr (from e-Matica) | Ministarstvo znanosti, obrazovanja i mladih | Otvorena dozvola | No: address + `Mjesto` | National lists (926 / 443 / 885). County key is spelled differently in each file (`Župnija`, `Županija`, `Zupanija ` with trailing space). `Šifra` = e-Matica code. |
 | Dječji vrtići Grada Varaždina | Grad Varaždin | Otvorena dozvola | No | `;`-separated, UTF-8 BOM, line breaks inside fields. **Contains names of responsible persons: drop those columns.** |
 | Adresar ustanova u zdravstvu Varaždinske županije 2026 | Varaždinska županija | Otvorena dozvola | No | Only 6 county-level institutions; cp1250 encoding |
-| OpenStreetMap via Overpass | OSM contributors | ODbL (attribution required) | Yes | `amenity`/`healthcare` = school, kindergarten, clinic, doctors, hospital, pharmacy, dentist; 162 elements in the county. Schools carry `ref:HR:e-matica`, a join key to the ministry lists. overpass-api.de returned 502; kumi.systems worked (data as of 15 Jul 2026). |
+| OpenStreetMap via Overpass | OSM contributors | ODbL (attribution required) | Yes | `amenity`/`healthcare` = school, kindergarten, clinic, doctors, hospital, pharmacy, dentist; 163 elements in the county (22 Oct 2026). The fetcher selects the county by `ISO3166-2=HR-05` (same numbering as MinFin) and tries several Overpass instances in turn. Schools carry `ref:HR:e-matica`, a join key to the ministry lists. |
 
-The HZZO practice-locations file (`hzzo-net.hr/hackathon/…`) did not respond.
+The HZZO practice-locations file (`hzzo-net.hr/hackathon/…`) did not respond. The ministry registries are fetched as national JSON from data.gov.hr (`schools_primary`, `schools_secondary`, `kindergartens`), so they scale to every county; the two city/county-specific lists above are not fetched (OSM covers health facilities, and the Varaždin kindergarten list contains personal data).
 
 | Pilot | Primary | Secondary | Kindergartens | OSM health points |
 | --- | --- | --- | --- | --- |
@@ -112,7 +127,7 @@ The HZZO practice-locations file (`hzzo-net.hr/hackathon/…`) did not respond.
 
 ## Monthly payments
 
-None of the pilots mirrors its payments on data.gov.hr, and none of the portals states a licence.
+None of the pilots mirrors its payments on data.gov.hr, and none of the portals states a licence. `pipeline/config/payments.toml` maps each municipality to its platform; covering another municipality on a supported platform is a config entry. The fetcher keeps 13 months and re-checks only the 2 newest months (or files) on each run.
 
 | Pilot | Where | Format | Downloaded |
 | --- | --- | --- | --- |
@@ -120,7 +135,7 @@ None of the pilots mirrors its payments on data.gov.hr, and none of the portals 
 | Ivanec | Same platform, `LC-Tenant: grad-ivanec` | CSV | Oct 2025 – Sep 2026, 12 files |
 | Jalžabet | Kipos, `transparentnost-jalzabet.kipos.hr` | JSON from `dbapi.php?radim=search…`; the date filter is ignored, all years returned | 2022-01 – 2026-09, 7,676 rows |
 | Breznički Hum | Monthly ODS files under `/images/isplate_iz_proracuna/<year>/` | ODS | May 2025 – Apr 2026 (publishing lags ~6 months) |
-| Varaždin | `transparentni.varazdin.hr` (Infomare) | Search form behind reCAPTCHA v3 | **Not downloaded.** Ask the city for an export. |
+| Varaždin | `transparentni.varazdin.hr` (Infomare) | Search form behind reCAPTCHA v3 | **Not available.** No file, API or data.gov.hr mirror exists; CAPTCHAs are not circumvented. Recorded as `unavailable` in `payments.toml` and shown on the coverage map. |
 
 Layouts:
 
@@ -134,31 +149,38 @@ Layouts:
 
 **Correction to SPEC.md:** the data.gov.hr dataset the spec cites as the national "contract register 2018–2023" (`247c96e7-…`) is **Grad Ivanec's own register**, published by Ivanec under Otvorena dozvola. No national EOJN dataset exists on data.gov.hr.
 
-| Pilot | 2018–2023 | 2024 onwards |
-| --- | --- | --- |
-| Ivanec | data.gov.hr: `registar-ugovora-o-javnoj-nabavi-i-os-2018-2023.xlsx` (573 contracts) | data.gov.hr: `…-od-2024.g.-nadalje.xlsx` (241 contracts) |
-| Varaždin, Ludbreg, Jalžabet, Breznički Hum | Old EOJN report form (`eojn.nn.hr` RptRegistarUgovora, one buyer at a time); not fetched | New EOJN `eojn.hr/contracts`; not fetched (see below) |
+Contracts are fetched automatically for every buyer in scope: each municipality plus its own budget users from the RKP register (67 buyers in Varaždin County; `opcina_pipeline/buyers.py`).
 
-**Old system (Ivanec 2018–2023 file):** sheet `RPT_Ugovor`, merged cells, header on row 14 from column B: `Evidencijski broj nabave | Predmet nabave | CPV | Broj objave iz EOJN RH | Vrsta postupka | Naziv i OIB ugovaratelja | … | Datum sklapanja | Oznaka/broj ugovora | … | Iznos bez PDV-a | Iznos PDV-a | Ukupni iznos s PDV-om | …`.
+| Source key | System | Route | Coverage |
+| --- | --- | --- | --- |
+| `contracts_eojn_legacy` | Old EOJN RH (`eojn.nn.hr`) | Public contract register form, buyer by buyer, Excel export | 2018 – early 2024, all buyers |
+| `contracts_eojn` | New EOJN RH (`eojn.hr`) | Official Open Data API with `X-API-Key` | 2024 onwards, all buyers, **once a key is set** |
+| `contracts_ivanec` | Grad Ivanec on data.gov.hr | CKAN | Ivanec's own register, 2015–2026 (cross-check) |
+
+**Old register (`contracts_eojn_legacy`).** `https://eojn.nn.hr/Spin/application/ipn/JavniReporti/RptRegistarUgovora.aspx` is public, and robots.txt there disallows only `/administrator`. It is an ASP.NET page with a ReportViewer:
+
+1. GET the page for the session cookie, `__VIEWSTATE` and the partner lookup URL.
+2. Look the buyer up by OIB in `Common/SearchFrm.aspx` (`__EVENTTARGET=uiFilterSearch`, `uiFilter$Txt_OIB`). Partner ids are stable and cached in `partners.json`.
+3. POST the form with the partner id in `ctl04` and every date filter blanked (the page defaults to "updated in the last 3 months").
+4. GET `ExportUrlBase` + `EXCELOPENXML` from the response: an xlsx with sheet `RPT_Ugovor` (CSV export returns 500).
+
+There is no national or incremental export: a report needs a buyer, and "view all data" errors. Steady state is two requests per buyer, 3 s apart (~20 minutes for 67 buyers), so the source has `refresh_days = 7`. Files whose cell values have not changed are left untouched. First run, 22 Oct 2026: Varaždin 772 rows, Ivanec 609, Jalžabet 153, Breznički Hum 25, Ludbreg 24; the Ivanec export contains every row of Ivanec's own data.gov.hr file plus 35 later updates.
+
+**New register (`contracts_eojn`).** `eojn.hr` robots.txt is `Disallow: /` and its public grid needs a token scraped from the page, so the grid is not used. The official Open Data API (`/api/public/eContractRegister/contractsSearch`, `/api/public/eProcurementData/eventsForContractsByTime`, `getContractData`) needs an `X-API-Key`, requested from **eojn@nn.hr**. The fetcher walks 7-day windows from 2024-01-01 (resuming from `state.json` with a 1-day overlap), keeps contracts whose buyer OIB is in scope, and merges them by `contractId` into `contracts.jsonl`. Without `EOJN_API_KEY` it reports `skipped`. It is unit-tested against the API schema but **not yet tested live**.
+
+**Old-register export layout** (`RPT_Ugovor`, as in Ivanec's 2018–2023 file): sheet `RPT_Ugovor`, merged cells, header on row 14 from column B: `Evidencijski broj nabave | Predmet nabave | CPV | Broj objave iz EOJN RH | Vrsta postupka | Naziv i OIB ugovaratelja | … | Datum sklapanja | Oznaka/broj ugovora | … | Iznos bez PDV-a | Iznos PDV-a | Ukupni iznos s PDV-om | …`.
 
 - The buyer is only in the file title.
 - Supplier name and OIB share one cell.
 - Amounts are text like `25.000,00 HRK`. **The currency follows the record's last update, not the signing date** (28 contracts from 2022 are in EUR), so parse the suffix on every cell.
 - 5 exact duplicate rows; one obvious VAT typo (row 38).
 
-**New system (2024+ file):** sheet `Analytics`, header row 1, 34 columns.
+**New-system grid export layout** (Ivanec's 2024+ file on data.gov.hr): sheet `Analytics`, header row 1, 34 columns.
 
 - Buyer name and OIB, supplier name and OIB in separate columns; amounts are numeric EUR.
 - Contract URL `https://eojn.hr/contract-eo/{id}` is a unique key.
 - Includes amendment columns and `Status ugovora`.
 - 216 of 241 rows are purchases exempt from the procurement law.
 - One supplier OIB reads `KRIVO_SE_REGISTRIRALI_87607151174`.
-
-**Access to eojn.hr for the other pilots:**
-
-- The public grid's JSON endpoint needs an anonymous token scraped from the page.
-- The official API (`/api/public/…`) needs an `X-API-Key`.
-- `robots.txt` is `Disallow: /`, and about 45 quick requests trigger a temporary block.
-- The pipeline should **not** scrape it. Options: request an API key from eojn@nn.hr, or export each pilot's contracts by hand from the public grid for the MVP.
 
 Pilot buyer OIBs: Varaždin 13269011531, Ivanec 84121580205, Ludbreg 84947290034, Jalžabet 59790184195, Breznički Hum 35774913576. Pilot institutions seen as buyers: Dječji vrtić Ivančice Ivanec (37103102119), Dječji vrtić Radost Ludbreg (63026242663), Knjižnica i čitaonica "Mladen Kerstner" Ludbreg (52291394442). VARKOM d.o.o. (39048902955) serves several municipalities and cannot be attributed to one.
