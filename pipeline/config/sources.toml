@@ -56,3 +56,83 @@ page = "https://data.gov.hr/ckan/dataset/naselje-i-odredisni-postanski-ured"
 url = "https://www.posta.hr/mjestaRh.aspx"
 licence = "Licence not stated on data.gov.hr"
 file = "postcodes/mjestaRh.xlsx"
+
+[dgu_boundaries]
+title = "INSPIRE Administrative Units (AU)"
+publisher = "Državna geodetska uprava"
+page = "https://geoportal.dgu.hr/services/atom/au/xml"
+url = "https://geoportal.dgu.hr/services/atom/INSPIRE_Administrative_Units_(AU).zip"
+licence = "Otvorena dozvola Republike Hrvatske"
+file = "dgu_boundaries/varazdinska_jls.geojson"
+
+[schools_primary]
+title = "Osnovne škole (e-Matica)"
+publisher = "Ministarstvo znanosti, obrazovanja i mladih"
+page = "https://data.gov.hr/ckan/dataset/osnovne-skole"
+url = "https://data.gov.hr/ckan/dataset/osnovne-skole"
+licence = "Otvorena dozvola Republike Hrvatske"
+file = "facilities/mzom_osnovne_skole.json"
+
+[schools_secondary]
+title = "Srednje škole (e-Matica)"
+publisher = "Ministarstvo znanosti, obrazovanja i mladih"
+page = "https://data.gov.hr/ckan/dataset/srednje-skole"
+url = "https://data.gov.hr/ckan/dataset/srednje-skole"
+licence = "Otvorena dozvola Republike Hrvatske"
+file = "facilities/mzom_srednje_skole.json"
+
+[kindergartens]
+title = "Dječji vrtići (e-Matica)"
+publisher = "Ministarstvo znanosti, obrazovanja i mladih"
+page = "https://data.gov.hr/ckan/dataset/djecji-vrtici"
+url = "https://data.gov.hr/ckan/dataset/djecji-vrtici"
+licence = "Otvorena dozvola Republike Hrvatske"
+file = "facilities/mzom_djecji_vrtici.json"
+
+[osm_facilities]
+title = "OpenStreetMap: schools, kindergartens, health facilities"
+publisher = "OpenStreetMap contributors"
+page = "https://www.openstreetmap.org/copyright"
+url = "https://overpass.kumi.systems/api/interpreter"
+licence = "ODbL 1.0"
+file = "facilities/osm_overpass_varazdinska_bbox.json"
+
+[payments_ludbreg]
+title = "Isplate iz proračuna Grada Ludbrega (iTransparentnost)"
+publisher = "Grad Ludbreg"
+page = "https://api.otvorenigrad.hr/itransparentnost/isplate"
+url = "https://api.otvorenigrad.hr/itransparentnost/isplate"
+licence = "Licence not stated"
+file = "payments/ludbreg"
+
+[payments_ivanec]
+title = "Isplate iz proračuna Grada Ivanca (iTransparentnost)"
+publisher = "Grad Ivanec"
+page = "https://api.otvorenigrad.hr/itransparentnost/isplate"
+url = "https://api.otvorenigrad.hr/itransparentnost/isplate"
+licence = "Licence not stated"
+file = "payments/ivanec"
+
+[payments_jalzabet]
+title = "Isplate iz proračuna Općine Jalžabet (Kipos)"
+publisher = "Općina Jalžabet"
+page = "https://transparentnost-jalzabet.kipos.hr/"
+url = "https://transparentnost-jalzabet.kipos.hr/"
+licence = "Licence not stated"
+file = "payments/jalzabet/kipos_dbapi_search_all_2022-01_2026-09.json"
+
+[payments_breznicki_hum]
+title = "Informacije o trošenju sredstava Općine Breznički Hum"
+publisher = "Općina Breznički Hum"
+page = "https://www.breznicki-hum.hr/index.php/vazni-dokumenti/transparentnost"
+url = "https://www.breznicki-hum.hr/images/isplate_iz_proracuna/"
+licence = "Licence not stated"
+file = "payments/breznicki_hum"
+
+[contracts_ivanec]
+title = "Registar sklopljenih ugovora i njihovo izvršenje (Grad Ivanec)"
+publisher = "Grad Ivanec"
+page = "https://data.gov.hr/ckan/dataset/247c96e7-fcce-42e5-8119-334f702f8c61"
+url = "https://data.gov.hr/ckan/api/3/action/package_show?id=247c96e7-fcce-42e5-8119-334f702f8c61"
+licence = "Otvorena dozvola Republike Hrvatske"
+file = "eojn_contracts"

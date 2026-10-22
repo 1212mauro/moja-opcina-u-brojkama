@@ -20,12 +20,14 @@ The datathon MVP covers five pilots, all in **Varaždin County** (Varaždinska �
 
 ## Data available per pilot (as of 22 Oct 2026)
 
-| Pilot | Budget 2019–2025 | Contracts | Payments | Budget users in RKP register |
+| Pilot | Budget 2019–2025 | Contracts | Payments (12 months) | Budget users in RKP register |
 | --- | --- | --- | --- | --- |
-| Varaždin | yes | see [sources.md](sources.md#procurement) | see [sources.md](sources.md#monthly-payments) | 19 |
-| Ivanec | yes | 2018–2026, data.gov.hr | see sources.md | 3 |
-| Ludbreg | yes | see sources.md | see sources.md | 4 |
-| Jalžabet | yes | see sources.md | see sources.md | 1 |
-| Breznički Hum | yes | see sources.md | see sources.md | 0 |
+| Varaždin | yes | not yet: eojn.hr access pending | no: portal behind reCAPTCHA | 19 |
+| Ivanec | yes | 2018–2026, data.gov.hr | yes, CSV API | 3 |
+| Ludbreg | yes | not yet: eojn.hr access pending | yes, CSV API | 4 |
+| Jalžabet | yes | not yet: eojn.hr access pending | yes, JSON (from 2022) | 1 |
+| Breznički Hum | yes | not yet: eojn.hr access pending | yes, ODS (lags ~6 months) | 0 |
+
+Details and quirks for each source: [sources.md](sources.md).
 
 The pilot list lives in `pipeline/config/scope.toml`; `opcina master` checks that every pilot exists in the county.
