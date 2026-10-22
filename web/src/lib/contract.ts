@@ -7,6 +7,7 @@ export interface Contract {
   municipalityPage: MunicipalityPage;
   searchIndex: SearchIndex;
   sourceStatus: SourceStatus;
+  boundaries: Boundaries;
 }
 /**
  * Everything shown on one municipality page. Sections are null when data is missing.
@@ -69,15 +70,12 @@ export interface BudgetItem {
   perResidentEur: number;
 }
 /**
- * Same county, same unit type, same population band.
+ * Same county, unit type and population band as the page's municipality.
  *
  * This interface was referenced by `Contract`'s JSON-Schema
  * via the `definition` "Peers".
  */
 export interface Peers {
-  county: string;
-  unitType: "grad" | "opcina";
-  band: "under_3k" | "3k_10k" | "10k_35k" | "over_35k";
   year: number;
   members: PeerMember[];
   ranks: Rank[];
@@ -244,4 +242,35 @@ export interface SearchEntry {
 export interface SourceStatus {
   generatedAt: string;
   runs: SourceRun[];
+}
+/**
+ * GeoJSON FeatureCollection of municipality outlines.
+ *
+ * This interface was referenced by `Contract`'s JSON-Schema
+ * via the `definition` "Boundaries".
+ */
+export interface Boundaries {
+  type: "FeatureCollection";
+  features: BoundaryFeature[];
+}
+/**
+ * This interface was referenced by `Contract`'s JSON-Schema
+ * via the `definition` "BoundaryFeature".
+ */
+export interface BoundaryFeature {
+  type: "Feature";
+  properties: BoundaryProperties;
+  geometry: {
+    [k: string]: unknown;
+  };
+}
+/**
+ * This interface was referenced by `Contract`'s JSON-Schema
+ * via the `definition` "BoundaryProperties".
+ */
+export interface BoundaryProperties {
+  slug: string;
+  name: string;
+  type: "grad" | "opcina";
+  hasData: boolean;
 }

@@ -5,6 +5,7 @@ The pipeline writes JSON files shaped by these models into ``web/public/data/``:
 - ``search-index.json``      -> SearchIndex
 - ``m/<slug>.json``          -> MunicipalityPage
 - ``sources.json``           -> SourceStatus
+- ``boundaries.geojson``     -> Boundaries
 
 These models are the single source of truth: ``opcina schema`` writes them to
 ``contract/schema.json`` and the website generates its TypeScript types from
@@ -12,7 +13,7 @@ that file (``npm run gen:types`` in ``web/``).
 """
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
@@ -100,11 +101,8 @@ class Rank(ContractModel):
 
 
 class Peers(ContractModel):
-    """Same county, same unit type, same population band."""
+    """Same county, unit type and population band as the page's municipality."""
 
-    county: str
-    unit_type: UnitType
-    band: PopulationBand
     year: int
     members: list[PeerMember]
     ranks: list[Rank]
@@ -215,9 +213,30 @@ class SourceStatus(ContractModel):
     runs: list[SourceRun]
 
 
+class BoundaryProperties(ContractModel):
+    slug: str
+    name: str
+    type: UnitType
+    has_data: bool
+
+
+class BoundaryFeature(ContractModel):
+    type: Literal["Feature"]
+    properties: BoundaryProperties
+    geometry: dict[str, Any]  # GeoJSON Polygon or MultiPolygon, simplified for the browser
+
+
+class Boundaries(ContractModel):
+    """GeoJSON FeatureCollection of municipality outlines."""
+
+    type: Literal["FeatureCollection"]
+    features: list[BoundaryFeature]
+
+
 class Contract(ContractModel):
     """Wrapper that pulls every published file shape into one JSON Schema."""
 
     municipality_page: MunicipalityPage
     search_index: SearchIndex
     source_status: SourceStatus
+    boundaries: Boundaries

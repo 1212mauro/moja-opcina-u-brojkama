@@ -1,5 +1,79 @@
 {
   "$defs": {
+    "Boundaries": {
+      "additionalProperties": false,
+      "description": "GeoJSON FeatureCollection of municipality outlines.",
+      "properties": {
+        "type": {
+          "const": "FeatureCollection",
+          "type": "string"
+        },
+        "features": {
+          "items": {
+            "$ref": "#/$defs/BoundaryFeature"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "features"
+      ],
+      "title": "Boundaries",
+      "type": "object"
+    },
+    "BoundaryFeature": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "Feature",
+          "type": "string"
+        },
+        "properties": {
+          "$ref": "#/$defs/BoundaryProperties"
+        },
+        "geometry": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "properties",
+        "geometry"
+      ],
+      "title": "BoundaryFeature",
+      "type": "object"
+    },
+    "BoundaryProperties": {
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "grad",
+            "opcina"
+          ],
+          "type": "string"
+        },
+        "hasData": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "slug",
+        "name",
+        "type",
+        "hasData"
+      ],
+      "title": "BoundaryProperties",
+      "type": "object"
+    },
     "Budget": {
       "additionalProperties": false,
       "properties": {
@@ -447,27 +521,8 @@
     },
     "Peers": {
       "additionalProperties": false,
-      "description": "Same county, same unit type, same population band.",
+      "description": "Same county, unit type and population band as the page's municipality.",
       "properties": {
-        "county": {
-          "type": "string"
-        },
-        "unitType": {
-          "enum": [
-            "grad",
-            "opcina"
-          ],
-          "type": "string"
-        },
-        "band": {
-          "enum": [
-            "under_3k",
-            "3k_10k",
-            "10k_35k",
-            "over_35k"
-          ],
-          "type": "string"
-        },
         "year": {
           "type": "integer"
         },
@@ -485,9 +540,6 @@
         }
       },
       "required": [
-        "county",
-        "unitType",
-        "band",
         "year",
         "members",
         "ranks"
@@ -780,12 +832,16 @@
     },
     "sourceStatus": {
       "$ref": "#/$defs/SourceStatus"
+    },
+    "boundaries": {
+      "$ref": "#/$defs/Boundaries"
     }
   },
   "required": [
     "municipalityPage",
     "searchIndex",
-    "sourceStatus"
+    "sourceStatus",
+    "boundaries"
   ],
   "title": "Contract",
   "type": "object"

@@ -6,7 +6,19 @@ from pathlib import Path
 
 from opcina_pipeline.contract import Contract
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+
+def find_repo_root(start: Path) -> Path:
+    """Nearest ancestor of ``start`` holding both ``contract/`` and ``pipeline/``.
+
+    Works for editable installs and for a regular install run from inside a checkout.
+    """
+    for path in [start, *start.parents]:
+        if (path / "contract").is_dir() and (path / "pipeline").is_dir():
+            return path
+    raise SystemExit("opcina: run this from inside the repository checkout")
+
+
+REPO_ROOT = find_repo_root(Path.cwd().resolve())
 SCHEMA_PATH = REPO_ROOT / "contract" / "schema.json"
 
 
