@@ -59,4 +59,18 @@ def run_fetch(only: list[str] | None = None) -> dict[str, Outcome]:
                 f"{key:<24} {outcome.status:<11} {len(outcome.files):>3} files  {outcome.message}"
             )
 
+    write_step_summary(outcomes)
     return outcomes
+
+
+def write_step_summary(outcomes: dict[str, Outcome]) -> None:
+    """Markdown table on the GitHub Actions run page (no-op elsewhere)."""
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary:
+        return
+    lines = ["| Source | Status | Files | Note |", "| --- | --- | --- | --- |"]
+    for key, outcome in outcomes.items():
+        note = outcome.message.replace("|", "\\|")
+        lines.append(f"| `{key}` | {outcome.status} | {len(outcome.files)} | {note} |")
+    with open(summary, "a", encoding="utf-8") as f:
+        f.write("## Source fetch\n\n" + "\n".join(lines) + "\n")
