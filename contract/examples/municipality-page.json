@@ -1,0 +1,132 @@
+{
+  "slug": "primjer",
+  "oib": "00000000001",
+  "rkp": "99999",
+  "dzsCode": "00000",
+  "lauCode": "HR000000",
+  "name": "Općina Primjer",
+  "type": "opcina",
+  "county": "Primjerna županija",
+  "population": {
+    "year": 2021,
+    "total": 4250
+  },
+  "band": "3k_10k",
+  "budget": {
+    "year": 2025,
+    "period": "FY",
+    "revenueTotalEur": 5100000,
+    "expenditureTotalEur": 4800000,
+    "revenuePerResidentEur": 1200,
+    "expenditurePerResidentEur": 1129.41,
+    "revenueByType": [
+      {
+        "code": "61",
+        "label": "Prihodi od poreza",
+        "amountEur": 2100000,
+        "perResidentEur": 494.12
+      },
+      {
+        "code": "63",
+        "label": "Pomoći",
+        "amountEur": 3000000,
+        "perResidentEur": 705.88
+      }
+    ],
+    "expenditureByFunction": [
+      {
+        "code": "04",
+        "label": "Ekonomski poslovi",
+        "amountEur": 2000000,
+        "perResidentEur": 470.59
+      },
+      {
+        "code": "09",
+        "label": "Obrazovanje",
+        "amountEur": 2800000,
+        "perResidentEur": 658.82
+      }
+    ],
+    "sourceRunId": "minfin_budget-2026-10-22"
+  },
+  "peers": {
+    "year": 2025,
+    "members": [
+      {
+        "slug": "primjer",
+        "name": "Općina Primjer",
+        "population": 4250,
+        "revenuePerResidentEur": 1200,
+        "expenditurePerResidentEur": 1129.41
+      },
+      {
+        "slug": "susjed",
+        "name": "Općina Susjed",
+        "population": 3600,
+        "revenuePerResidentEur": 980,
+        "expenditurePerResidentEur": 1010
+      }
+    ],
+    "ranks": [
+      {
+        "metric": "expenditurePerResidentEur",
+        "rank": 1,
+        "of": 2
+      }
+    ]
+  },
+  "procurement": {
+    "dataFrom": "2018-01-01",
+    "dataTo": "2023-12-31",
+    "contractCount": 1,
+    "totalValueEur": 250000,
+    "recentAwards": [
+      {
+        "contractId": "2023/S 0F3-0000000",
+        "subject": "Rekonstrukcija nerazvrstane ceste",
+        "supplierName": "Primjer gradnja d.o.o.",
+        "supplierOib": "00000000002",
+        "cpv": "45233140",
+        "valueEur": 250000,
+        "signedOn": "2023-05-12"
+      }
+    ],
+    "topSuppliers": [
+      {
+        "name": "Primjer gradnja d.o.o.",
+        "oib": "00000000002",
+        "contracts": 1,
+        "totalEur": 250000
+      }
+    ],
+    "sourceRunIds": [
+      "eojn_contracts-2026-10-22"
+    ]
+  },
+  "payments": null,
+  "facilities": [
+    {
+      "type": "school",
+      "name": "Osnovna škola Primjer",
+      "address": "Školska 1",
+      "lat": 46.3,
+      "lon": 16.3,
+      "sourceRunId": "facilities-2026-10-22"
+    }
+  ],
+  "sources": [
+    {
+      "id": "minfin_budget-2026-10-22",
+      "source": "minfin_budget",
+      "title": "Izvršenje proračuna JLP(R)S",
+      "publisher": "Ministarstvo financija",
+      "url": "https://mfin.gov.hr/",
+      "licence": "Otvorena dozvola Republike Hrvatske",
+      "fetchedAt": "2026-10-22T10:00:00Z",
+      "fileHash": "sha256:0000",
+      "rowCount": 1,
+      "status": "ok"
+    }
+  ],
+  "generatedAt": "2026-10-22T10:05:00Z"
+}
