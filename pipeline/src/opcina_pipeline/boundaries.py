@@ -1,0 +1,62 @@
+"""Browser-sized municipality boundaries (task B6) in the contract's ``Boundaries`` shape.
+
+Polygons are simplified as one coverage (``shapely.coverage_simplify``), so a
+border shared by two municipalities is simplified once and neighbours keep
+meeting exactly: no slivers or gaps on the map.
+"""
+
+import json
+from pathlib import Path
+
+import polars as pl
+import shapely
+from shapely.geometry import mapping, shape
+
+from opcina_pipeline.contract import Boundaries
+
+# Coverage simplification tolerance in degrees (~40 m at 46° N).
+DEFAULT_TOLERANCE = 0.0004
+COORDINATE_DECIMALS = 5  # ~1 m
+
+
+def simplify_boundaries(
+    features: list[dict], master: pl.DataFrame, tolerance: float = DEFAULT_TOLERANCE
+) -> Boundaries:
+    units = {row["dzs_code"]: row for row in master.iter_rows(named=True)}
+    missing = {f["properties"]["dzs_code"] for f in features} ^ set(units)
+    if missing:
+        raise ValueError(f"boundaries and master table disagree on: {sorted(missing)}")
+
+    geometries = [shape(f["geometry"]) for f in features]
+    simplified = shapely.coverage_simplify(geometries, tolerance)
+    simplified = shapely.set_precision(simplified, 10**-COORDINATE_DECIMALS)
+
+    out = []
+    for feature, geometry in zip(features, simplified, strict=True):
+        unit = units[feature["properties"]["dzs_code"]]
+        if geometry.geom_type == "Polygon":
+            geometry = shapely.MultiPolygon([geometry])
+        out.append(
+            {
+                "type": "Feature",
+                "properties": {
+                    "slug": unit["slug"],
+                    "name": unit["name"],
+                    "type": unit["type"],
+                    "hasData": unit["pilot"] == "true",
+                },
+                "geometry": mapping(geometry),
+            }
+        )
+    return Boundaries.model_validate({"type": "FeatureCollection", "features": out})
+
+
+def write_boundaries(source: Path, master: pl.DataFrame, dest: Path) -> Boundaries:
+    features = json.loads(source.read_text(encoding="utf-8"))["features"]
+    boundaries = simplify_boundaries(features, master)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(
+        json.dumps(boundaries.model_dump(mode="json"), ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
+    return boundaries
