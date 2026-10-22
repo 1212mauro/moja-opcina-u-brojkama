@@ -1,0 +1,29 @@
+{
+  "name": "moja-opcina-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "gen:types": "json2ts -i ../contract/schema.json -o src/lib/contract.ts --unreachableDefinitions --additionalProperties false --bannerComment \"/* Generated from contract/schema.json by npm run gen:types. Do not edit by hand. */\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "json-schema-to-typescript": "^16.0.0",
+    "typescript": "^5"
+  },
+  "description": "Website for Moja općina u brojkama",
+  "license": "EUPL-1.2"
+}
