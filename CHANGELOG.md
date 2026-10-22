@@ -12,3 +12,11 @@ All notable changes to this project are documented here. The format follows [Kee
 - Next.js website configured for static export.
 - JSON data contract: Pydantic models → `contract/schema.json` → generated TypeScript types.
 - GitHub Actions CI for pipeline and website.
+- Pilot municipalities: five Varaždin County units covering all four population bands (`docs/pilots.md`).
+- Municipality master table for all 28 Varaždin County units (`opcina master` → `pipeline/config/municipalities.csv`).
+- Postcode → municipality lookup (`opcina postcodes` → `pipeline/config/postcodes.csv`).
+- Source registry (`pipeline/config/sources.toml`) and source documentation (`docs/sources.md`).
+
+### Changed
+
+- Procurement: the data.gov.hr file the spec cites as national is Grad Ivanec's own register; national access goes through eojn.hr (see `docs/sources.md`).
