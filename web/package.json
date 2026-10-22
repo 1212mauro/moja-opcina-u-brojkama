@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "gen:types": "json2ts -i ../contract/schema.json -o src/lib/contract.ts --unreachableDefinitions --additionalProperties false --bannerComment \"/* Generated from contract/schema.json by npm run gen:types. Do not edit by hand. */\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "next": "16.4.2",
@@ -16,7 +16,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
