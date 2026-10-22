@@ -1,4 +1,4 @@
-"""Schemas of the clean tables parsers write to ``data/interim/<table>.parquet``.
+"""Schemas of the clean tables parsers write to ``data/interim/staging/<table>.parquet``.
 
 These follow the data model in SPEC.md. Every row is tied to one municipality by
 ``dzs_code`` (the master table's key) and to the fetch it came from by
@@ -96,8 +96,9 @@ TABLES = {
 }
 
 
-def interim_path(table: str) -> Path:
-    return repo_root() / "data" / "interim" / f"{table}.parquet"
+def interim_path(table: str, stage: str = "staging") -> Path:
+    """Parsers write to ``staging``; the quality gate promotes good tables to ``published``."""
+    return repo_root() / "data" / "interim" / stage / f"{table}.parquet"
 
 
 def conform(df: pl.DataFrame, table: str) -> pl.DataFrame:
@@ -116,8 +117,8 @@ def write_table(df: pl.DataFrame, table: str) -> Path:
     return path
 
 
-def read_table(table: str) -> pl.DataFrame:
-    return pl.read_parquet(interim_path(table))
+def read_table(table: str, stage: str = "published") -> pl.DataFrame:
+    return pl.read_parquet(interim_path(table, stage))
 
 
 def latest_run_id(source: str, log_path: Path | None = None) -> str:
