@@ -1,0 +1,792 @@
+{
+  "$defs": {
+    "Budget": {
+      "additionalProperties": false,
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "period": {
+          "enum": [
+            "H1",
+            "FY"
+          ],
+          "type": "string"
+        },
+        "revenueTotalEur": {
+          "type": "number"
+        },
+        "expenditureTotalEur": {
+          "type": "number"
+        },
+        "revenuePerResidentEur": {
+          "type": "number"
+        },
+        "expenditurePerResidentEur": {
+          "type": "number"
+        },
+        "revenueByType": {
+          "items": {
+            "$ref": "#/$defs/BudgetItem"
+          },
+          "type": "array"
+        },
+        "expenditureByFunction": {
+          "items": {
+            "$ref": "#/$defs/BudgetItem"
+          },
+          "type": "array"
+        },
+        "sourceRunId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "year",
+        "period",
+        "revenueTotalEur",
+        "expenditureTotalEur",
+        "revenuePerResidentEur",
+        "expenditurePerResidentEur",
+        "revenueByType",
+        "expenditureByFunction",
+        "sourceRunId"
+      ],
+      "title": "Budget",
+      "type": "object"
+    },
+    "BudgetItem": {
+      "additionalProperties": false,
+      "description": "A revenue type or a spending function (COFOG) with its amount.",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "amountEur": {
+          "type": "number"
+        },
+        "perResidentEur": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "code",
+        "label",
+        "amountEur",
+        "perResidentEur"
+      ],
+      "title": "BudgetItem",
+      "type": "object"
+    },
+    "ContractAward": {
+      "additionalProperties": false,
+      "properties": {
+        "contractId": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "supplierName": {
+          "type": "string"
+        },
+        "supplierOib": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cpv": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valueEur": {
+          "type": "number"
+        },
+        "signedOn": {
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "contractId",
+        "subject",
+        "supplierName",
+        "supplierOib",
+        "cpv",
+        "valueEur",
+        "signedOn"
+      ],
+      "title": "ContractAward",
+      "type": "object"
+    },
+    "Facility": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "school",
+            "kindergarten",
+            "health"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lon": {
+          "type": "number"
+        },
+        "sourceRunId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "address",
+        "lat",
+        "lon",
+        "sourceRunId"
+      ],
+      "title": "Facility",
+      "type": "object"
+    },
+    "MonthlyTotal": {
+      "additionalProperties": false,
+      "properties": {
+        "month": {
+          "type": "string"
+        },
+        "totalEur": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "month",
+        "totalEur"
+      ],
+      "title": "MonthlyTotal",
+      "type": "object"
+    },
+    "MunicipalityPage": {
+      "additionalProperties": false,
+      "description": "Everything shown on one municipality page. Sections are null when data is missing.",
+      "properties": {
+        "slug": {
+          "type": "string"
+        },
+        "oib": {
+          "type": "string"
+        },
+        "rkp": {
+          "type": "string"
+        },
+        "dzsCode": {
+          "type": "string"
+        },
+        "lauCode": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "grad",
+            "opcina"
+          ],
+          "type": "string"
+        },
+        "county": {
+          "type": "string"
+        },
+        "population": {
+          "$ref": "#/$defs/Population"
+        },
+        "band": {
+          "enum": [
+            "under_3k",
+            "3k_10k",
+            "10k_35k",
+            "over_35k"
+          ],
+          "type": "string"
+        },
+        "budget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Budget"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "peers": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Peers"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "procurement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Procurement"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payments": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Payments"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "facilities": {
+          "items": {
+            "$ref": "#/$defs/Facility"
+          },
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRun"
+          },
+          "type": "array"
+        },
+        "generatedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slug",
+        "oib",
+        "rkp",
+        "dzsCode",
+        "lauCode",
+        "name",
+        "type",
+        "county",
+        "population",
+        "band",
+        "budget",
+        "peers",
+        "procurement",
+        "payments",
+        "facilities",
+        "sources",
+        "generatedAt"
+      ],
+      "title": "MunicipalityPage",
+      "type": "object"
+    },
+    "PaymentCategory": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "amountEur": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "label",
+        "amountEur"
+      ],
+      "title": "PaymentCategory",
+      "type": "object"
+    },
+    "PaymentRecipient": {
+      "additionalProperties": false,
+      "description": "Legal persons only; payments to private individuals appear only as categories.",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "oib": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payments": {
+          "type": "integer"
+        },
+        "amountEur": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "oib",
+        "payments",
+        "amountEur"
+      ],
+      "title": "PaymentRecipient",
+      "type": "object"
+    },
+    "Payments": {
+      "additionalProperties": false,
+      "properties": {
+        "months": {
+          "items": {
+            "$ref": "#/$defs/MonthlyTotal"
+          },
+          "type": "array"
+        },
+        "byCategory": {
+          "items": {
+            "$ref": "#/$defs/PaymentCategory"
+          },
+          "type": "array"
+        },
+        "topRecipients": {
+          "items": {
+            "$ref": "#/$defs/PaymentRecipient"
+          },
+          "type": "array"
+        },
+        "sourceRunId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "months",
+        "byCategory",
+        "topRecipients",
+        "sourceRunId"
+      ],
+      "title": "Payments",
+      "type": "object"
+    },
+    "PeerMember": {
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "population": {
+          "type": "integer"
+        },
+        "revenuePerResidentEur": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expenditurePerResidentEur": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "slug",
+        "name",
+        "population",
+        "revenuePerResidentEur",
+        "expenditurePerResidentEur"
+      ],
+      "title": "PeerMember",
+      "type": "object"
+    },
+    "Peers": {
+      "additionalProperties": false,
+      "description": "Same county, same unit type, same population band.",
+      "properties": {
+        "county": {
+          "type": "string"
+        },
+        "unitType": {
+          "enum": [
+            "grad",
+            "opcina"
+          ],
+          "type": "string"
+        },
+        "band": {
+          "enum": [
+            "under_3k",
+            "3k_10k",
+            "10k_35k",
+            "over_35k"
+          ],
+          "type": "string"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/PeerMember"
+          },
+          "type": "array"
+        },
+        "ranks": {
+          "items": {
+            "$ref": "#/$defs/Rank"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "county",
+        "unitType",
+        "band",
+        "year",
+        "members",
+        "ranks"
+      ],
+      "title": "Peers",
+      "type": "object"
+    },
+    "Population": {
+      "additionalProperties": false,
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "year",
+        "total"
+      ],
+      "title": "Population",
+      "type": "object"
+    },
+    "Procurement": {
+      "additionalProperties": false,
+      "properties": {
+        "dataFrom": {
+          "format": "date",
+          "type": "string"
+        },
+        "dataTo": {
+          "format": "date",
+          "type": "string"
+        },
+        "contractCount": {
+          "type": "integer"
+        },
+        "totalValueEur": {
+          "type": "number"
+        },
+        "recentAwards": {
+          "items": {
+            "$ref": "#/$defs/ContractAward"
+          },
+          "type": "array"
+        },
+        "topSuppliers": {
+          "items": {
+            "$ref": "#/$defs/SupplierTotal"
+          },
+          "type": "array"
+        },
+        "sourceRunIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dataFrom",
+        "dataTo",
+        "contractCount",
+        "totalValueEur",
+        "recentAwards",
+        "topSuppliers",
+        "sourceRunIds"
+      ],
+      "title": "Procurement",
+      "type": "object"
+    },
+    "Rank": {
+      "additionalProperties": false,
+      "description": "Position of this municipality among its peers for one metric (1 = highest).",
+      "properties": {
+        "metric": {
+          "type": "string"
+        },
+        "rank": {
+          "type": "integer"
+        },
+        "of": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "metric",
+        "rank",
+        "of"
+      ],
+      "title": "Rank",
+      "type": "object"
+    },
+    "SearchEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nameAscii": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "grad",
+            "opcina"
+          ],
+          "type": "string"
+        },
+        "county": {
+          "type": "string"
+        },
+        "population": {
+          "type": "integer"
+        },
+        "postcodes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "hasData": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "slug",
+        "name",
+        "nameAscii",
+        "type",
+        "county",
+        "population",
+        "postcodes",
+        "hasData"
+      ],
+      "title": "SearchEntry",
+      "type": "object"
+    },
+    "SearchIndex": {
+      "additionalProperties": false,
+      "properties": {
+        "generatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/SearchEntry"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "generatedAt",
+        "entries"
+      ],
+      "title": "SearchIndex",
+      "type": "object"
+    },
+    "SourceRun": {
+      "additionalProperties": false,
+      "description": "One fetch of one source file; every figure on the site points to one of these.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "minfin_budget",
+            "minfin_budget_users",
+            "eojn_contracts",
+            "dzs_population",
+            "dgu_boundaries",
+            "facilities",
+            "payments"
+          ],
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "licence": {
+          "type": "string"
+        },
+        "fetchedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "fileHash": {
+          "type": "string"
+        },
+        "rowCount": {
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "failed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "title",
+        "publisher",
+        "url",
+        "licence",
+        "fetchedAt",
+        "fileHash",
+        "rowCount",
+        "status"
+      ],
+      "title": "SourceRun",
+      "type": "object"
+    },
+    "SourceStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "generatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "runs": {
+          "items": {
+            "$ref": "#/$defs/SourceRun"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "generatedAt",
+        "runs"
+      ],
+      "title": "SourceStatus",
+      "type": "object"
+    },
+    "SupplierTotal": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "oib": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "contracts": {
+          "type": "integer"
+        },
+        "totalEur": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "oib",
+        "contracts",
+        "totalEur"
+      ],
+      "title": "SupplierTotal",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Wrapper that pulls every published file shape into one JSON Schema.",
+  "properties": {
+    "municipalityPage": {
+      "$ref": "#/$defs/MunicipalityPage"
+    },
+    "searchIndex": {
+      "$ref": "#/$defs/SearchIndex"
+    },
+    "sourceStatus": {
+      "$ref": "#/$defs/SourceStatus"
+    }
+  },
+  "required": [
+    "municipalityPage",
+    "searchIndex",
+    "sourceStatus"
+  ],
+  "title": "Contract",
+  "type": "object"
+}
