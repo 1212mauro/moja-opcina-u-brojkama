@@ -1,6 +1,7 @@
 """Automatic download of every source (task C1): ``opcina fetch``."""
 
 import importlib
+import os
 import traceback
 from datetime import UTC, datetime
 
