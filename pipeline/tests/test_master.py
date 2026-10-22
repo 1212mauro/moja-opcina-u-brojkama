@@ -54,3 +54,20 @@ def test_fails_when_a_pilot_is_out_of_scope(register, lau, scope):
     scope = replace(scope, pilot_lau_codes=("99999",))
     with pytest.raises(ValueError, match="pilot"):
         build_master(register, lau, scope)
+
+
+def test_scope_buyers_skips_budget_users_without_oib(register, lau, scope):
+    from opcina_pipeline.buyers import scope_buyers
+
+    master = build_master(register, lau, scope)
+    register = pl.concat(
+        [
+            register,
+            register.filter(pl.col("rkp") == "41001").with_columns(
+                rkp=pl.lit("41002"), oib=pl.lit(None, dtype=pl.Utf8)
+            ),
+        ]
+    )
+    buyers = scope_buyers(master, register)
+    assert buyers.filter(pl.col("kind") == "budget_user")["oib"].to_list() == ["00000000003"]
+    assert buyers["oib"].null_count() == 0

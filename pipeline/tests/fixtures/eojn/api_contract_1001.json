@@ -1,0 +1,27 @@
+{
+  "versionNumber": 1,
+  "isReversed": false,
+  "contractId": 1001,
+  "contractingAuthority": {
+    "partyId": 501,
+    "identificationNumber": "35774913576",
+    "name": "Općina Breznički Hum",
+    "countryCode": "HR"
+  },
+  "baseContractingAuthority": null,
+  "publishedDate": "2024-01-03T09:15:00+01:00",
+  "lastModificationDate": "2024-01-09T08:00:00+01:00",
+  "totalAmountPayedVAT": {"value": 12500.0, "currency": "EUR"},
+  "contractLots": null,
+  "procedureReferenceNumber": "JN-1/2024",
+  "procedureName": "Održavanje nerazvrstanih cesta",
+  "cpv": {"number": "45233141", "description": "Radovi na održavanju cesta"},
+  "procedureType": {"number": "1", "description": "Otvoreni postupak"},
+  "agreementType": {"number": "1", "description": "Ugovor"},
+  "referenceNumber": "UG-1/2024",
+  "contractingDate": "2024-01-02T00:00:00+01:00",
+  "economicOperators": [{"identificationNumber": "00000000001", "name": "Ceste d.o.o."}],
+  "totalAmount": {"value": 44000.0, "currency": "EUR"},
+  "totalAmountVAT": {"value": 55000.0, "currency": "EUR"},
+  "status": {"number": "3", "description": "Izmijenjen"}
+}

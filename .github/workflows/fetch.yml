@@ -1,0 +1,77 @@
+name: Fetch sources
+
+# Downloads every source nightly (task C1). data/raw/ is carried between runs in
+# the Actions cache so unchanged files are not downloaded again. A failed source
+# fails the job, which emails the maintainer; the last good files stay in place.
+
+on:
+  schedule:
+    - cron: "30 3 * * *"  # 03:30 UTC, after MinFin/DZS overnight publishing
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "pipeline/src/opcina_pipeline/fetch/**"
+      - "pipeline/config/sources.toml"
+      - "pipeline/config/payments.toml"
+      - ".github/workflows/fetch.yml"
+
+concurrency:
+  group: fetch-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    # Weekly old-EOJN crawl ~20 min + EOJN API (capped per run) ~5 min + the rest.
+    timeout-minutes: 75
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.lock
+      - run: pip install -c requirements.lock -e .
+
+      - name: Restore raw data from the previous run
+        uses: actions/cache/restore@v4
+        with:
+          path: data/raw
+          key: raw-${{ github.run_id }}
+          restore-keys: raw-
+
+      - name: Fetch all sources
+        id: fetch
+        run: opcina fetch
+        env:
+          EOJN_API_KEY: ${{ secrets.EOJN_API_KEY }}
+
+      - name: Rebuild derived tables
+        if: always()
+        run: |
+          opcina master
+          opcina postcodes
+          opcina boundaries
+          git diff --stat -- config/ || true
+
+      - name: Save raw data for the next run
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/raw
+          key: raw-${{ github.run_id }}
+
+      - name: Upload run log and derived files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fetch-${{ github.run_id }}
+          path: |
+            data/raw/source_runs.jsonl
+            pipeline/config/municipalities.csv
+            pipeline/config/postcodes.csv
+            web/public/data/boundaries.geojson
+          retention-days: 30

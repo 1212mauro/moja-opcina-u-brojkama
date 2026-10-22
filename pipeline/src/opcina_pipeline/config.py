@@ -1,7 +1,7 @@
 """Paths and configuration files."""
 
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cache
 from pathlib import Path
 
@@ -41,6 +41,9 @@ class Scope:
     pilot_lau_codes: tuple[str, ...]
 
 
+SOURCE_FIELDS = ("title", "publisher", "page", "url", "licence", "file")
+
+
 @dataclass(frozen=True)
 class Source:
     key: str
@@ -49,7 +52,9 @@ class Source:
     page: str
     url: str
     licence: str
+    # What parsers read, relative to data/raw/: a file, or a folder for multi-file sources.
     file: str
+    options: dict = field(default_factory=dict)  # fetcher-specific settings
 
     @property
     def path(self) -> Path:
@@ -76,4 +81,9 @@ def load_scope() -> Scope:
 
 @cache
 def load_sources() -> dict[str, Source]:
-    return {key: Source(key=key, **fields) for key, fields in _read_toml("sources.toml").items()}
+    sources = {}
+    for key, fields in _read_toml("sources.toml").items():
+        known = {name: fields[name] for name in SOURCE_FIELDS}
+        options = {name: value for name, value in fields.items() if name not in SOURCE_FIELDS}
+        sources[key] = Source(key=key, **known, options=options)
+    return sources

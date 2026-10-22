@@ -49,9 +49,9 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 - [x] B1 Pick 5 pilot municipalities of different sizes, ideally in one county so peer comparison works; include at least one city and cover several population bands; write down why (~3h)
 - [x] B2 Build the master table for the pilots (and their county peers): OIB, RKP, DZS code, LAU code, name, county, type → `pipeline/config/municipalities.csv` (~6h, needs B1)
 - [x] B3 Download the latest Ministry of Finance budget execution XLSX (plus the previous year for context) (~2h)
-- [ ] B4 Download the EOJN contract register 2018–2023 XLSX; find out how to export 2024+ contracts from the new EOJN (~5h) — Ivanec 2018–2026 done; the data.gov.hr "national" file is really Ivanec's own register. Other pilots need eojn.hr access (API key or manual export)
+- [x] B4 Download the EOJN contract register 2018–2023 XLSX; find out how to export 2024+ contracts from the new EOJN (~5h) — automatic: old register (eojn.nn.hr) for all 67 buyers; new EOJN via the official API once `EOJN_API_KEY` is set (request from eojn@nn.hr)
 - [x] B5 Download DZS Census 2021 and the latest population estimates; check settlement → municipality roll-up (~5h)
-- [ ] B6 Get DGU administrative boundaries (WFS/GeoJSON) for the pilot county and simplify the polygons for the browser (~5h) — downloaded via DGU ATOM feed; reprojection with pyproj and simplification still to do
+- [x] B6 Get DGU administrative boundaries (WFS/GeoJSON) for the pilot county and simplify the polygons for the browser (~5h) — DGU ATOM feed, pyproj, coverage simplification (`opcina boundaries`)
 - [x] B7 Collect school, kindergarten and health facility lists for the pilots from data.gov.hr; use OpenStreetMap (Overpass) where none exist (~6h)
 - [x] B8 Find 1–2 pilots that publish monthly payment disclosures as CSV/XLSX and download the last 12 months (~4h, needs B1) — 4 of 5 pilots (Varaždin is behind reCAPTCHA)
 - [x] B9 Build a postcode → municipality lookup for the pilots (~2h, needs B2)
@@ -59,7 +59,7 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 ### C. Data pipeline — weeks 1–2 (~82 h)
 
-- [ ] C1 Fetch step: download each source into `data/raw/`, store file hash, row count and timestamp as a `source_run` record (~6h)
+- [x] C1 Fetch step: download each source into `data/raw/`, store file hash, row count and timestamp as a `source_run` record (~6h) — `opcina fetch`, every source automatic; see docs/sources.md
 - [ ] C2 Budget parser: MinFin XLSX → `budget_line` (year, period, account code, COFOG function, amount_eur); keep the column mapping in a config file, not in code (~12h, needs B3)
 - [ ] C3 Kuna → euro conversion at the fixed rate 7.53450 HRK/EUR for pre-2023 figures, keeping the original value in its own column; unit tests (~3h, needs C2)
 - [ ] C4 Population loader and per-resident figures (~4h, needs B5)
@@ -100,7 +100,7 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 ### F. Deployment — weeks 3–4 (~16 h)
 
-- [ ] F1 GitHub Actions workflow that runs the pipeline and publishes the generated JSON (~6h, needs C11)
+- [ ] F1 GitHub Actions workflow that runs the pipeline and publishes the generated JSON (~6h, needs C11) — 🚧 nightly fetch runs (`.github/workflows/fetch.yml`); publishing the JSON comes with C11
 - [ ] F2 Deploy the static site to GitHub Pages (base path, 404 page) (~5h, needs A4)
 - [ ] F3 Source-status section showing when each source was last refreshed (~3h, needs C1)
 - [ ] F4 Smoke-test the deployed site: every pilot page, both languages, all links (~2h)

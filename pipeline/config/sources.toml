@@ -1,13 +1,21 @@
-# Every open-data source the pipeline reads. `file` is relative to data/raw/.
-# Human-readable documentation of each source lives in docs/sources.md.
+# Every open-data source the pipeline reads, fetched automatically by `opcina fetch`.
+#
+# Each source writes to data/raw/<key>/; `file` is what parsers read, relative to
+# data/raw/. Keys other than title/publisher/page/url/licence/file are options for
+# that source's fetcher (see pipeline/src/opcina_pipeline/fetch/). Human-readable
+# documentation of each source lives in docs/sources.md.
 
 [minfin_budget]
-title = "Financijski izvještaji JLP(R)S, PR-RAS i RAS-funkcijski 2019-2025 (EUR)"
+title = "Financijski izvještaji JLP(R)S, PR-RAS i RAS-funkcijski (EUR)"
 publisher = "Ministarstvo financija"
-page = "https://mfin.gov.hr/istaknute-teme/lokalna-samouprava/financijski-izvjestaji-jlp-r-s/pr-ras-i-ras-funkc-za-razdoblje-2019-2025-euro/3922"
-url = "https://mfin.gov.hr/UserDocsImages//dokumenti/o-ministarstvu/lokalna-samouprava/financijski-izvjestaji-jlp-r-s//Lokalci%20FINALI%202019%202024%20EURO.zip"
+page = "https://mfin.gov.hr/istaknute-teme/lokalna-samouprava/financijski-izvjestaji-jlp-r-s/203"
+url = "https://mfin.gov.hr/istaknute-teme/lokalna-samouprava/financijski-izvjestaji-jlp-r-s/203"
 licence = "Ministarstvo financija, javno objavljeni podaci (licence not stated)"
-file = "minfin_budget/Lokalci_FINALI_2019_2025_EURO.zip"
+file = "minfin_budget/county.xlsx"
+# The section page links one page per period ("...-2019-2025-euro/3922"); the newest
+# period page links the zip with one workbook per county.
+period_page_pattern = '/istaknute-teme/lokalna-samouprava/financijski-izvjestaji-jlp-r-s/pr-ras-i-ras-funkc-za-razdoblje-(\d{4})-(\d{4})-euro/\d+'
+zip_pattern = '[^"\x27]*EURO\.zip'
 
 [minfin_budget_users]
 title = "Registar proračunskih i izvanproračunskih korisnika"
@@ -15,15 +23,19 @@ publisher = "Ministarstvo financija"
 page = "https://rkpfi.drzavna-riznica.hr/PORTAL/Rkp"
 url = "https://rkpfi.drzavna-riznica.hr/PORTAL/Rkp/Export"
 licence = "Otvorena dozvola Republike Hrvatske"
-file = "minfin_budget_users/registar_korisnika_proracuna_2026_active_2026-10-22.xlsx"
+file = "minfin_budget_users/rkp_register.xlsx"
+# Sheet 2 holds only the export timestamp, which changes on every download.
+ignore_parts = ["xl/worksheets/sheet2.xml"]
 
 [lau_codes]
-title = "Local Administrative Units (LAU) 2025, NUTS 2024"
+title = "Local Administrative Units (LAU)"
 publisher = "Eurostat"
 page = "https://ec.europa.eu/eurostat/web/nuts/local-administrative-units"
 url = "https://ec.europa.eu/eurostat/web/nuts/local-administrative-units"
 licence = "© European Union, reuse with attribution"
-file = "codes/EU-27-LAU-2025-NUTS-2024.xlsx"
+file = "lau_codes/lau.xlsx"
+# Newest "EU-27-LAU-<year>-NUTS-<year>.xlsx" linked from the page; "Census" files are skipped.
+link_pattern = '/eurostat/documents/[^"]*/EU-27-LAU-(\d{4})-NUTS-\d{4}\.xlsx[^"]*'
 
 [dzs_population]
 title = "Popis stanovništva 2021, stanovništvo po gradovima/općinama"
@@ -31,7 +43,7 @@ publisher = "Državni zavod za statistiku"
 page = "https://dzs.gov.hr/u-fokusu/popis-2021/88"
 url = "https://podaci.dzs.hr/media/td3jvrbu/popis_2021-stanovnistvo_po_gradovima_opcinama.xlsx"
 licence = "Slobodno korištenje uz navođenje izvora (DZS)"
-file = "dzs_population/popis_2021-stanovnistvo_po_gradovima_opcinama.xlsx"
+file = "dzs_population/census_2021_municipalities.xlsx"
 
 [dzs_settlements]
 title = "Popis stanovništva 2021, stanovništvo po naseljima"
@@ -39,15 +51,15 @@ publisher = "Državni zavod za statistiku"
 page = "https://dzs.gov.hr/u-fokusu/popis-2021/88"
 url = "https://podaci.dzs.hr/media/rqybclnx/popis_2021-stanovnistvo_po_naseljima.xlsx"
 licence = "Slobodno korištenje uz navođenje izvora (DZS)"
-file = "dzs_population/popis_2021-stanovnistvo_po_naseljima.xlsx"
+file = "dzs_settlements/census_2021_settlements.xlsx"
 
 [dzs_estimates]
-title = "Gradovi u statistici: procjena stanovništva 2011-2025"
+title = "Gradovi u statistici: procjena stanovništva"
 publisher = "Državni zavod za statistiku"
 page = "https://podaci.dzs.hr/hr/podaci/stanovnistvo/procjena-stanovnistva/"
 url = "https://podaci.dzs.hr/media/bz5hplcj/gradovi-u-statistici.xlsx"
 licence = "Slobodno korištenje uz navođenje izvora (DZS)"
-file = "dzs_population/gradovi-u-statistici.xlsx"
+file = "dzs_estimates/estimates.xlsx"
 
 [postcodes]
 title = "Naselja i odredišni poštanski uredi"
@@ -55,79 +67,69 @@ publisher = "Hrvatska pošta d.d."
 page = "https://data.gov.hr/ckan/dataset/naselje-i-odredisni-postanski-ured"
 url = "https://www.posta.hr/mjestaRh.aspx"
 licence = "Licence not stated on data.gov.hr"
-file = "postcodes/mjestaRh.xlsx"
+file = "postcodes/mjesta.xlsx"
 
 [dgu_boundaries]
 title = "INSPIRE Administrative Units (AU)"
 publisher = "Državna geodetska uprava"
 page = "https://geoportal.dgu.hr/services/atom/au/xml"
-url = "https://geoportal.dgu.hr/services/atom/INSPIRE_Administrative_Units_(AU).zip"
+url = "https://geoportal.dgu.hr/services/atom/au/xml"
 licence = "Otvorena dozvola Republike Hrvatske"
-file = "dgu_boundaries/varazdinska_jls.geojson"
+file = "dgu_boundaries/municipalities.geojson"
 
 [schools_primary]
 title = "Osnovne škole (e-Matica)"
 publisher = "Ministarstvo znanosti, obrazovanja i mladih"
 page = "https://data.gov.hr/ckan/dataset/osnovne-skole"
-url = "https://data.gov.hr/ckan/dataset/osnovne-skole"
+url = "https://data.gov.hr/ckan/api/3/action/package_show?id=osnovne-skole"
 licence = "Otvorena dozvola Republike Hrvatske"
-file = "facilities/mzom_osnovne_skole.json"
+file = "schools_primary"
+ckan_dataset = "osnovne-skole"
+formats = ["JSON"]
 
 [schools_secondary]
 title = "Srednje škole (e-Matica)"
 publisher = "Ministarstvo znanosti, obrazovanja i mladih"
 page = "https://data.gov.hr/ckan/dataset/srednje-skole"
-url = "https://data.gov.hr/ckan/dataset/srednje-skole"
+url = "https://data.gov.hr/ckan/api/3/action/package_show?id=srednje-skole"
 licence = "Otvorena dozvola Republike Hrvatske"
-file = "facilities/mzom_srednje_skole.json"
+file = "schools_secondary"
+ckan_dataset = "srednje-skole"
+formats = ["JSON"]
 
 [kindergartens]
 title = "Dječji vrtići (e-Matica)"
 publisher = "Ministarstvo znanosti, obrazovanja i mladih"
 page = "https://data.gov.hr/ckan/dataset/djecji-vrtici"
-url = "https://data.gov.hr/ckan/dataset/djecji-vrtici"
+url = "https://data.gov.hr/ckan/api/3/action/package_show?id=djecji-vrtici"
 licence = "Otvorena dozvola Republike Hrvatske"
-file = "facilities/mzom_djecji_vrtici.json"
+file = "kindergartens"
+ckan_dataset = "djecji-vrtici"
+formats = ["JSON"]
 
 [osm_facilities]
 title = "OpenStreetMap: schools, kindergartens, health facilities"
 publisher = "OpenStreetMap contributors"
 page = "https://www.openstreetmap.org/copyright"
-url = "https://overpass.kumi.systems/api/interpreter"
+url = "https://overpass-api.de/api/interpreter"
 licence = "ODbL 1.0"
-file = "facilities/osm_overpass_varazdinska_bbox.json"
+file = "osm_facilities/overpass.json"
+# Tried in order; public Overpass instances are often overloaded.
+endpoints = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+]
 
-[payments_ludbreg]
-title = "Isplate iz proračuna Grada Ludbrega (iTransparentnost)"
-publisher = "Grad Ludbreg"
-page = "https://api.otvorenigrad.hr/itransparentnost/isplate"
-url = "https://api.otvorenigrad.hr/itransparentnost/isplate"
-licence = "Licence not stated"
-file = "payments/ludbreg"
-
-[payments_ivanec]
-title = "Isplate iz proračuna Grada Ivanca (iTransparentnost)"
-publisher = "Grad Ivanec"
-page = "https://api.otvorenigrad.hr/itransparentnost/isplate"
-url = "https://api.otvorenigrad.hr/itransparentnost/isplate"
-licence = "Licence not stated"
-file = "payments/ivanec"
-
-[payments_jalzabet]
-title = "Isplate iz proračuna Općine Jalžabet (Kipos)"
-publisher = "Općina Jalžabet"
-page = "https://transparentnost-jalzabet.kipos.hr/"
-url = "https://transparentnost-jalzabet.kipos.hr/"
-licence = "Licence not stated"
-file = "payments/jalzabet/kipos_dbapi_search_all_2022-01_2026-09.json"
-
-[payments_breznicki_hum]
-title = "Informacije o trošenju sredstava Općine Breznički Hum"
-publisher = "Općina Breznički Hum"
-page = "https://www.breznicki-hum.hr/index.php/vazni-dokumenti/transparentnost"
-url = "https://www.breznicki-hum.hr/images/isplate_iz_proracuna/"
-licence = "Licence not stated"
-file = "payments/breznicki_hum"
+[payments]
+title = "Informacije o trošenju sredstava (isplate iz proračuna)"
+publisher = "Gradovi i općine"
+page = "https://narodne-novine.nn.hr/clanci/sluzbeni/2023_06_59_1003.html"
+url = "https://narodne-novine.nn.hr/clanci/sluzbeni/2023_06_59_1003.html"
+licence = "Licence not stated by the publishing municipalities"
+file = "payments"
+# Which platform each municipality publishes on: pipeline/config/payments.toml
+months = 13
 
 [contracts_ivanec]
 title = "Registar sklopljenih ugovora i njihovo izvršenje (Grad Ivanec)"
@@ -135,4 +137,24 @@ publisher = "Grad Ivanec"
 page = "https://data.gov.hr/ckan/dataset/247c96e7-fcce-42e5-8119-334f702f8c61"
 url = "https://data.gov.hr/ckan/api/3/action/package_show?id=247c96e7-fcce-42e5-8119-334f702f8c61"
 licence = "Otvorena dozvola Republike Hrvatske"
-file = "eojn_contracts"
+file = "contracts_ivanec"
+ckan_dataset = "247c96e7-fcce-42e5-8119-334f702f8c61"
+formats = ["XLSX"]
+
+[contracts_eojn_legacy]
+title = "Registar ugovora, stari EOJN RH (2018-2023)"
+publisher = "Narodne novine d.d. (EOJN RH)"
+page = "https://eojn.nn.hr/Oglasnik/"
+url = "https://eojn.nn.hr/Spin/application/ipn/JavniReporti/RptRegistarUgovora.aspx"
+licence = "Javno objavljeni podaci (licence not stated)"
+file = "contracts_eojn_legacy"
+# 2 polite requests per buyer (~20 min for a county); the old system rarely changes.
+refresh_days = 7
+
+[contracts_eojn]
+title = "Registar ugovora, EOJN RH (od 2024)"
+publisher = "Narodne novine d.d. (EOJN RH)"
+page = "https://eojn.hr/"
+url = "https://eojn.hr/api/public/eProcurementData/"
+licence = "Javno objavljeni podaci (licence not stated)"
+file = "contracts_eojn/contracts.jsonl"

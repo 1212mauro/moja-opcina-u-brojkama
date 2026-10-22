@@ -16,6 +16,9 @@ All notable changes to this project are documented here. The format follows [Kee
 - Municipality master table for all 28 Varaždin County units (`opcina master` → `pipeline/config/municipalities.csv`).
 - Postcode → municipality lookup (`opcina postcodes` → `pipeline/config/postcodes.csv`).
 - Source registry (`pipeline/config/sources.toml`) and source documentation (`docs/sources.md`).
+- Automatic fetching of every source (`opcina fetch`): MinFin budget and RKP register, DZS census and estimates, Eurostat LAU codes, Pošta postcodes, DGU boundaries, school and kindergarten registries, OpenStreetMap facilities, monthly payments for 4 of 5 pilots, and EOJN contracts (old register for all buyers; new register via the official API once a key is configured). Polite HTTP with conditional downloads, data-only change detection and a run log (`data/raw/source_runs.jsonl`).
+- Nightly fetch workflow on GitHub Actions with cached raw data and a per-source status table.
+- Simplified municipality boundaries for the website (`opcina boundaries`).
 
 ### Changed
 

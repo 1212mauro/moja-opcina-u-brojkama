@@ -6,9 +6,10 @@ from pathlib import Path
 
 import polars as pl
 
-from opcina_pipeline import master, postcodes
+from opcina_pipeline import boundaries, master, postcodes
 from opcina_pipeline.config import config_path, load_scope, load_sources, repo_root, schema_path
 from opcina_pipeline.contract import Contract
+from opcina_pipeline.fetch import run_fetch
 
 MASTER_CSV = "municipalities.csv"
 POSTCODES_CSV = "postcodes.csv"
@@ -66,12 +67,25 @@ def build_postcodes() -> None:
     write_csv(df, config_path(POSTCODES_CSV))
 
 
+def build_boundaries() -> None:
+    dest = repo_root() / "web" / "public" / "data" / "boundaries.geojson"
+    result = boundaries.write_boundaries(
+        load_sources()["dgu_boundaries"].path,
+        pl.read_csv(config_path(MASTER_CSV), infer_schema_length=0),
+        dest,
+    )
+    print(f"wrote {dest.relative_to(repo_root())} ({len(result.features)} features)")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="opcina", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("schema", help="write the data contract to contract/schema.json")
     commands.add_parser("master", help="build config/municipalities.csv from raw files")
     commands.add_parser("postcodes", help="build config/postcodes.csv from raw files")
+    commands.add_parser("boundaries", help="simplify boundaries for the website")
+    fetch_cmd = commands.add_parser("fetch", help="download every source into data/raw/")
+    fetch_cmd.add_argument("sources", nargs="*", help="source keys (default: all)")
 
     args = parser.parse_args()
     if args.command == "schema":
@@ -80,6 +94,12 @@ def main() -> None:
         build_master()
     elif args.command == "postcodes":
         build_postcodes()
+    elif args.command == "boundaries":
+        build_boundaries()
+    elif args.command == "fetch":
+        outcomes = run_fetch(args.sources or None)
+        if any(o.status == "failed" for o in outcomes.values()):
+            raise SystemExit(1)
 
 
 if __name__ == "__main__":
