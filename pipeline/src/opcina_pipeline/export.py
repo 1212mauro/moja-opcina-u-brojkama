@@ -214,11 +214,19 @@ def procurement_section(contracts: pl.DataFrame) -> Procurement | None:
     )
 
 
-def payments_section(payments: pl.DataFrame) -> Payments | None:
+def payments_section(payments: pl.DataFrame, as_of: datetime) -> Payments | None:
+    """12 calendar months up to the newest complete published month.
+
+    The month in progress is left out: it is still being published (by the 20th of
+    the next month) and would look like a drop in spending. A month the publisher
+    skipped stays a gap in ``months`` instead of pulling in an older month.
+    """
+    payments = payments.filter(pl.col("month") < f"{as_of:%Y-%m}")
     if payments.is_empty():
         return None
-    months = sorted(payments["month"].unique().to_list())[-PAYMENT_MONTHS:]
-    recent = payments.filter(pl.col("month").is_in(months))
+    year, month = map(int, payments["month"].max().split("-"))
+    first_year, first_month = divmod(year * 12 + month - PAYMENT_MONTHS, 12)
+    recent = payments.filter(pl.col("month") >= f"{first_year}-{first_month + 1:02d}")
     by_month = recent.group_by("month").agg(pl.col("amount_eur").sum()).sort("month")
     categories = (
         recent.group_by("economic_label")
@@ -305,7 +313,11 @@ def build_pages(generated_at: datetime | None = None) -> tuple[list[Municipality
         procurement = (
             procurement_section(unit_rows["contract"]) if unit_rows["contract"].height else None
         )
-        payments = payments_section(unit_rows["payment"]) if unit_rows["payment"].height else None
+        payments = (
+            payments_section(unit_rows["payment"], generated_at)
+            if unit_rows["payment"].height
+            else None
+        )
         facilities = (
             facilities_section(unit_rows["facility"]) if unit_rows["facility"].height else []
         )
