@@ -1,0 +1,43 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "slug": "primjer",
+        "name": "Općina Primjer",
+        "type": "opcina",
+        "hasData": true
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                16.25,
+                46.25
+              ],
+              [
+                16.35,
+                46.25
+              ],
+              [
+                16.35,
+                46.32
+              ],
+              [
+                16.25,
+                46.32
+              ],
+              [
+                16.25,
+                46.25
+              ]
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
