@@ -76,7 +76,7 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 - [x] D1 Base layout, design tokens, header and footer with source attribution and licences (~6h, needs A4) — tokens checked for AA in light and dark
 - [x] D2 Search by municipality name (diacritic-insensitive: "cakovec" finds "Čakovec") and by postcode (~6h, needs C11, B9) — static list + search box with JavaScript
-- [ ] D3 County map with municipality polygons; clicking one opens its page (MapLibre GL JS) (~8h, needs B6)
+- [x] D3 County map with municipality polygons; clicking one opens its page (MapLibre GL JS) (~8h, needs B6) — server-rendered SVG with linked municipalities instead of MapLibre: works without JavaScript and by keyboard; locator map on every page
 - [x] D4 Municipality page route, statically generated for every pilot (~4h, needs C11) — all 28 units, not only the pilots
 - [x] D5 Budget card: revenue, spending by function, per-resident figures; Observable Plot chart + HTML data table + one-sentence plain summary (~14h, needs D4) — server-rendered HTML/SVG instead of Observable Plot, so charts need no JavaScript
 - [x] D6 Basic peer comparison: per-resident figures and rank against same-county, same-band peers (~10h, needs C9)

@@ -1,0 +1,77 @@
+.figure {
+  margin: 0 0 var(--space-5);
+}
+
+.caption {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-2);
+}
+
+.map {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 32rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.locator {
+  max-width: 24rem;
+  max-height: 16rem;
+}
+
+/* Boundaries in muted ink (5.3:1) so each municipality is identifiable (WCAG 1.4.11). */
+.unit,
+.highlight,
+.noData {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.unit {
+  fill: var(--surface-2);
+  transition: fill 120ms ease-out;
+}
+
+.highlight {
+  fill: var(--series-1);
+}
+
+.noData {
+  fill: var(--surface-1);
+  stroke-dasharray: 3 3;
+}
+
+/* Rules for links stay under .map: a bare `a:focus` in a CSS module is global. */
+.map a:hover .unit,
+.map a:focus-visible .unit {
+  fill: var(--series-1);
+}
+
+/*
+ * Focus is shown on the shape itself: the whole municipality turns blue (3.8:1
+ * against the unfocused fill in light mode, 4.2:1 in dark), plus a focus-coloured
+ * outline. Neighbours drawn later can cover part of that outline, never the fill.
+ */
+.map a:focus {
+  outline: none;
+}
+.map a:focus-visible path {
+  stroke: var(--focus);
+  stroke-width: 3;
+}
+
+.label {
+  fill: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: var(--surface-1);
+  stroke-width: 4px;
+  pointer-events: none;
+}

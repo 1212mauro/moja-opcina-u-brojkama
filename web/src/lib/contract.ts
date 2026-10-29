@@ -267,4 +267,6 @@ export interface BoundaryProperties {
   name: string;
   type: "grad" | "opcina";
   hasData: boolean;
+  labelLon: number;
+  labelLat: number;
 }

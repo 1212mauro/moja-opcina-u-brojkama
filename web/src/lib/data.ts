@@ -10,6 +10,7 @@ import path from "node:path";
 import { cache } from "react";
 
 import type {
+  Boundaries,
   MunicipalityPage,
   SearchIndex,
   SourceStatus,
@@ -43,3 +44,7 @@ export const loadSourceStatus = cache((): SourceStatus =>
 export function pageSlugs(): string[] {
   return loadSearchIndex().entries.map((entry) => entry.slug);
 }
+
+export const loadBoundaries = cache((): Boundaries =>
+  readJson<Boundaries>("boundaries.geojson"),
+);

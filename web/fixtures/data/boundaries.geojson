@@ -1,0 +1,45 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "slug": "primjer",
+        "name": "Općina Primjer",
+        "type": "opcina",
+        "hasData": true,
+        "labelLon": 16.3,
+        "labelLat": 46.285
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                16.25,
+                46.25
+              ],
+              [
+                16.35,
+                46.25
+              ],
+              [
+                16.35,
+                46.32
+              ],
+              [
+                16.25,
+                46.32
+              ],
+              [
+                16.25,
+                46.25
+              ]
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

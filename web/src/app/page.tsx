@@ -1,3 +1,4 @@
+import { CountyMap } from "@/components/CountyMap";
 import { MunicipalitySearch } from "@/components/MunicipalitySearch";
 import { loadSearchIndex } from "@/lib/data";
 import { hr } from "@/messages/hr";
@@ -13,6 +14,7 @@ export default function Home() {
         <h1>{hr.home.title}</h1>
         <p className={styles.lead}>{hr.home.intro}</p>
       </header>
+      <CountyMap title={hr.map.home} />
       {/* One search across every county in scope. */}
       <MunicipalitySearch
         entries={entries}

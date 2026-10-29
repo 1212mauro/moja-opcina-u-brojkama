@@ -219,6 +219,12 @@ export const hr = {
     mapLink: "Prikaži na karti",
   },
 
+  map: {
+    home: "Karta: kliknite grad ili općinu, ili ih odaberite iz popisa ispod.",
+    locator: (name: string) => `Položaj: ${name} u županiji`,
+    noData: "podaci još nisu dostupni",
+  },
+
   missing: {
     budget: "Za ovu jedinicu još nemamo podatke o proračunu.",
     peers: "Usporedba nije dostupna jer nemamo podatke o proračunu.",

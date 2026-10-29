@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { CountyMap } from "@/components/CountyMap";
 import { BudgetSection } from "@/components/sections/BudgetSection";
 import { FacilitiesSection } from "@/components/sections/FacilitiesSection";
 import { PaymentsSection } from "@/components/sections/PaymentsSection";
@@ -126,6 +127,12 @@ export default async function MunicipalityPage({
           </div>
         ) : null}
       </section>
+
+      <CountyMap
+        highlight={page.slug}
+        title={hr.map.locator(page.name)}
+        width={400}
+      />
 
       <nav aria-labelledby="sadrzaj-stranice" className={styles.toc}>
         <h2 id="sadrzaj-stranice" className={styles.tocTitle}>

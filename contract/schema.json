@@ -63,13 +63,21 @@
         },
         "hasData": {
           "type": "boolean"
+        },
+        "labelLon": {
+          "type": "number"
+        },
+        "labelLat": {
+          "type": "number"
         }
       },
       "required": [
         "slug",
         "name",
         "type",
-        "hasData"
+        "hasData",
+        "labelLon",
+        "labelLat"
       ],
       "title": "BoundaryProperties",
       "type": "object"
