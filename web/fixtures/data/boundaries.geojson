@@ -7,7 +7,9 @@
         "slug": "primjer",
         "name": "Općina Primjer",
         "type": "opcina",
-        "hasData": true
+        "hasData": true,
+        "labelLon": 16.3,
+        "labelLat": 46.285
       },
       "geometry": {
         "type": "MultiPolygon",

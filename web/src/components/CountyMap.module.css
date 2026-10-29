@@ -47,16 +47,21 @@
   stroke-dasharray: 3 3;
 }
 
-a:hover .unit,
-a:focus-visible .unit {
+/* Rules for links stay under .map: a bare `a:focus` in a CSS module is global. */
+.map a:hover .unit,
+.map a:focus-visible .unit {
   fill: var(--series-1);
 }
 
-/* SVG links do not draw the global outline reliably; mark focus on the shape. */
-a:focus {
+/*
+ * Focus is shown on the shape itself: the whole municipality turns blue (3.8:1
+ * against the unfocused fill in light mode, 4.2:1 in dark), plus a focus-coloured
+ * outline. Neighbours drawn later can cover part of that outline, never the fill.
+ */
+.map a:focus {
   outline: none;
 }
-a:focus-visible path {
+.map a:focus-visible path {
   stroke: var(--focus);
   stroke-width: 3;
 }

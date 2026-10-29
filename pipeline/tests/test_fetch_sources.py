@@ -180,12 +180,13 @@ def test_simplify_boundaries_keeps_neighbours_touching():
     assert left.intersection(right).area == pytest.approx(0, abs=1e-12)
     assert left.distance(right) == 0
     assert len(result["features"][0]["geometry"]["coordinates"][0][0]) < 20
-    assert result["features"][0]["properties"] == {
-        "slug": "lijevo",
-        "name": "Lijevo",
-        "type": "opcina",
-        "hasData": True,
-    }
+    properties = result["features"][0]["properties"]
+    label = properties.pop("labelLon"), properties.pop("labelLat")
+    assert properties == {"slug": "lijevo", "name": "Lijevo", "type": "opcina", "hasData": True}
+    # The label point lies inside its own municipality, not just in its bounding box.
+    from shapely.geometry import Point
+
+    assert left.contains(Point(label))
 
 
 def test_simplify_boundaries_rejects_units_missing_from_master():

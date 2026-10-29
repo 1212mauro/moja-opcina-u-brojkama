@@ -37,6 +37,7 @@ def simplify_boundaries(
 
     out = []
     for feature, geometry in zip(features, simplified, strict=True):
+        label = geometry.representative_point()
         unit = units[feature["properties"]["dzs_code"]]
         if geometry.geom_type == "Polygon":
             geometry = shapely.MultiPolygon([geometry])
@@ -52,6 +53,8 @@ def simplify_boundaries(
                         if has_data is not None
                         else unit["pilot"] == "true"
                     ),
+                    "labelLon": round(label.x, COORDINATE_DECIMALS),
+                    "labelLat": round(label.y, COORDINATE_DECIMALS),
                 },
                 "geometry": mapping(geometry),
             }

@@ -32,6 +32,7 @@ export function CountyMap({ highlight, title, width = 800 }: Props) {
       <svg
         className={highlight ? `${styles.map} ${styles.locator}` : styles.map}
         viewBox={`0 0 ${map.width} ${map.height}`}
+        role="group"
         aria-label={title}
       >
         {shapes.map((shape) => {

@@ -1,9 +1,12 @@
+import Link from "next/link";
+
 import { BarList } from "@/components/BarList";
 import { Figure } from "@/components/Figure";
 import { Notice } from "@/components/Notice";
 import { SourceNote } from "@/components/SourceNote";
 import type { MunicipalityPage } from "@/lib/contract";
 import { formatEurCents, formatInteger } from "@/lib/format";
+import { municipalityPath } from "@/lib/paths";
 import { hr } from "@/messages/hr";
 
 export function PeersSection({ page }: { page: MunicipalityPage }) {
@@ -53,7 +56,7 @@ export function PeersSection({ page }: { page: MunicipalityPage }) {
               m.slug === page.slug ? (
                 <strong>{m.name}</strong>
               ) : (
-                <a href={`../${m.slug}/`}>{m.name}</a>
+                <Link href={municipalityPath(m.slug)}>{m.name}</Link>
               ),
           },
           {

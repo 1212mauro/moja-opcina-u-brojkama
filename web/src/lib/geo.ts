@@ -16,7 +16,7 @@ export type Shape = {
   hasData: boolean;
   /** SVG path data in the map's coordinate space. */
   d: string;
-  /** A point inside the bounding box centre, for a label. */
+  /** Where to put the name: a point inside the municipality. */
   labelX: number;
   labelY: number;
 };
@@ -31,12 +31,20 @@ export function projectBoundaries(
   const polygons = boundaries.features.map(
     (f) => (f.geometry as { coordinates: MultiPolygon }).coordinates,
   );
-  // features -> polygons -> rings -> points
-  const points = polygons.flat(3) as [number, number][];
-  const lons = points.map((p) => p[0]);
-  const lats = points.map((p) => p[1]);
-  const [minLon, maxLon] = [Math.min(...lons), Math.max(...lons)];
-  const [minLat, maxLat] = [Math.min(...lats), Math.max(...lats)];
+  // features -> polygons -> rings -> points. Loops, not Math.min(...all): spreading
+  // ~150k vertices (all of Croatia) exceeds the engine's argument limit.
+  let [minLon, maxLon, minLat, maxLat] = [
+    Infinity,
+    -Infinity,
+    Infinity,
+    -Infinity,
+  ];
+  for (const [lon, lat] of polygons.flat(3) as [number, number][]) {
+    if (lon < minLon) minLon = lon;
+    if (lon > maxLon) maxLon = lon;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  }
   const kx = Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
 
   const spanX = (maxLon - minLon) * kx;
@@ -62,15 +70,13 @@ export function projectBoundaries(
         return `M${unique.join("L")}Z`;
       })
       .join("");
-    const xs = rings.flat().map(([lon]) => x(lon));
-    const ys = rings.flat().map(([, lat]) => y(lat));
     return {
       slug: feature.properties.slug,
       name: feature.properties.name,
       hasData: feature.properties.hasData,
       d,
-      labelX: (Math.min(...xs) + Math.max(...xs)) / 2,
-      labelY: (Math.min(...ys) + Math.max(...ys)) / 2,
+      labelX: x(feature.properties.labelLon),
+      labelY: y(feature.properties.labelLat),
     };
   });
   return { width, height, shapes };

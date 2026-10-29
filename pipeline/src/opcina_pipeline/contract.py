@@ -212,6 +212,10 @@ class BoundaryProperties(ContractModel):
     name: str
     type: UnitType
     has_data: bool
+    # A point guaranteed inside the polygon (shapely representative_point), for a label;
+    # a bounding-box centre can fall outside concave municipalities.
+    label_lon: float
+    label_lat: float
 
 
 class BoundaryFeature(ContractModel):

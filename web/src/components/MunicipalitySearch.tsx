@@ -5,6 +5,7 @@ import { useId, useState, useSyncExternalStore } from "react";
 
 import type { SearchEntry } from "@/lib/contract";
 import { formatInteger } from "@/lib/format";
+import { municipalityPath } from "@/lib/paths";
 import { filterEntries } from "@/lib/search";
 import { hr } from "@/messages/hr";
 import styles from "./MunicipalitySearch.module.css";
@@ -78,7 +79,10 @@ export function MunicipalitySearch({
             {shown.map((entry) => (
               <tr key={entry.slug}>
                 <td>
-                  <Link href={`/opcina/${entry.slug}/`} className={styles.name}>
+                  <Link
+                    href={municipalityPath(entry.slug)}
+                    className={styles.name}
+                  >
                     {entry.name}
                   </Link>
                 </td>
