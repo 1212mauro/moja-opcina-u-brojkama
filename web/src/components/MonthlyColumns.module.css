@@ -1,0 +1,33 @@
+.scroll {
+  overflow-x: auto;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  min-width: 36rem; /* at 576 px the 15-unit labels render at ~12 px */
+  height: auto;
+  max-height: 16rem;
+}
+
+.column {
+  fill: var(--series-1);
+}
+.column:hover {
+  opacity: 0.85;
+}
+
+.baseline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.axis {
+  fill: var(--text-muted);
+  font-size: 15px;
+}
+
+.missing {
+  fill: var(--text-muted);
+  font-size: 16px;
+}
