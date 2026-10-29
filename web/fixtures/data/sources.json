@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-10-22T10:05:00Z",
+  "runs": [
+    {
+      "id": "minfin_budget-2026-10-22",
+      "source": "minfin_budget",
+      "title": "Izvršenje proračuna JLP(R)S",
+      "publisher": "Ministarstvo financija",
+      "url": "https://mfin.gov.hr/",
+      "licence": "Otvorena dozvola Republike Hrvatske",
+      "fetchedAt": "2026-10-22T10:00:00Z",
+      "fileHash": "sha256:0000",
+      "rowCount": 1,
+      "status": "ok"
+    }
+  ]
+}

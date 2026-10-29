@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-10-22T10:05:00Z",
+  "entries": [
+    {
+      "slug": "primjer",
+      "name": "Općina Primjer",
+      "nameAscii": "opcina primjer",
+      "type": "opcina",
+      "county": "Primjerna županija",
+      "population": 4250,
+      "postcodes": [
+        "42999"
+      ],
+      "hasData": true
+    }
+  ]
+}
