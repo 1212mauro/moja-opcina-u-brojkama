@@ -60,17 +60,17 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 ### C. Data pipeline — weeks 1–2 (~82 h)
 
 - [x] C1 Fetch step: download each source into `data/raw/`, store file hash, row count and timestamp as a `source_run` record (~6h) — `opcina fetch`, every source automatic; see docs/sources.md
-- [ ] C2 Budget parser: MinFin XLSX → `budget_line` (year, period, account code, COFOG function, amount_eur); keep the column mapping in a config file, not in code (~12h, needs B3)
-- [ ] C3 Kuna → euro conversion at the fixed rate 7.53450 HRK/EUR for pre-2023 figures, keeping the original value in its own column; unit tests (~3h, needs C2)
-- [ ] C4 Population loader and per-resident figures (~4h, needs B5)
-- [ ] C5 Procurement parser: EOJN XLSX → `contract`; match buyers by OIB, and attribute contracts of the municipality's own budget users (kindergartens, utilities) via the MinFin budget-user register (~12h, needs B2, B4)
-- [ ] C6 Deduplicate contracts across old and new EOJN on contract number + OIB; record the data's start and end dates (~3h, needs C5)
-- [ ] C7 Payments parser for the pilots' file format(s) → `payment`; payments to private individuals only as the aggregated categories the Naputak prescribes, never by name (~10h, needs B8)
-- [ ] C8 Facilities: normalise columns across publishers, geocode addresses that lack coordinates (cached, rate-limited), assign to municipalities by point-in-polygon (~10h, needs B6, B7)
-- [ ] C9 Peer groups: same county, same type, population band (<3,000; 3,000–10,000; 10,000–35,000; >35,000); compute basic ranks (~5h, needs C2, C4)
-- [ ] C10 Quality gate: schema unchanged, row counts within ±20% of the last run, totals reconcile; on failure keep the last good output (~6h)
-- [ ] C11 Export: one JSON file per municipality, a search index, simplified boundaries; every figure references its `source_run` (~6h, needs A6)
-- [ ] C12 Parser tests with small fixture files for budget, procurement and payments (~5h)
+- [x] C2 Budget parser: MinFin XLSX → `budget_line` (year, period, account code, COFOG function, amount_eur); keep the column mapping in a config file, not in code (~12h, needs B3) — `parse/budget.py`; all 3 reconciliations hold for 28 units × 7 years
+- [x] C3 Kuna → euro conversion at the fixed rate 7.53450 HRK/EUR for pre-2023 figures, keeping the original value in its own column; unit tests (~3h, needs C2) — contract amounts per cell; budget file already in EUR
+- [x] C4 Population loader and per-resident figures (~4h, needs B5) — `parse/population.py`
+- [x] C5 Procurement parser: EOJN XLSX → `contract`; match buyers by OIB, and attribute contracts of the municipality's own budget users (kindergartens, utilities) via the MinFin budget-user register (~12h, needs B2, B4) — `parse/contracts.py`; 5,379 contracts, budget users attributed via the RKP register
+- [x] C6 Deduplicate contracts across old and new EOJN on contract number + OIB; record the data's start and end dates (~3h, needs C5) — number + supplier (numbers are reused), priority eojn > legacy > municipal
+- [x] C7 Payments parser for the pilots' file format(s) → `payment`; payments to private individuals only as the aggregated categories the Naputak prescribes, never by name (~10h, needs B8) — `parse/payments.py`; 4 pilots, natural persons never named (docs/pipeline.md)
+- [x] C8 Facilities: normalise columns across publishers, geocode addresses that lack coordinates (cached, rate-limited), assign to municipalities by point-in-polygon (~10h, needs B6, B7) — `parse/facilities.py`; 199 facilities, Nominatim cached
+- [x] C9 Peer groups: same county, same type, population band (<3,000; 3,000–10,000; 10,000–35,000; >35,000); compute basic ranks (~5h, needs C2, C4) — `peers.py`
+- [x] C10 Quality gate: schema unchanged, row counts within ±20% of the last run, totals reconcile; on failure keep the last good output (~6h) — `quality.py`; staging → published
+- [x] C11 Export: one JSON file per municipality, a search index, simplified boundaries; every figure references its `source_run` (~6h, needs A6) — `export.py`; all 28 units get a page
+- [x] C12 Parser tests with small fixture files for budget, procurement and payments (~5h) — 173 tests
 
 ### D. Frontend — weeks 2–3 (~90 h)
 

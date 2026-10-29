@@ -5,6 +5,10 @@
 #   kipos         Kipos transparency portal; `base_url` is the municipality's subdomain
 #   html_links    files linked from one page; `page` and a regex `pattern` for the links
 #   unavailable   no machine-readable route; `reason` is shown on the coverage map
+#
+# `pending_access`: the publisher refuses our automated requests (HTTP 401/403) and
+# we have asked for access. Such a refusal is reported, not failed; when access is
+# granted the fetch succeeds again on its own and this line can be removed.
 
 ["04723"]  # Varaždin
 platform = "unavailable"
@@ -13,10 +17,12 @@ reason = "Payments are published only on transparentni.varazdin.hr, a search for
 ["01562"]  # Ivanec
 platform = "otvorenigrad"
 tenant = "grad-ivanec"
+pending_access = "api.otvorenigrad.hr answers 403 to GitHub Actions; access requested from the city, Oct 2026"
 
 ["02445"]  # Ludbreg
 platform = "otvorenigrad"
 tenant = "grad-ludbreg"
+pending_access = "api.otvorenigrad.hr answers 403 to GitHub Actions; access requested from the city, Oct 2026"
 
 ["01651"]  # Jalžabet
 platform = "kipos"

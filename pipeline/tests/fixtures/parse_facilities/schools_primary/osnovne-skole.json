@@ -1,0 +1,6 @@
+[
+  {"Naziv": "Osnovna škola Alfa", "Adresa": "Školska 1", "Mjesto": "Alfa", "Šifra": "05-001-001", "PoštanskiBroj": "42000", "Osnivač": "Grad Alfa", "Župnija": "Varaždinska županija", "Ravnatelj": "Ivo Ivić", "TipUstanove": "Osnovna škola", "Telefon": "042/000-000", "ePošta": "ured@example.org"},
+  {"Naziv": "Osnovna škola Beta", "Adresa": "Glavna 5", "Mjesto": "Beta", "Šifra": "05-002-001", "PoštanskiBroj": "42001", "Osnivač": "Varaždinska županija", "Župnija": "Varaždinska županija", "Ravnatelj": "Ana Anić", "TipUstanove": "Osnovna škola"},
+  {"Naziv": "Osnovna škola Gama", "Adresa": "Selo 7", "Mjesto": "Nepoznato", "Šifra": "05-002-002", "PoštanskiBroj": "42001", "Osnivač": "Varaždinska županija", "Župnija": "Varaždinska županija", "Ravnatelj": "Ana Anić", "TipUstanove": "Osnovna škola"},
+  {"Naziv": "Osnovna škola Drugdje", "Adresa": "Ulica 1", "Mjesto": "Samobor", "Šifra": "01-073-001", "PoštanskiBroj": "10430", "Osnivač": "Grad Samobor", "Župnija": "Zagrebačka županija", "Ravnatelj": "Ivo Ivić", "TipUstanove": "Osnovna škola"}
+]

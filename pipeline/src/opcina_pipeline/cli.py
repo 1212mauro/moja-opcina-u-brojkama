@@ -9,7 +9,10 @@ import polars as pl
 from opcina_pipeline import boundaries, master, postcodes
 from opcina_pipeline.config import config_path, load_scope, load_sources, repo_root, schema_path
 from opcina_pipeline.contract import Contract
+from opcina_pipeline.export import export
 from opcina_pipeline.fetch import run_fetch
+from opcina_pipeline.parse import PARSERS, run_parsers
+from opcina_pipeline.quality import run_gate
 
 MASTER_CSV = "municipalities.csv"
 POSTCODES_CSV = "postcodes.csv"
@@ -77,6 +80,15 @@ def build_boundaries() -> None:
     print(f"wrote {dest.relative_to(repo_root())} ({len(result.features)} features)")
 
 
+def gate(accept: set[str] = frozenset()) -> bool:
+    """Run the quality gate and print the verdicts; True when every table passed."""
+    results = run_gate(accept=accept)
+    for r in results:
+        verdict = "published" if r.passed else "KEPT PREVIOUS: " + "; ".join(r.problems)
+        print(f"{r.table:<12} {r.rows:>8} rows  {verdict}")
+    return all(r.passed for r in results)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="opcina", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -86,6 +98,19 @@ def main() -> None:
     commands.add_parser("boundaries", help="simplify boundaries for the website")
     fetch_cmd = commands.add_parser("fetch", help="download every source into data/raw/")
     fetch_cmd.add_argument("sources", nargs="*", help="source keys (default: all)")
+    parse_cmd = commands.add_parser("parse", help="parse raw files into data/interim/staging/")
+    parse_cmd.add_argument("tables", nargs="*", help=f"any of {', '.join(PARSERS)} (default: all)")
+    gate_cmd = commands.add_parser("gate", help="check staged tables, publish the ones that pass")
+    gate_cmd.add_argument(
+        "--accept",
+        nargs="+",
+        default=[],
+        metavar="TABLE",
+        help="accept an expected jump in row count for these tables (other checks still apply)",
+    )
+    commands.add_parser("export", help="write the website's JSON from published tables")
+    build_cmd = commands.add_parser("build", help="parse + gate + export")
+    build_cmd.add_argument("--accept", nargs="+", default=[], metavar="TABLE", help="see gate")
 
     args = parser.parse_args()
     if args.command == "schema":
@@ -99,6 +124,23 @@ def main() -> None:
     elif args.command == "fetch":
         outcomes = run_fetch(args.sources or None)
         if any(o.status == "failed" for o in outcomes.values()):
+            raise SystemExit(1)
+    elif args.command == "parse":
+        unknown = sorted(set(args.tables) - set(PARSERS))
+        if unknown:
+            parser.error(f"unknown tables {unknown}; choose from {', '.join(PARSERS)}")
+        if any(r.startswith("failed") for r in run_parsers(args.tables or None).values()):
+            raise SystemExit(1)
+    elif args.command == "gate":
+        if not gate(set(args.accept)):
+            raise SystemExit(1)
+    elif args.command == "export":
+        print(export())
+    elif args.command == "build":
+        parsed = run_parsers()
+        passed = gate(set(args.accept))  # failing tables keep their last published version...
+        print(export())  # ...and every table that passed is still exported
+        if not passed or any(r.startswith("failed") for r in parsed.values()):
             raise SystemExit(1)
 
 

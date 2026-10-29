@@ -1,0 +1,51 @@
+# Layout of the Ministry of Finance budget-execution workbook (PR-RAS and RAS-funkcijski,
+# one xlsx per county, one sheet per unit). Read by opcina_pipeline/parse/budget.py; see
+# docs/sources.md "Budget execution" for what the file looks like.
+
+[header]
+# The header is row 7 in the 2019-2025 file. It is found by these column names (in the
+# first `search_rows` rows) rather than by row number, because the Excel reader drops
+# leading empty rows and would shift a fixed index.
+search_rows = 20
+account_column = "Račun iz rač. plana"  # informative only; codes come from `key_column`
+label_column = "Opis stavke"
+key_column = "Pozicija u obrascu"  # unique per sheet; the code we store
+# Amount columns; the "Indeks YYYY/YYYY" columns between them are formulas and are skipped.
+year_column_pattern = '^Ostvareno u (\d{4})$'
+
+[metadata]
+# Label/value pairs in the rows above the header; the parser refuses a sheet whose values
+# differ (a kuna file or a half-year file would need a different conversion or period).
+currency_label = "Valuta"
+currency = "Euro"
+period_label = "Izvještajno razdoblje"
+period_value = "I-XII"
+period = "FY"  # stored in budget_line.period
+
+[sections]
+# Section headings, matched (case-sensitive prefix) in any of the first three columns.
+# Rows between the economic heading and the function heading are the economic section
+# (accounts mixed with derived positions); rows after the function heading are COFOG.
+economic_heading = "PRIHODI I RASHODI, PRIMICI I IZDACI PREMA EKONOMSKOJ KLASIFIKACIJI"
+function_heading = "RASHODI PREMA FUNKCIJSKOJ KLASIFIKACIJI"
+
+[codes]
+# A position matching these patterns is an account (economic section) or a COFOG function
+# (function section); level = number of digits. Everything else ("X067", "Y034", "Z006",
+# "11K", "dio611", "9221x,9222x VP", "R1", ...) is a derived position with level 0.
+economic_pattern = '^\d{1,5}$'  # 1-4 digit accounts plus 5-digit sub-accounts (e.g. 61341)
+function_pattern = '^\d{2,4}$'  # "01", "011", "0111"; leading zeros kept
+# Positions Excel turned into numbers: "96,97" (accounts 96+97) was typed in a Croatian
+# locale and stored as the decimal 96.97.
+aliases = { "96.97" = "96,97" }
+
+[sheets]
+# Aggregate sheets, skipped. Every other sheet must be a unit in municipalities.csv
+# (matched on official_name); names are compared with surrounding spaces stripped.
+skip = [
+    "UKUPNO GRADOVI",
+    "UKUPNO OPĆINE",
+    "UKUPNO OPĆINE GRADOVI",
+    "VARAŽDINSKA ŽUPANIJA",
+    "SVEUKUPNO OPĆ_GRAD_ŽUPANIJA",
+]

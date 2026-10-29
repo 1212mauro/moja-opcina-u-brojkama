@@ -1,0 +1,4 @@
+[
+  {"Naziv": "Gimnazija Alfa", "Adresa": "Trg 2", "Mjesto": "Alfa", "Šifra": "05-001-501", "PoštanskiBroj": "42000", "Osnivač": "Varaždinska županija", "Županija": "Varaždinska županija", "Ravnatelj": "Ivo Ivić", "TipUstanove": "Srednja škola"},
+  {"Naziv": "Osnovna škola Alfa", "Adresa": "Školska 1", "Mjesto": "Alfa", "Šifra": "05-001-001", "PoštanskiBroj": "42000", "Osnivač": "Grad Alfa", "Županija": "Varaždinska županija", "Ravnatelj": "Ivo Ivić", "TipUstanove": "Osnovna škola, Srednja škola"}
+]

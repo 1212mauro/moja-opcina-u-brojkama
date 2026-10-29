@@ -188,11 +188,25 @@
           ]
         },
         "valueEur": {
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "signedOn": {
-          "format": "date",
-          "type": "string"
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -568,12 +582,26 @@
       "additionalProperties": false,
       "properties": {
         "dataFrom": {
-          "format": "date",
-          "type": "string"
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dataTo": {
-          "format": "date",
-          "type": "string"
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "contractCount": {
           "type": "integer"
@@ -711,15 +739,6 @@
           "type": "string"
         },
         "source": {
-          "enum": [
-            "minfin_budget",
-            "minfin_budget_users",
-            "eojn_contracts",
-            "dzs_population",
-            "dgu_boundaries",
-            "facilities",
-            "payments"
-          ],
           "type": "string"
         },
         "title": {

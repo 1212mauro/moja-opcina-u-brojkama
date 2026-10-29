@@ -20,15 +20,6 @@ from pydantic.alias_generators import to_camel
 
 UnitType = Literal["grad", "opcina"]
 PopulationBand = Literal["under_3k", "3k_10k", "10k_35k", "over_35k"]
-SourceKey = Literal[
-    "minfin_budget",
-    "minfin_budget_users",
-    "eojn_contracts",
-    "dzs_population",
-    "dgu_boundaries",
-    "facilities",
-    "payments",
-]
 FacilityType = Literal["school", "kindergarten", "health"]
 
 
@@ -47,7 +38,7 @@ class SourceRun(ContractModel):
     """One fetch of one source file; every figure on the site points to one of these."""
 
     id: str
-    source: SourceKey
+    source: str  # a key of pipeline/config/sources.toml
     title: str
     publisher: str
     url: str
@@ -114,8 +105,8 @@ class ContractAward(ContractModel):
     supplier_name: str
     supplier_oib: str | None
     cpv: str | None
-    value_eur: float
-    signed_on: date
+    value_eur: float | None  # None: the register publishes no amount
+    signed_on: date | None
 
 
 class SupplierTotal(ContractModel):
@@ -126,8 +117,8 @@ class SupplierTotal(ContractModel):
 
 
 class Procurement(ContractModel):
-    data_from: date
-    data_to: date
+    data_from: date | None  # None when no contract carries a signing date
+    data_to: date | None
     contract_count: int
     total_value_eur: float
     recent_awards: list[ContractAward]

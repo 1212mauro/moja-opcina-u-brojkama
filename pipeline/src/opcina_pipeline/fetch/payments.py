@@ -11,6 +11,8 @@ from datetime import date
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlsplit
 
+import httpx
+
 from opcina_pipeline.config import config_path
 from opcina_pipeline.fetch.base import FetchContext, Outcome, fetcher
 from opcina_pipeline.fetch.http import Download
@@ -50,7 +52,7 @@ def next_month(start: date) -> date:
 def fetch_otvorenigrad(ctx: FetchContext, entry: dict, dest: Path) -> list[Download]:
     """iTransparentnost API: one CSV per month. The upper date bound is exclusive."""
     starts = month_starts(_today(), ctx.source.options["months"])
-    refresh_from = starts[-REFRESH_MONTHS]
+    refresh_from = starts[-min(REFRESH_MONTHS, len(starts))]
     files = []
     for start in starts:
         target = dest / f"{start:%Y-%m}.csv"
@@ -155,6 +157,15 @@ def fetch_payments(ctx: FetchContext) -> Outcome:
             continue
         try:
             unit_files = PLATFORMS[platform](ctx, entry, ctx.out_dir / code)
+        except httpx.HTTPStatusError as error:
+            # A refusal we already know about and have asked the publisher to lift:
+            # reported, not failed, and the last downloaded files stay in place.
+            # Once access works the same call simply succeeds again.
+            if error.response.status_code in (401, 403) and entry.get("pending_access"):
+                notes.append(f"{code} pending access ({entry['pending_access']})")
+            else:
+                failures.append(f"{code} {platform}: {type(error).__name__}: {error}")
+            continue
         except Exception as error:  # noqa: BLE001 - one municipality must not stop the rest
             failures.append(f"{code} {platform}: {type(error).__name__}: {error}")
             continue

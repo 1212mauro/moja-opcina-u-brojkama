@@ -1,0 +1,18 @@
+{"version": 0.6, "elements": [
+  {"type": "way", "id": 1, "center": {"lat": 46.02, "lon": 16.02}, "tags": {"amenity": "school", "name": "Osnovna škola Alfa", "ref:HR:e-matica": "05-001-001", "addr:street": "Školska ulica", "addr:housenumber": "1", "addr:city": "Alfa"}},
+  {"type": "way", "id": 2, "center": {"lat": 46.02, "lon": 16.12}, "tags": {"amenity": "school", "name": "Područna škola Selo", "ref:HR:e-matica": "05-001-001", "addr:place": "Selo", "addr:housenumber": "3"}},
+  {"type": "node", "id": 3, "lat": 46.03, "lon": 16.03, "tags": {"amenity": "school", "name": "Gimnazija Alfa", "ref:HR:e-matica": "05-001-501", "addr:street": "Trg", "addr:housenumber": "2"}},
+  {"type": "node", "id": 4, "lat": 46.031, "lon": 16.031, "tags": {"amenity": "school", "name": "Gimnazija Alfa", "ref:HR:e-matica": "05-001-501", "addr:street": "Trg", "addr:housenumber": "9"}},
+  {"type": "node", "id": 5, "lat": 46.04, "lon": 16.04, "tags": {"amenity": "school", "name": "Privatna gimnazija", "ref:HR:e-matica": "05-001-517"}},
+  {"type": "way", "id": 20, "center": {"lat": 46.05, "lon": 16.05}, "tags": {"amenity": "kindergarten", "name": "Dječji vrtić Sunce - Dravska", "addr:street": "Dravska ulica", "addr:housenumber": "1"}},
+  {"type": "way", "id": 21, "center": {"lat": 46.08, "lon": 16.08}, "tags": {"amenity": "kindergarten", "name": "Dječji vrtić Sunce - Istok"}},
+  {"type": "node", "id": 22, "lat": 46.0501, "lon": 16.0502, "tags": {"amenity": "kindergarten", "name": "Dječji vrtić"}},
+  {"type": "node", "id": 23, "lat": 46.0705, "lon": 16.1505, "tags": {"amenity": "kindergarten", "name": "Dječji vrtić Zvijezda"}},
+  {"type": "node", "id": 24, "lat": 46.09, "lon": 16.19, "tags": {"amenity": "kindergarten", "name": "Dječji vrtić Daleki"}},
+  {"type": "node", "id": 30, "lat": 46.01, "lon": 16.01, "tags": {"amenity": "pharmacy", "healthcare": "pharmacy", "name": "Ljekarna Centar"}},
+  {"type": "node", "id": 31, "lat": 46.0101, "lon": 16.0101, "tags": {"amenity": "pharmacy", "name": "Ljekarne Centar"}},
+  {"type": "node", "id": 32, "lat": 46.06, "lon": 16.06, "tags": {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "general", "name": "Ordinacija opće medicine dr. Ivo Ivić"}},
+  {"type": "way", "id": 33, "center": {"lat": 46.05, "lon": 16.15}, "tags": {"amenity": "clinic", "healthcare": "clinic", "name": "Ambulanta Beta"}},
+  {"type": "node", "id": 34, "lat": 46.06, "lon": 16.16, "tags": {"healthcare": "dentist"}},
+  {"type": "node", "id": 35, "lat": 45.5, "lon": 17.0, "tags": {"amenity": "hospital", "healthcare": "hospital", "name": "Bolnica Daleko"}}
+]}

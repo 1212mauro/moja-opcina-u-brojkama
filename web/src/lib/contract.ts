@@ -107,8 +107,8 @@ export interface Rank {
  * via the `definition` "Procurement".
  */
 export interface Procurement {
-  dataFrom: string;
-  dataTo: string;
+  dataFrom: string | null;
+  dataTo: string | null;
   contractCount: number;
   totalValueEur: number;
   recentAwards: ContractAward[];
@@ -125,8 +125,8 @@ export interface ContractAward {
   supplierName: string;
   supplierOib: string | null;
   cpv: string | null;
-  valueEur: number;
-  signedOn: string;
+  valueEur: number | null;
+  signedOn: string | null;
 }
 /**
  * This interface was referenced by `Contract`'s JSON-Schema
@@ -196,14 +196,7 @@ export interface Facility {
  */
 export interface SourceRun {
   id: string;
-  source:
-    | "minfin_budget"
-    | "minfin_budget_users"
-    | "eojn_contracts"
-    | "dzs_population"
-    | "dgu_boundaries"
-    | "facilities"
-    | "payments";
+  source: string;
   title: string;
   publisher: string;
   url: string;
