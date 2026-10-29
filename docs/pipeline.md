@@ -30,7 +30,7 @@ Schemas are in `pipeline/src/opcina_pipeline/tables.py`. Every row carries `dzs_
 | `population` | `parse/population.py` | 448 | census 2021 + DZS estimates 2011–2025 |
 | `budget_line` | `parse/budget.py` | 224,560 | 28 units × 2019–2025; economic, COFOG and derived positions; layout in `config/budget_layout.toml` |
 | `contract` | `parse/contracts.py` | 5,379 | old EOJN register (61 buyers), Ivanec's own register, new EOJN API when a key is set |
-| `payment` | `parse/payments.py` | 15,555 | Ivanec, Ludbreg, Jalžabet, Breznički Hum |
+| `payment` | `parse/payments.py` | 15,540 | Ivanec, Ludbreg, Jalžabet, Breznički Hum |
 | `facility` | `parse/facilities.py` | 199 | ministry school and kindergarten registries + OpenStreetMap |
 
 ## Rules that matter
@@ -50,7 +50,8 @@ The app republishes only what municipalities must publish, and never names priva
   - the publisher marks it (OIB "GDPR");
   - its label stands for people (salaries, "ugovor o djelu", meeting fees);
   - the municipality pays itself on a personal-expense account;
-  - the recipient name looks like a person's, **even if an OIB is published**. Some portals print people with their personal OIB.
+  - the recipient name looks like a person's, **even if an OIB is published**. Some portals print people with their personal OIB;
+  - the name carries no organisation marker (legal form, "obrt", "udruga", …) **and** its OIB is not a known business or public body, meaning neither a supplier or buyer in the procurement registers nor an entity in the MinFin register. This is the safety net for people the name rules miss. It also hides some small associations and firms (in October 2026, 75 recipients, 0.5 % of named spending).
 
   Such rows keep only the amount and the expense category; name and OIB are cleared.
 - Free-text payment descriptions are dropped entirely, because they name employees and welfare recipients.
@@ -70,4 +71,14 @@ A staged table is published only if all of these hold:
 - its row count is within ±20 % of the last published version;
 - its own checks pass: no duplicate keys, no missing required values, every municipality present, natural persons anonymous, facilities inside Croatia.
 
-Otherwise the last published version stays live, and `opcina gate` exits with an error, which makes the nightly job email the maintainer. Contract amounts may legitimately be empty (not published) or negative (annexes that lower a contract).
+Otherwise the last published version stays live. Every table that passed is still exported. `opcina gate` / `opcina build` then exit with an error, which makes the nightly job email the maintainer. Contract amounts may legitimately be empty (not published) or negative (annexes that lower a contract).
+
+When a jump in row count is expected, accept it once and let every other check still run. Examples: a municipality added to `payments.toml`, a new county, or the EOJN API backfill once a key is set.
+
+```bash
+opcina build --accept contract
+```
+
+On GitHub, run the "Fetch and build data" workflow by hand and enter the table name in the `accept` field.
+
+On the website, procurement counts and recent awards leave out annexes ("Dodatak ugovoru", "Aneks"); their value still counts in the totals.
