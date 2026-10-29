@@ -22,7 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className={styles.brand}>
               {hr.site.name}
             </Link>
-            <nav aria-label="Glavna navigacija">
+            <nav aria-label={hr.site.nav.label}>
               <ul className={styles.nav}>
                 <li>
                   <Link href="/">{hr.site.nav.home}</Link>

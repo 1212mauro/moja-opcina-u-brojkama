@@ -54,6 +54,7 @@ class SourceRun(ContractModel):
 class Population(ContractModel):
     year: int
     total: int
+    kind: Literal["census", "estimate"]
 
 
 class BudgetItem(ContractModel):

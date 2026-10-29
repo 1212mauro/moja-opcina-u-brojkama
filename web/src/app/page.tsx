@@ -13,13 +13,15 @@ export default function Home() {
         <h1>{hr.home.title}</h1>
         <p className={styles.lead}>{hr.home.intro}</p>
       </header>
-      {counties.map((county) => (
-        <MunicipalitySearch
-          key={county}
-          caption={hr.home.tableCaption(county)}
-          entries={entries.filter((e) => e.county === county)}
-        />
-      ))}
+      {/* One search across every county in scope. */}
+      <MunicipalitySearch
+        entries={entries}
+        caption={
+          counties.length === 1
+            ? hr.home.tableCaption(counties[0])
+            : hr.home.allUnits
+        }
+      />
     </>
   );
 }

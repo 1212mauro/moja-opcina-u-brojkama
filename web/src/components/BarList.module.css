@@ -61,9 +61,9 @@
   font-size: var(--text-sm);
 }
 
-/* Single-series lists (budget) colour every bar; peer lists colour only this unit. */
-.list:not(:has(.highlight)) .bar,
-.highlight .bar {
+/* Single-series lists (budget) colour every bar; comparisons colour only this unit. */
+.single .bar,
+.compare .highlight .bar {
   background: var(--series-1);
 }
 .highlight .label,

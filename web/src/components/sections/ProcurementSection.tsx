@@ -35,10 +35,15 @@ export function ProcurementSection({ page }: { page: MunicipalityPage }) {
       {top ? (
         <Figure
           title={hr.procurement.topSuppliers}
-          summary={hr.procurement.topSuppliersSummary(
-            top.name,
-            formatShare(top.totalEur / procurement.totalValueEur),
-          )}
+          summary={
+            // A share only makes sense of a positive total (amounts can be unpublished).
+            procurement.totalValueEur > 0
+              ? hr.procurement.topSuppliersSummary(
+                  top.name,
+                  formatShare(top.totalEur / procurement.totalValueEur),
+                )
+              : hr.procurement.topSupplierName(top.name)
+          }
           rows={procurement.topSuppliers}
           columns={[
             { header: t.supplier, cell: (s) => s.name },

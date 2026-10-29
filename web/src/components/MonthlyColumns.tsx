@@ -70,7 +70,9 @@ export function MonthlyColumns({ months, totals }: Props) {
               </g>
             );
           }
-          const height = max > 0 ? Math.max((value / max) * plot, 1) : 1;
+          // A net-negative month (refunds) sits on the baseline; the table shows the amount.
+          const height =
+            max > 0 ? Math.max((Math.max(value, 0) / max) * plot, 1) : 1;
           const y = TOP + plot - height;
           const r = Math.min(4, height / 2, width / 2);
           // Rounded at the data end (top), square on the baseline.

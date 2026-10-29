@@ -41,6 +41,7 @@ export interface MunicipalityPage {
 export interface Population {
   year: number;
   total: number;
+  kind: "census" | "estimate";
 }
 /**
  * This interface was referenced by `Contract`'s JSON-Schema

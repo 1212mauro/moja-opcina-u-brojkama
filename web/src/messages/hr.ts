@@ -1,6 +1,7 @@
 /**
- * Croatian UI text. Every user-facing string lives here, so English and the
- * simple-language mode (tasks E1, E2) are new message files, not component edits.
+ * Croatian UI text. Every user-facing string lives in messages/: short strings here,
+ * long prose as one component per language (hr-methodology.tsx). English and the
+ * simple-language mode (tasks E1, E2) are new files there, not component edits.
  */
 import type { MunicipalityPage } from "@/lib/contract";
 
@@ -23,6 +24,8 @@ export function plural(
   return many;
 }
 
+type Band = MunicipalityPage["band"];
+
 const units = (n: number) =>
   plural(
     n,
@@ -30,7 +33,6 @@ const units = (n: number) =>
     "usporedive jedinice",
     "usporedivih jedinica",
   );
-type Band = MunicipalityPage["band"];
 
 export const hr = {
   site: {
@@ -39,6 +41,7 @@ export const hr = {
       "Kako vaš grad ili općina troši novac, što nabavlja i koje su javne usluge u blizini.",
     skipToContent: "Preskoči na sadržaj",
     nav: {
+      label: "Glavna navigacija",
       home: "Početna",
       methodology: "Kako računamo",
       sources: "Izvori podataka",
@@ -61,6 +64,7 @@ export const hr = {
     resultsCount: (n: number) => `Rezultata: ${n}`,
     noResults: "Nijedna općina ni grad ne odgovaraju upisanom pojmu.",
     tableCaption: (county: string) => `Gradovi i općine: ${county} županija`,
+    allUnits: "Gradovi i općine",
     columns: {
       name: "Naziv",
       type: "Vrsta",
@@ -166,6 +170,7 @@ export const hr = {
     topSuppliers: "Najveći dobavljači",
     topSuppliersSummary: (name: string, share: string) =>
       `Najveći dobavljač je ${name} s ${share} ukupne vrijednosti ugovora.`,
+    topSupplierName: (name: string) => `Najveći dobavljač je ${name}.`,
     noValue: "iznos nije objavljen",
     columns: {
       date: "Datum",

@@ -17,8 +17,6 @@ import {
 import { hr } from "@/messages/hr";
 import styles from "./page.module.css";
 
-const CENSUS_YEAR = 2021;
-
 // Every municipality page is generated at build time; anything else is a 404.
 export const dynamicParams = false;
 
@@ -80,7 +78,7 @@ export default async function MunicipalityPage({
           {hr.page.population(
             formatInteger(page.population.total),
             page.population.year,
-            page.population.year !== CENSUS_YEAR,
+            page.population.kind === "estimate",
           )}
         </p>
       </header>

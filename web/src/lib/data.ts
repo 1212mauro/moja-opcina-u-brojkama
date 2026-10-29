@@ -7,6 +7,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { cache } from "react";
 
 import type {
   MunicipalityPage,
@@ -25,17 +26,18 @@ function readJson<T>(...parts: string[]): T {
   return JSON.parse(readFileSync(path.join(dataDir(), ...parts), "utf-8")) as T;
 }
 
-export function loadSearchIndex(): SearchIndex {
-  return readJson<SearchIndex>("search-index.json");
-}
+// cache(): metadata and page both ask for the same file; read and parse it once.
+export const loadSearchIndex = cache((): SearchIndex =>
+  readJson<SearchIndex>("search-index.json"),
+);
 
-export function loadPage(slug: string): MunicipalityPage {
-  return readJson<MunicipalityPage>("m", `${slug}.json`);
-}
+export const loadPage = cache((slug: string): MunicipalityPage =>
+  readJson<MunicipalityPage>("m", `${slug}.json`),
+);
 
-export function loadSourceStatus(): SourceStatus {
-  return readJson<SourceStatus>("sources.json");
-}
+export const loadSourceStatus = cache((): SourceStatus =>
+  readJson<SourceStatus>("sources.json"),
+);
 
 /** Slugs of every municipality that has a page. */
 export function pageSlugs(): string[] {

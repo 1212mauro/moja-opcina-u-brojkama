@@ -569,11 +569,19 @@
         },
         "total": {
           "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "census",
+            "estimate"
+          ],
+          "type": "string"
         }
       },
       "required": [
         "year",
-        "total"
+        "total",
+        "kind"
       ],
       "title": "Population",
       "type": "object"

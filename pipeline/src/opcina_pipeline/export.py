@@ -372,7 +372,7 @@ def build_pages(
                 name=unit["name"],
                 type=unit["type"],
                 county=unit["county"],
-                population=Population(year=pop["year"], total=pop["total"]),
+                population=Population(year=pop["year"], total=pop["total"], kind=pop["kind"]),
                 band=band,
                 budget=budget,
                 peers=peers_section(peers, code),

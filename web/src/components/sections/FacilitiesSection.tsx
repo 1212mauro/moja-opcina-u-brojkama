@@ -37,8 +37,8 @@ export function FacilitiesSection({ page }: { page: MunicipalityPage }) {
                 <span className={styles.count}>({items.length})</span>
               </h3>
               <ul className={styles.list}>
-                {items.map((facility) => (
-                  <li key={`${facility.name}-${facility.lat}-${facility.lon}`}>
+                {items.map((facility, index) => (
+                  <li key={`${index}-${facility.name}`}>
                     <span className={styles.name}>{facility.name}</span>
                     <span className={styles.address}>
                       {facility.address ?? hr.facilities.noAddress} ·{" "}

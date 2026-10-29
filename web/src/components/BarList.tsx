@@ -17,10 +17,22 @@ export type Bar = {
  * correctly without CSS, without JavaScript and in a screen reader; the bar itself is
  * decorative. Bars start at zero, one value axis, rounded only at the data end.
  */
-export function BarList({ bars, label }: { bars: Bar[]; label: string }) {
+export function BarList({
+  bars,
+  label,
+  compare = false,
+}: {
+  bars: Bar[];
+  label: string;
+  /** Peer comparison: only the highlighted bar is blue, the others grey. */
+  compare?: boolean;
+}) {
   const max = Math.max(...bars.map((bar) => Math.abs(bar.value)), 0);
   return (
-    <ul className={styles.list} aria-label={label}>
+    <ul
+      className={`${styles.list} ${compare ? styles.compare : styles.single}`}
+      aria-label={label}
+    >
       {bars.map((bar) => {
         const width = max > 0 ? (Math.max(bar.value, 0) / max) * 100 : 0;
         return (

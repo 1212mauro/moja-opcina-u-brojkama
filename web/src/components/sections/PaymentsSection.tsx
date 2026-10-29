@@ -18,7 +18,9 @@ export function PaymentsSection({ page }: { page: MunicipalityPage }) {
     return <Notice>{hr.missing.payments}</Notice>;
 
   const totals = new Map(payments.months.map((m) => [m.month, m.totalEur]));
-  const window = monthWindow(payments.months[payments.months.length - 1].month);
+  const calendar = monthWindow(
+    payments.months[payments.months.length - 1].month,
+  );
   const sum = payments.months.reduce((acc, m) => acc + m.totalEur, 0);
   const t = hr.payments.columns;
 
@@ -26,8 +28,8 @@ export function PaymentsSection({ page }: { page: MunicipalityPage }) {
     <>
       <p>
         {hr.payments.intro(
-          formatMonth(window[0]),
-          formatMonth(window[window.length - 1]),
+          formatMonth(calendar[0]),
+          formatMonth(calendar[calendar.length - 1]),
         )}
       </p>
       <Figure
@@ -36,7 +38,7 @@ export function PaymentsSection({ page }: { page: MunicipalityPage }) {
           formatEur(sum),
           payments.months.length,
         )}
-        rows={window}
+        rows={calendar}
         columns={[
           { header: t.month, cell: (m) => formatMonth(m) },
           {
@@ -49,7 +51,7 @@ export function PaymentsSection({ page }: { page: MunicipalityPage }) {
           },
         ]}
       >
-        <MonthlyColumns months={window} totals={totals} />
+        <MonthlyColumns months={calendar} totals={totals} />
       </Figure>
 
       {payments.byCategory.length ? (

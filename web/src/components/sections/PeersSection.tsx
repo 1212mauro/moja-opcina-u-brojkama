@@ -81,6 +81,7 @@ export function PeersSection({ page }: { page: MunicipalityPage }) {
         note={hr.peers.context}
       >
         <BarList
+          compare
           label={hr.peers.chartTitle}
           bars={members.map((m) => ({
             key: m.slug,
