@@ -21,6 +21,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Simplified municipality boundaries for the website (`opcina boundaries`).
 - Data pipeline (`opcina build`): parsers for population, budget execution, procurement contracts (with kuna conversion and deduplication), monthly payments (natural persons never named) and facilities (with geocoding); peer groups and per-resident ranks; quality gate between staged and published tables; export of one JSON page per municipality, search index, source status and boundaries. Documented in `docs/pipeline.md`.
 - Known publisher refusals are reported as "pending access" instead of failing the nightly job.
+- Website: home page with municipality list and search (name without diacritics, or postcode); a page for each of the 28 municipalities with key figures, budget by revenue type and function, peer comparison, procurement, monthly payments, facilities and sources; methodology and source-status pages. Charts are server-rendered with a summary sentence and a data table, work without JavaScript, and meet WCAG AA contrast in light and dark mode.
 
 ### Changed
 

@@ -10,7 +10,7 @@ title = "Financijski izvještaji JLP(R)S, PR-RAS i RAS-funkcijski (EUR)"
 publisher = "Ministarstvo financija"
 page = "https://mfin.gov.hr/istaknute-teme/lokalna-samouprava/financijski-izvjestaji-jlp-r-s/203"
 url = "https://mfin.gov.hr/istaknute-teme/lokalna-samouprava/financijski-izvjestaji-jlp-r-s/203"
-licence = "Ministarstvo financija, javno objavljeni podaci (licence not stated)"
+licence = "Javno objavljeni podaci (licenca nije navedena)"
 file = "minfin_budget/county.xlsx"
 # The section page links one page per period ("...-2019-2025-euro/3922"); the newest
 # period page links the zip with one workbook per county.
@@ -32,7 +32,7 @@ title = "Local Administrative Units (LAU)"
 publisher = "Eurostat"
 page = "https://ec.europa.eu/eurostat/web/nuts/local-administrative-units"
 url = "https://ec.europa.eu/eurostat/web/nuts/local-administrative-units"
-licence = "© European Union, reuse with attribution"
+licence = "© Europska unija, ponovna uporaba uz navođenje izvora"
 file = "lau_codes/lau.xlsx"
 # Newest "EU-27-LAU-<year>-NUTS-<year>.xlsx" linked from the page; "Census" files are skipped.
 link_pattern = '/eurostat/documents/[^"]*/EU-27-LAU-(\d{4})-NUTS-\d{4}\.xlsx[^"]*'
@@ -66,7 +66,7 @@ title = "Naselja i odredišni poštanski uredi"
 publisher = "Hrvatska pošta d.d."
 page = "https://data.gov.hr/ckan/dataset/naselje-i-odredisni-postanski-ured"
 url = "https://www.posta.hr/mjestaRh.aspx"
-licence = "Licence not stated on data.gov.hr"
+licence = "Licenca nije navedena"
 file = "postcodes/mjesta.xlsx"
 
 [dgu_boundaries]
@@ -126,7 +126,7 @@ title = "Informacije o trošenju sredstava (isplate iz proračuna)"
 publisher = "Gradovi i općine"
 page = "https://narodne-novine.nn.hr/clanci/sluzbeni/2023_06_59_1003.html"
 url = "https://narodne-novine.nn.hr/clanci/sluzbeni/2023_06_59_1003.html"
-licence = "Licence not stated by the publishing municipalities"
+licence = "Licencu ne navode gradovi i općine koji objavljuju"
 file = "payments"
 # Which platform each municipality publishes on: pipeline/config/payments.toml
 months = 13
@@ -146,7 +146,7 @@ title = "Registar ugovora, stari EOJN RH (2018-2023)"
 publisher = "Narodne novine d.d. (EOJN RH)"
 page = "https://eojn.nn.hr/Oglasnik/"
 url = "https://eojn.nn.hr/Spin/application/ipn/JavniReporti/RptRegistarUgovora.aspx"
-licence = "Javno objavljeni podaci (licence not stated)"
+licence = "Javno objavljeni podaci (licenca nije navedena)"
 file = "contracts_eojn_legacy"
 # 2 polite requests per buyer (~20 min for a county); the old system rarely changes.
 refresh_days = 7
@@ -156,5 +156,5 @@ title = "Registar ugovora, EOJN RH (od 2024)"
 publisher = "Narodne novine d.d. (EOJN RH)"
 page = "https://eojn.hr/"
 url = "https://eojn.hr/api/public/eProcurementData/"
-licence = "Javno objavljeni podaci (licence not stated)"
+licence = "Javno objavljeni podaci (licenca nije navedena)"
 file = "contracts_eojn/contracts.jsonl"

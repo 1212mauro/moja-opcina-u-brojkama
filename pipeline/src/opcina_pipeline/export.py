@@ -74,8 +74,10 @@ def read_runs(log_path: Path) -> dict[str, dict]:
     return runs
 
 
-def source_run(run: dict, row_count: int) -> SourceRun:
+def source_run(run: dict, row_count: int, attempt: dict | None = None) -> SourceRun:
+    """``run`` gives date, hash and rows; ``attempt`` (default: the same run) the status."""
     source = load_sources()[run["source"]]
+    status = (attempt or run)["status"]
     return SourceRun(
         id=run["id"],
         source=run["source"],
@@ -86,7 +88,7 @@ def source_run(run: dict, row_count: int) -> SourceRun:
         fetched_at=datetime.fromisoformat(run["finished_at"]),
         file_hash=(run["files"][0]["sha256"] if run["files"] else ""),
         row_count=row_count,
-        status="ok" if run["status"] in ("ok", "unchanged") else "failed",
+        status="ok" if status in ("ok", "unchanged") else status,
     )
 
 
@@ -370,7 +372,7 @@ def build_pages(
                 name=unit["name"],
                 type=unit["type"],
                 county=unit["county"],
-                population=Population(year=pop["year"], total=pop["total"]),
+                population=Population(year=pop["year"], total=pop["total"], kind=pop["kind"]),
                 band=band,
                 budget=budget,
                 peers=peers_section(peers, code),
@@ -414,14 +416,20 @@ def search_index(pages: list[MunicipalityPage], generated_at: datetime) -> Searc
 
 
 def source_status(runs: dict, generated_at: datetime, row_counts: dict[str, int]) -> SourceStatus:
-    latest = {}
-    for run in runs.values():
-        if run["source"] in load_sources():
-            latest[run["source"]] = run  # the log is in time order: last one wins
-    return SourceStatus(
-        generated_at=generated_at,
-        runs=[source_run(r, row_counts.get(r["id"], 0)) for _, r in sorted(latest.items())],
-    )
+    """Per source: the last successful fetch (what the site shows) and the latest attempt."""
+    attempts: dict[str, dict] = {}
+    successes: dict[str, dict] = {}
+    for run in runs.values():  # the log is in time order: later runs win
+        if run["source"] not in load_sources():
+            continue
+        attempts[run["source"]] = run
+        if run["status"] in ("ok", "unchanged"):
+            successes[run["source"]] = run
+    rows = []
+    for source, attempt in sorted(attempts.items()):
+        shown = successes.get(source, attempt)
+        rows.append(source_run(shown, row_counts.get(shown["id"], 0), attempt))
+    return SourceStatus(generated_at=generated_at, runs=rows)
 
 
 def _write(path: Path, model) -> None:

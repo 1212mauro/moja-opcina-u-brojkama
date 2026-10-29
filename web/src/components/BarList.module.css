@@ -1,0 +1,72 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* Mobile first: label on its own line, then bar and value. */
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "label label"
+    "track value";
+  align-items: center;
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+}
+
+@media (min-width: 48rem) {
+  .row {
+    grid-template-columns: minmax(10rem, 16rem) 1fr minmax(7rem, auto);
+    grid-template-areas: "label track value";
+  }
+}
+
+.label {
+  grid-area: label;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.track {
+  grid-area: track;
+  display: block;
+  height: 12px;
+  background: var(--track);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background: var(--series-muted);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.value {
+  grid-area: value;
+  text-align: right;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.detail {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* Single-series lists (budget) colour every bar; comparisons colour only this unit. */
+.single .bar,
+.compare .highlight .bar {
+  background: var(--series-1);
+}
+.highlight .label,
+.highlight .value {
+  font-weight: 700;
+}

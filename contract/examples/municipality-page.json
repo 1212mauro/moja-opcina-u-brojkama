@@ -9,7 +9,8 @@
   "county": "Primjerna županija",
   "population": {
     "year": 2021,
-    "total": 4250
+    "total": 4250,
+    "kind": "census"
   },
   "band": "3k_10k",
   "budget": {

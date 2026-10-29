@@ -1,0 +1,30 @@
+.prose {
+  max-width: 44rem;
+}
+.prose h2 {
+  margin-top: var(--space-6);
+}
+.prose ul {
+  padding-left: var(--space-5);
+}
+.prose li {
+  margin-bottom: var(--space-2);
+}
+
+.lead {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+}
+
+/* Tables may be wider than the reading column. */
+.wide {
+  width: min(var(--content-width), calc(100vw - 2 * var(--space-4)));
+  overflow-x: auto;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.warning {
+  font-weight: 600;
+}

@@ -74,19 +74,19 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 ### D. Frontend — weeks 2–3 (~90 h)
 
-- [ ] D1 Base layout, design tokens, header and footer with source attribution and licences (~6h, needs A4)
-- [ ] D2 Search by municipality name (diacritic-insensitive: "cakovec" finds "Čakovec") and by postcode (~6h, needs C11, B9)
+- [x] D1 Base layout, design tokens, header and footer with source attribution and licences (~6h, needs A4) — tokens checked for AA in light and dark
+- [x] D2 Search by municipality name (diacritic-insensitive: "cakovec" finds "Čakovec") and by postcode (~6h, needs C11, B9) — static list + search box with JavaScript
 - [ ] D3 County map with municipality polygons; clicking one opens its page (MapLibre GL JS) (~8h, needs B6)
-- [ ] D4 Municipality page route, statically generated for every pilot (~4h, needs C11)
-- [ ] D5 Budget card: revenue, spending by function, per-resident figures; Observable Plot chart + HTML data table + one-sentence plain summary (~14h, needs D4)
-- [ ] D6 Basic peer comparison: per-resident figures and rank against same-county, same-band peers (~10h, needs C9)
-- [ ] D7 Procurement section: recent awards and top suppliers (~8h, needs C5)
-- [ ] D8 Monthly payments explorer for the 1–2 units with data: month filter, categories, top recipients (~10h, needs C7)
-- [ ] D9 Services map plus a text list of facilities grouped by type (the map is optional, the list is not) (~10h, needs C8)
-- [ ] D10 "Where does this number come from?" link on every figure: source file and date (~4h)
-- [ ] D11 Methodology page: sources, matching rules, peer groups, context notes, no judgement of whether spending is "good" (~4h)
-- [ ] D12 Missing-data states, e.g. "this municipality does not publish machine-readable payment files" (~3h)
-- [ ] D13 Mobile and responsive pass (~3h)
+- [x] D4 Municipality page route, statically generated for every pilot (~4h, needs C11) — all 28 units, not only the pilots
+- [x] D5 Budget card: revenue, spending by function, per-resident figures; Observable Plot chart + HTML data table + one-sentence plain summary (~14h, needs D4) — server-rendered HTML/SVG instead of Observable Plot, so charts need no JavaScript
+- [x] D6 Basic peer comparison: per-resident figures and rank against same-county, same-band peers (~10h, needs C9)
+- [x] D7 Procurement section: recent awards and top suppliers (~8h, needs C5)
+- [x] D8 Monthly payments explorer for the 1–2 units with data: month filter, categories, top recipients (~10h, needs C7) — 4 pilots
+- [x] D9 Services map plus a text list of facilities grouped by type (the map is optional, the list is not) (~10h, needs C8) — list with OpenStreetMap links; the map comes with D3
+- [x] D10 "Where does this number come from?" link on every figure: source file and date (~4h)
+- [x] D11 Methodology page: sources, matching rules, peer groups, context notes, no judgement of whether spending is "good" (~4h)
+- [x] D12 Missing-data states, e.g. "this municipality does not publish machine-readable payment files" (~3h)
+- [x] D13 Mobile and responsive pass (~3h) — checked at 375 px
 
 ### E. Language and accessibility — weeks 3–4 (~40 h)
 
@@ -95,14 +95,14 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 - [ ] E3 Keyboard navigation, visible focus, skip link, 4.5:1 text contrast (~6h)
 - [ ] E4 axe-core accessibility checks in CI (~5h, needs A5)
 - [ ] E5 Screen-reader test with NVDA and VoiceOver on a full municipality page; fix findings (~8h)
-- [ ] E6 Core content works without JavaScript (~3h)
+- [x] E6 Core content works without JavaScript (~3h) — everything but the search box is static HTML
 - [ ] E7 Draft the accessibility statement using the EU template (~4h)
 
 ### F. Deployment — weeks 3–4 (~16 h)
 
 - [ ] F1 GitHub Actions workflow that runs the pipeline and publishes the generated JSON (~6h, needs C11) — 🚧 nightly fetch runs (`.github/workflows/fetch.yml`); publishing the JSON comes with C11
 - [ ] F2 Deploy the static site to GitHub Pages (base path, 404 page) (~5h, needs A4)
-- [ ] F3 Source-status section showing when each source was last refreshed (~3h, needs C1)
+- [x] F3 Source-status section showing when each source was last refreshed (~3h, needs C1) — /izvori/
 - [ ] F4 Smoke-test the deployed site: every pilot page, both languages, all links (~2h)
 
 ### G. Testing and demo — week 4 (~38 h)

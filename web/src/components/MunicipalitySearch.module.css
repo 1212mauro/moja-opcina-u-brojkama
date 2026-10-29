@@ -1,0 +1,59 @@
+.search {
+  margin-bottom: var(--space-5);
+  max-width: 32rem;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.input {
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-lg);
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 2px solid var(--text-muted); /* 5.3:1, a visible input boundary */
+  border-radius: var(--radius-md);
+}
+.input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-color: var(--focus);
+}
+
+.hint {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.count {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.caption {
+  text-align: left;
+  font-weight: 600;
+  padding: var(--space-3);
+}
+
+.name {
+  font-weight: 600;
+}
+
+.postcodes {
+  color: var(--text-secondary);
+}

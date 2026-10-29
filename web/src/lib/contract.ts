@@ -41,6 +41,7 @@ export interface MunicipalityPage {
 export interface Population {
   year: number;
   total: number;
+  kind: "census" | "estimate";
 }
 /**
  * This interface was referenced by `Contract`'s JSON-Schema
@@ -204,7 +205,7 @@ export interface SourceRun {
   fetchedAt: string;
   fileHash: string;
   rowCount: number;
-  status: "ok" | "failed";
+  status: "ok" | "failed" | "skipped" | "unavailable";
 }
 /**
  * This interface was referenced by `Contract`'s JSON-Schema

@@ -46,12 +46,15 @@ class SourceRun(ContractModel):
     fetched_at: datetime
     file_hash: str
     row_count: int
-    status: Literal["ok", "failed"]
+    # Latest attempt: "skipped" = waiting for access (e.g. an API key), "unavailable" =
+    # no machine-readable route. Dates and counts are from the last successful fetch.
+    status: Literal["ok", "failed", "skipped", "unavailable"]
 
 
 class Population(ContractModel):
     year: int
     total: int
+    kind: Literal["census", "estimate"]
 
 
 class BudgetItem(ContractModel):
