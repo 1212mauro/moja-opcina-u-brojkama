@@ -1,11 +1,189 @@
-/* Placeholder base styles; design tokens arrive with task D1. */
+/*
+ * Design tokens. One brand hue (blue, the data-viz reference palette's series 1)
+ * plus neutrals; every text pair meets WCAG 2.1 AA (ratios noted where close).
+ * Dark values are their own steps, not an automatic flip.
+ */
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+
+  /* Surfaces and ink */
+  --surface-0: #f6f5f2; /* page */
+  --surface-1: #fcfcfb; /* cards, chart surface */
+  --surface-2: #eeede9; /* subtle fills, table stripes */
+  --border: #d9d7d0;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e; /* 7.7:1 on surface-1 */
+  --text-muted: #6b6a66; /* 5.3:1 on surface-1, 4.6:1 on surface-2 */
+
+  /* Brand and data */
+  --link: #1c5cab; /* 6.5:1 on surface-1 */
+  --link-hover: #104281;
+  --focus: #1c5cab;
+  --series-1: #2a78d6; /* bars: the municipality on this page (4.3:1) */
+  --series-muted: #8f8d86; /* bars: peers (3.2:1); never told apart by colour alone */
+  --track: #eeede9;
+  --gap: #fcfcfb; /* 2 px surface gap between adjacent marks */
+
+  /* Status (never used for data series; always with a label) */
+  --notice-bg: #fff4d6;
+  --notice-border: #e0a800;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Type scale */
+  --text-sm: 0.875rem; /* 14 */
+  --text-md: 1rem; /* 16 */
+  --text-lg: 1.25rem; /* 20 */
+  --text-xl: 1.5rem; /* 24 */
+  --text-2xl: 2rem; /* 32 */
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --content-width: 72rem;
+  --font:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-0: #121211;
+    --surface-1: #1a1a19;
+    --surface-2: #262624;
+    --border: #3a3a37;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7; /* 9.7:1 on surface-1 */
+    --text-muted: #a3a29a; /* 6.8:1 on surface-1 */
+    --link: #86b6ef; /* 8.3:1 on surface-1 */
+    --link-hover: #b7d3f6;
+    --focus: #86b6ef;
+    --series-1: #3987e5;
+    --series-muted: #6f6e68; /* 3.4:1 */
+    --track: #262624;
+    --gap: #1a1a19;
+    --notice-bg: #3a2f10;
+    --notice-border: #c98500;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #121211;
+  --surface-1: #1a1a19;
+  --surface-2: #262624;
+  --border: #3a3a37;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #a3a29a;
+  --link: #86b6ef;
+  --link-hover: #b7d3f6;
+  --focus: #86b6ef;
+  --series-1: #3987e5;
+  --series-muted: #6f6e68;
+  --track: #262624;
+  --gap: #1a1a19;
+  --notice-bg: #3a2f10;
+  --notice-border: #c98500;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font);
   line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  padding: 1rem;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  margin: 0 0 var(--space-3);
+}
+h1 {
+  font-size: var(--text-2xl);
+}
+h2 {
+  font-size: var(--text-xl);
+}
+h3 {
+  font-size: var(--text-lg);
+}
+p {
+  margin: 0 0 var(--space-3);
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 0.15em;
+}
+a:hover {
+  color: var(--link-hover);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--text-sm);
+}
+th,
+td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+th {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
