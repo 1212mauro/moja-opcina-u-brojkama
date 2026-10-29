@@ -437,7 +437,8 @@ def test_build_payments(tmp_path, monkeypatch):
         "01511": {"platform": "html_links", "page": "x", "pattern": "x"},
         "02445": {"platform": "otvorenigrad", "tenant": "y"},  # nothing on disk yet
     }
-    df = P.build_payments(raw, platforms)
+    # An explicit known-OIB set keeps the test off the real RKP register in data/raw/.
+    df = P.build_payments(raw, platforms, known_oibs=frozenset())
     assert dict(df.schema) == PAYMENT
     assert sorted(df["dzs_code"].unique()) == ["01511", "01562", "01651"]
     assert set(df["source_run_id"]) == {"payments-run"}
