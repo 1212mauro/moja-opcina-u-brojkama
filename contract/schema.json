@@ -766,7 +766,9 @@
         "status": {
           "enum": [
             "ok",
-            "failed"
+            "failed",
+            "skipped",
+            "unavailable"
           ],
           "type": "string"
         }
