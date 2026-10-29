@@ -80,13 +80,13 @@ def build_boundaries() -> None:
     print(f"wrote {dest.relative_to(repo_root())} ({len(result.features)} features)")
 
 
-def gate() -> None:
-    results = run_gate()
+def gate(accept: set[str] = frozenset()) -> bool:
+    """Run the quality gate and print the verdicts; True when every table passed."""
+    results = run_gate(accept=accept)
     for r in results:
         verdict = "published" if r.passed else "KEPT PREVIOUS: " + "; ".join(r.problems)
         print(f"{r.table:<12} {r.rows:>8} rows  {verdict}")
-    if not all(r.passed for r in results):
-        raise SystemExit(1)
+    return all(r.passed for r in results)
 
 
 def main() -> None:
@@ -100,9 +100,17 @@ def main() -> None:
     fetch_cmd.add_argument("sources", nargs="*", help="source keys (default: all)")
     parse_cmd = commands.add_parser("parse", help="parse raw files into data/interim/staging/")
     parse_cmd.add_argument("tables", nargs="*", help=f"any of {', '.join(PARSERS)} (default: all)")
-    commands.add_parser("gate", help="check staged tables, publish the ones that pass")
+    gate_cmd = commands.add_parser("gate", help="check staged tables, publish the ones that pass")
+    gate_cmd.add_argument(
+        "--accept",
+        nargs="+",
+        default=[],
+        metavar="TABLE",
+        help="accept an expected jump in row count for these tables (other checks still apply)",
+    )
     commands.add_parser("export", help="write the website's JSON from published tables")
-    commands.add_parser("build", help="parse + gate + export")
+    build_cmd = commands.add_parser("build", help="parse + gate + export")
+    build_cmd.add_argument("--accept", nargs="+", default=[], metavar="TABLE", help="see gate")
 
     args = parser.parse_args()
     if args.command == "schema":
@@ -124,14 +132,15 @@ def main() -> None:
         if any(r.startswith("failed") for r in run_parsers(args.tables or None).values()):
             raise SystemExit(1)
     elif args.command == "gate":
-        gate()
+        if not gate(set(args.accept)):
+            raise SystemExit(1)
     elif args.command == "export":
         print(export())
     elif args.command == "build":
         parsed = run_parsers()
-        gate()  # failing tables keep their last published version
-        print(export())
-        if any(r.startswith("failed") for r in parsed.values()):
+        passed = gate(set(args.accept))  # failing tables keep their last published version...
+        print(export())  # ...and every table that passed is still exported
+        if not passed or any(r.startswith("failed") for r in parsed.values()):
             raise SystemExit(1)
 
 

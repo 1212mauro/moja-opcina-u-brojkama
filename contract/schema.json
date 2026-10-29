@@ -582,12 +582,26 @@
       "additionalProperties": false,
       "properties": {
         "dataFrom": {
-          "format": "date",
-          "type": "string"
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dataTo": {
-          "format": "date",
-          "type": "string"
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "contractCount": {
           "type": "integer"

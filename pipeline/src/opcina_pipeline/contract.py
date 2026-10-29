@@ -117,8 +117,8 @@ class SupplierTotal(ContractModel):
 
 
 class Procurement(ContractModel):
-    data_from: date
-    data_to: date
+    data_from: date | None  # None when no contract carries a signing date
+    data_to: date | None
     contract_count: int
     total_value_eur: float
     recent_awards: list[ContractAward]

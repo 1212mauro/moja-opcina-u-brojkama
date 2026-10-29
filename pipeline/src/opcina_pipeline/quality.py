@@ -111,7 +111,10 @@ def check_table(
     staged: pl.DataFrame,
     published: pl.DataFrame | None,
     extra_checks: list[Check] = (),
+    accept_row_change: bool = False,
 ) -> TableResult:
+    """``accept_row_change``: skip the ±20 % check once, for an expected step change
+    (a new municipality or source, a backfill); every other check still applies."""
     result = TableResult(table, staged.height, published.height if published is not None else None)
     expected = TABLES[table]
     if dict(staged.schema) != expected:
@@ -119,7 +122,7 @@ def check_table(
         return result
     if staged.height == 0:
         result.problems.append("table is empty")
-    if published is not None and published.height:
+    if published is not None and published.height and not accept_row_change:
         change = staged.height / published.height - 1
         if abs(change) > ROW_TOLERANCE:
             result.problems.append(
@@ -132,7 +135,9 @@ def check_table(
 
 
 def run_gate(
-    tables: list[str] | None = None, extra_checks: dict[str, list[Check]] | None = None
+    tables: list[str] | None = None,
+    extra_checks: dict[str, list[Check]] | None = None,
+    accept: set[str] = frozenset(),
 ) -> list[TableResult]:
     """Check every staged table, publish the ones that pass, write the report."""
     results = []
@@ -143,7 +148,11 @@ def run_gate(
         published_path = interim_path(table, "published")
         published = pl.read_parquet(published_path) if published_path.exists() else None
         result = check_table(
-            table, pl.read_parquet(staged_path), published, (extra_checks or {}).get(table, [])
+            table,
+            pl.read_parquet(staged_path),
+            published,
+            (extra_checks or {}).get(table, []),
+            accept_row_change=table in accept,
         )
         if result.passed:
             published_path.parent.mkdir(parents=True, exist_ok=True)

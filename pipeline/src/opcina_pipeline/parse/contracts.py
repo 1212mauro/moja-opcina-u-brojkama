@@ -90,7 +90,7 @@ class Money(NamedTuple):
 
 
 _AMOUNT = re.compile(
-    r"(?P<sign>-)?\s*(?P<number>\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)"
+    r"(?P<sign>-)?\s*(?P<number>\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+\.\d{1,2}|\d+(?:,\d+)?)"
     r"\s*(?P<currency>HRK|KN|EUR|€)?\.?",
     re.IGNORECASE,
 )
@@ -115,7 +115,7 @@ def to_eur(value: Any, currency: str | None = None) -> Money | None:
         match = _AMOUNT.fullmatch(original)
         if not match:
             raise ValueError(f"unrecognised amount {value!r}")
-        number = float(match["number"].replace(".", "").replace(",", "."))
+        number = _number(match["number"])
         if match["sign"]:
             number = -number
         unit = match["currency"] or currency
@@ -124,6 +124,15 @@ def to_eur(value: Any, currency: str | None = None) -> Money | None:
         raise ValueError(f"amount {value!r} has no known currency")
     eur = number / HRK_PER_EUR if unit == "HRK" else number
     return Money(round(eur, 2), original, unit)
+
+
+def _number(text: str) -> float:
+    """Croatian ("25.000,00", "1.234", "1234,5") or dot-decimal ("1234.56") number."""
+    if "," in text:
+        return float(text.replace(".", "").replace(",", "."))
+    if re.fullmatch(r"\d+\.\d{1,2}", text):
+        return float(text)
+    return float(text.replace(".", ""))
 
 
 def _hr_number(number: float) -> str:

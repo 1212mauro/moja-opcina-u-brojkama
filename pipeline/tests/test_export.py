@@ -51,3 +51,54 @@ def test_clean_label_drops_form_notes():
     assert clean_label("Prihodi od poreza (šifre 611+612+613)") == "Prihodi od poreza"
     assert clean_label("Opće javne usluge (šifre 011+012+013+014 do 018)") == "Opće javne usluge"
     assert clean_label("Rashodi za zaposlene") == "Rashodi za zaposlene"
+
+
+def contract(subject: str, value: float | None, signed_on: date | None) -> dict:
+    return {
+        "contract_key": f"eojn_legacy:{subject}",
+        "system": "eojn_legacy",
+        "dzs_code": "02607",
+        "buyer_oib": "1",
+        "buyer_name": "Općina",
+        "buyer_kind": "unit",
+        "subject": subject,
+        "cpv": None,
+        "procedure": None,
+        "contract_number": None,
+        "supplier_name": "Gradnja d.o.o.",
+        "supplier_oib": "2",
+        "signed_on": signed_on,
+        "value_eur": value,
+        "value_with_vat_eur": None,
+        "value_original": None,
+        "currency_original": "EUR",
+        "source_run_id": "c-1",
+    }
+
+
+def test_annexes_change_totals_but_are_not_counted_as_awards():
+    from opcina_pipeline.export import procurement_section
+
+    rows = [
+        contract("Rekonstrukcija doma", 100_000, date(2022, 3, 1)),
+        contract("Rekonstrukcija doma – 1. dodatak ugovoru", -11.67, date(2022, 11, 29)),
+        contract("Dodatni radovi na domu", 5_000, date(2022, 12, 1)),
+    ]
+    section = procurement_section(conform(pl.DataFrame(rows), "contract"))
+    assert section.contract_count == 2
+    assert section.total_value_eur == 104_988.33
+    assert [a.subject for a in section.recent_awards] == [
+        "Dodatni radovi na domu",
+        "Rekonstrukcija doma",
+    ]
+    assert section.top_suppliers[0].contracts == 2
+
+
+def test_procurement_without_any_signing_date_still_exports():
+    from opcina_pipeline.export import procurement_section
+
+    section = procurement_section(
+        conform(pl.DataFrame([contract("Nabava", None, None)]), "contract")
+    )
+    assert section.data_from is None and section.contract_count == 1
+    assert section.recent_awards == []

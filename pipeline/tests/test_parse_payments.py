@@ -444,3 +444,24 @@ def test_build_payments(tmp_path, monkeypatch):
     natural = df.filter(pl.col("natural_person"))
     assert natural["recipient_name"].is_null().all() and natural["recipient_oib"].is_null().all()
     assert df["description"].is_null().all()
+
+
+def test_recipient_without_org_marker_needs_a_known_oib():
+    from opcina_pipeline.parse.payments import natural_person_rule
+
+    known = frozenset({"94577403194"})
+    # No legal form, no first name on the list, valid OIB: only a known OIB keeps the name.
+    assert (
+        natural_person_rule("NISKOGRADNJA HUĐEK", "94577403194", "3232", "Usluge", None, known)
+        is None
+    )
+    assert (
+        natural_person_rule("KOVAČ ŽELJANA", "69435151530", "3721", "Pomoći", None, known)
+        == "unverified"
+    )
+    # Organisations recognised by their name never need the OIB check.
+    assert (
+        natural_person_rule("Primjer d.o.o.", "69435151530", "3232", "Usluge", None, known) is None
+    )
+    # Without a known-OIB list the old behaviour stands (used by unit tests of other rules).
+    assert natural_person_rule("KOVAČ ŽELJANA", "69435151530", "3721", "Pomoći") is None

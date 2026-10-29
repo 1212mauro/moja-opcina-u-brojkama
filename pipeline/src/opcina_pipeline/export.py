@@ -14,6 +14,7 @@ table is missing for a municipality is ``null`` and the site says so.
 
 import json
 import re
+import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -167,10 +168,28 @@ def peers_section(peers: pl.DataFrame, dzs_code: str) -> Peers | None:
     )
 
 
+# Register rows that amend an existing contract: "Dodatak 1 Ugovoru ...", "Aneks ...",
+# "Izmjena ugovora ...", or "<subject> – 1. dodatak ugovoru" (also the typo "ododatak").
+# Their value changes the totals, but they are not new awards.
+ANNEX = re.compile(
+    r"^\W*(dodatak|aneks|izmjen[ae])\b|\bo?dodatak\w*\s+(br\.?\s*\d+\s+)?ugovor|\baneks\w*\s+ugovor",
+    re.IGNORECASE,
+)
+
+
+def is_annex(subject: str | None) -> bool:
+    return bool(ANNEX.search(ascii_fold(subject or "")))
+
+
 def procurement_section(contracts: pl.DataFrame) -> Procurement | None:
+    """Totals include annexes; counts and recent awards are new contracts only."""
     if contracts.is_empty():
         return None
-    dated = contracts.filter(pl.col("signed_on").is_not_null())
+    contracts = contracts.with_columns(
+        annex=pl.col("subject").map_elements(is_annex, return_dtype=pl.Boolean)
+    )
+    awards = contracts.filter(~pl.col("annex"))
+    dated = awards.filter(pl.col("signed_on").is_not_null())
     recent = dated.sort("signed_on", descending=True).head(RECENT_AWARDS)
     suppliers = (
         contracts.with_columns(key=pl.coalesce("supplier_oib", "supplier_name"))
@@ -178,16 +197,16 @@ def procurement_section(contracts: pl.DataFrame) -> Procurement | None:
         .agg(
             pl.col("supplier_name").first(),
             pl.col("supplier_oib").first(),
-            pl.len().alias("contracts"),
+            (~pl.col("annex")).sum().alias("contracts"),
             pl.col("value_eur").sum().alias("total"),
         )
         .sort("total", "supplier_name", descending=[True, False])
         .head(TOP_SUPPLIERS)
     )
     return Procurement(
-        data_from=dated["signed_on"].min(),
+        data_from=dated["signed_on"].min(),  # None when no award carries a date
         data_to=dated["signed_on"].max(),
-        contract_count=contracts.height,
+        contract_count=awards.height,
         total_value_eur=round(contracts["value_eur"].sum(), 2),
         recent_awards=[
             ContractAward(
@@ -285,8 +304,10 @@ def _rows(table: pl.DataFrame | None, dzs_code: str) -> pl.DataFrame:
     return table.filter(pl.col("dzs_code") == dzs_code)
 
 
-def build_pages(generated_at: datetime | None = None) -> tuple[list[MunicipalityPage], dict]:
-    """Pages for every unit in the master table, plus the fetch runs they cite."""
+def build_pages(
+    generated_at: datetime | None = None,
+) -> tuple[list[MunicipalityPage], dict, dict[str, int]]:
+    """Pages for every unit in the master table, the fetch log, and rows per fetch run."""
     generated_at = generated_at or datetime.now(UTC)
     master = pl.read_csv(config_path("municipalities.csv"), infer_schema_length=0)
     population = read_published("population")
@@ -309,7 +330,11 @@ def build_pages(generated_at: datetime | None = None) -> tuple[list[Municipality
         code = unit["dzs_code"]
         pop = latest_pop.filter(pl.col("dzs_code") == code).row(0, named=True)
         unit_rows = {name: _rows(t, code) for name, t in tables.items()}
-        budget = budget_section(_rows(budget_lines, code), pop["total"])
+        # Per-resident budget figures use the budget year's population, as the peer
+        # comparison does, so both sections of a page agree.
+        own_peers = peers.filter(pl.col("dzs_code") == code).sort("year")
+        budget_population = own_peers["population"][-1] if own_peers.height else pop["total"]
+        budget = budget_section(_rows(budget_lines, code), budget_population)
         procurement = (
             procurement_section(unit_rows["contract"]) if unit_rows["contract"].height else None
         )
@@ -334,8 +359,7 @@ def build_pages(generated_at: datetime | None = None) -> tuple[list[Municipality
         if boundaries_run:
             cited.add(boundaries_run)
 
-        own_peers = peers.filter(pl.col("dzs_code") == code)
-        band = own_peers.sort("year")["band"][-1] if own_peers.height else band_for(pop["total"])
+        band = own_peers["band"][-1] if own_peers.height else band_for(pop["total"])
         pages.append(
             MunicipalityPage(
                 slug=unit["slug"],
@@ -359,7 +383,7 @@ def build_pages(generated_at: datetime | None = None) -> tuple[list[Municipality
                 generated_at=generated_at,
             )
         )
-    return pages, runs
+    return pages, runs, row_counts
 
 
 def latest_run(runs: dict, source: str) -> str | None:
@@ -389,14 +413,14 @@ def search_index(pages: list[MunicipalityPage], generated_at: datetime) -> Searc
     )
 
 
-def source_status(runs: dict, generated_at: datetime) -> SourceStatus:
+def source_status(runs: dict, generated_at: datetime, row_counts: dict[str, int]) -> SourceStatus:
     latest = {}
     for run in runs.values():
         if run["source"] in load_sources():
             latest[run["source"]] = run  # the log is in time order: last one wins
     return SourceStatus(
         generated_at=generated_at,
-        runs=[source_run(r, 0) for _, r in sorted(latest.items())],
+        runs=[source_run(r, row_counts.get(r["id"], 0)) for _, r in sorted(latest.items())],
     )
 
 
@@ -411,16 +435,19 @@ def _write(path: Path, model) -> None:
 def export(out_dir: Path | None = None) -> dict[str, int]:
     out_dir = out_dir or repo_root() / "web" / "public" / "data"
     generated_at = datetime.now(UTC)
-    pages, runs = build_pages(generated_at)
+    pages, runs, row_counts = build_pages(generated_at)  # validates everything first
 
-    page_dir = out_dir / "m"
-    if page_dir.exists():
-        for old in page_dir.glob("*.json"):
-            old.unlink()  # a unit that left the scope must not keep a stale page
+    # Pages are written to a fresh folder that replaces the old one only when complete,
+    # so a failed export never leaves a half-written site; units that left the scope
+    # lose their page.
+    page_dir, next_dir = out_dir / "m", out_dir / "m.next"
+    shutil.rmtree(next_dir, ignore_errors=True)
     for page in pages:
-        _write(page_dir / f"{page.slug}.json", page)
+        _write(next_dir / f"{page.slug}.json", page)
+    shutil.rmtree(page_dir, ignore_errors=True)
+    next_dir.rename(page_dir)
     _write(out_dir / "search-index.json", search_index(pages, generated_at))
-    _write(out_dir / "sources.json", source_status(runs, generated_at))
+    _write(out_dir / "sources.json", source_status(runs, generated_at, row_counts))
 
     with_data = {p.dzs_code for p in pages if p.budget is not None}
     write_boundaries(

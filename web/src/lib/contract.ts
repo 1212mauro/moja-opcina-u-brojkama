@@ -107,8 +107,8 @@ export interface Rank {
  * via the `definition` "Procurement".
  */
 export interface Procurement {
-  dataFrom: string;
-  dataTo: string;
+  dataFrom: string | null;
+  dataTo: string | null;
   contractCount: number;
   totalValueEur: number;
   recentAwards: ContractAward[];

@@ -32,7 +32,8 @@ import polars as pl
 
 from opcina_pipeline.config import load_sources
 from opcina_pipeline.fetch.payments import load_platforms
-from opcina_pipeline.tables import PAYMENT, conform, latest_run_id
+from opcina_pipeline.master import read_register
+from opcina_pipeline.tables import PAYMENT, conform, interim_path, latest_run_id
 from opcina_pipeline.text import ascii_fold
 
 # Columns every platform parser returns, before the shared rules are applied.
@@ -192,6 +193,7 @@ def natural_person_rule(
     economic_code: str | None,
     economic_label: str | None,
     payer_name: str | None = None,
+    known_oibs: frozenset[str] | None = None,
 ) -> str | None:
     """Why this recipient is treated as a natural person, or None for a legal person.
 
@@ -214,6 +216,12 @@ def natural_person_rule(
     6. ``personal_account``: salaries (31xx), non-employee compensation (3241), council
        fees (3291), cash benefits (3721), or a work or author contract in the label.
     7. ``surname_no_oib``: the name is one or two "-ić" surnames ("Horvatić").
+
+    8. ``unverified``: when ``known_oibs`` is given, a recipient that rule 4 did not
+       recognise as an organisation keeps its name only if its OIB is a known business
+       or public body (a procurement supplier or buyer, or an entity in the MinFin
+       register). Name heuristics cannot recognise every person; this makes the
+       default "hidden" for anyone they miss.
     """
     folded = ascii_fold(name or "")
     label = ascii_fold(economic_label or "")
@@ -229,14 +237,15 @@ def natural_person_rule(
         return None
     if looks_like_person(name or ""):
         return "person_name"
-    if clean_oib(raw_oib) is not None:
-        return None
+    oib = clean_oib(raw_oib)
+    if oib is not None:
+        return None if known_oibs is None or oib in known_oibs else "unverified"
     if _PERSONAL_ACCOUNTS.match(code) or _PERSONAL_CONTRACT.search(label):
         return "personal_account"
     words = _words(folded)
     if 1 <= len(words) <= 2 and all(word.endswith("ic") for word in words):
         return "surname_no_oib"
-    return None
+    return None if known_oibs is None else "unverified"
 
 
 # --- Text helpers -----------------------------------------------------------------------
@@ -456,9 +465,10 @@ def parse_html_links(folder: Path) -> pl.DataFrame:
     frames, seen = [], {}
     for path in sorted(folder.glob("*.ods")):
         frame, period = parse_ods_file(path)
-        if period is not None and period in seen:
-            raise ValueError(f"{path.name} and {seen[period]} both cover {period}")
-        seen[period] = path.name
+        if period is not None:
+            if period in seen:
+                raise ValueError(f"{path.name} and {seen[period]} both cover {period}")
+            seen[period] = path.name
         frames.append(frame)
     return pl.concat(frames) if frames else pl.DataFrame(schema=RAW_COLUMNS)
 
@@ -473,7 +483,12 @@ PARSERS: dict[str, Callable[[Path], pl.DataFrame]] = {
 # --- Shared rules -----------------------------------------------------------------------
 
 
-def finish(raw: pl.DataFrame, dzs_code: str, source_run_id: str) -> pl.DataFrame:
+def finish(
+    raw: pl.DataFrame,
+    dzs_code: str,
+    source_run_id: str,
+    known_oibs: frozenset[str] | None = None,
+) -> pl.DataFrame:
     """Apply the personal-data rules, normalise codes and amounts, sum identical rows.
 
     Keeps a ``natural_person_rule`` column (dropped by ``conform``) for reporting.
@@ -489,6 +504,7 @@ def finish(raw: pl.DataFrame, dzs_code: str, source_run_id: str) -> pl.DataFrame
             account,
             row["economic_label"],
             row["payer_name"],
+            known_oibs,
         )
         natural = rule is not None
         records.append(
@@ -520,27 +536,52 @@ def finish(raw: pl.DataFrame, dzs_code: str, source_run_id: str) -> pl.DataFrame
     )
 
 
-def parse_unit(dzs_code: str, entry: dict, folder: Path, source_run_id: str) -> pl.DataFrame:
+def parse_unit(
+    dzs_code: str,
+    entry: dict,
+    folder: Path,
+    source_run_id: str,
+    known_oibs: frozenset[str] | None = None,
+) -> pl.DataFrame:
     """All payments of one municipality, with the ``natural_person_rule`` column."""
     platform = entry["platform"]
     if platform not in PARSERS:
         raise ValueError(f"{dzs_code}: no parser for platform {platform!r}")
-    return finish(PARSERS[platform](folder), dzs_code, source_run_id)
+    return finish(PARSERS[platform](folder), dzs_code, source_run_id, known_oibs)
+
+
+def known_business_oibs() -> frozenset[str]:
+    """OIBs known to belong to a business or public body (rule 8).
+
+    Procurement suppliers and buyers (the contract table parsed in this run, else the
+    last published one) and every entity in the MinFin RKP register.
+    """
+    oibs = set(read_register(load_sources()["minfin_budget_users"].path)["oib"].drop_nulls())
+    for stage in ("staging", "published"):
+        path = interim_path("contract", stage)
+        if path.exists():
+            contracts = pl.read_parquet(path, columns=["supplier_oib", "buyer_oib"])
+            oibs |= set(contracts["supplier_oib"].drop_nulls()) | set(contracts["buyer_oib"])
+            break
+    return frozenset(oibs)
 
 
 def build_payments(
-    raw_dir: Path | None = None, platforms: dict[str, dict] | None = None
+    raw_dir: Path | None = None,
+    platforms: dict[str, dict] | None = None,
+    known_oibs: frozenset[str] | None = None,
 ) -> pl.DataFrame:
     """Every configured municipality with files on disk, conformed to ``payment``."""
     raw_dir = raw_dir or load_sources()["payments"].path
     platforms = platforms if platforms is not None else load_platforms()
     run_id = latest_run_id("payments")
+    known = known_oibs if known_oibs is not None else known_business_oibs()
     frames = []
     for code, entry in sorted(platforms.items()):
         folder = raw_dir / code
         if entry["platform"] == "unavailable" or not folder.is_dir():
             continue
-        frames.append(parse_unit(code, entry, folder, run_id))
+        frames.append(parse_unit(code, entry, folder, run_id, known))
     if not frames:
         raise LookupError(f"no payment files under {raw_dir}")
     return conform(pl.concat(frames), "payment")
