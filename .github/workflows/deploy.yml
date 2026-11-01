@@ -16,9 +16,9 @@ on:
     branches: [main]
     paths:
       - "web/**"
-      - "pipeline/src/opcina_pipeline/export.py"
-      - "pipeline/src/opcina_pipeline/boundaries.py"
-      - "pipeline/src/opcina_pipeline/contract.py"
+      # The export reads pipeline code and config (licence texts, peer bands).
+      - "pipeline/src/**"
+      - "pipeline/config/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -34,8 +34,10 @@ concurrency:
 
 jobs:
   build:
-    # After a nightly run, deploy only if that run succeeded.
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    # Only main may deploy to Pages; after a nightly run, only if that run succeeded.
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
