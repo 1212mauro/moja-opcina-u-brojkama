@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { routePath } from "@/lib/paths";
 import { hr } from "@/messages/hr";
 
 /**
@@ -43,7 +44,10 @@ export function MethodologyText({ leadClass }: { leadClass: string }) {
       <p>
         Podatke preuzimamo automatski, svake noći. Popis izvora s datumom
         zadnjeg preuzimanja je na stranici{" "}
-        <Link href="/izvori/">{hr.site.nav.sources}</Link>.
+        <Link href={routePath("hr", { page: "sources" })}>
+          {hr.site.nav.sources}
+        </Link>
+        .
       </p>
 
       <h2>Kako povezujemo podatke</h2>

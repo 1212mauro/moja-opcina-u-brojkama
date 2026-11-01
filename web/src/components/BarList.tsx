@@ -3,6 +3,8 @@ import styles from "./BarList.module.css";
 export type Bar = {
   key: string;
   label: string;
+  /** The label's language when it differs from the page's. */
+  lang?: string;
   value: number;
   /** The formatted value shown next to the bar. */
   display: string;
@@ -42,7 +44,9 @@ export function BarList({
               bar.highlight ? `${styles.row} ${styles.highlight}` : styles.row
             }
           >
-            <span className={styles.label}>{bar.label}</span>
+            <span className={styles.label} lang={bar.lang}>
+              {bar.label}
+            </span>
             <span className={styles.track} aria-hidden="true">
               <span className={styles.bar} style={{ width: `${width}%` }} />
             </span>

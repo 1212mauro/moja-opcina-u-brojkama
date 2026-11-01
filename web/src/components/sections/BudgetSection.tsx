@@ -3,44 +3,55 @@ import { Figure } from "@/components/Figure";
 import { Notice } from "@/components/Notice";
 import { SourceNote } from "@/components/SourceNote";
 import type { BudgetItem, MunicipalityPage } from "@/lib/contract";
-import { formatEur, formatEurCents, formatShare } from "@/lib/format";
-import { hr } from "@/messages/hr";
+import { getFormat } from "@/lib/format";
+import type { Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
 
 function BudgetFigure({
+  locale,
   title,
   items,
+  labels,
   summary,
   note,
 }: {
+  locale: Locale;
   title: string;
   items: BudgetItem[];
+  /** This edition's wording by code; the data's official label otherwise. */
+  labels: Record<string, string>;
   summary: (top: string, share: string) => string;
   note?: string;
 }) {
-  const sorted = [...items].sort((a, b) => b.amountEur - a.amountEur);
+  const msg = getMessages(locale);
+  const fmt = getFormat(locale);
+  const sorted = [...items]
+    .sort((a, b) => b.amountEur - a.amountEur)
+    .map((item) => ({ ...item, label: labels[item.code] ?? item.label }));
   const total = sorted.reduce((sum, item) => sum + item.amountEur, 0);
   const top = sorted[0];
-  const t = hr.budget.columns;
+  const cols = msg.budget.columns;
   return (
     <Figure
+      locale={locale}
       title={title}
-      summary={summary(top.label, formatShare(top.amountEur / total))}
+      summary={summary(top.label, fmt.share(top.amountEur / total))}
       rows={sorted}
       columns={[
-        { header: t.item, cell: (item) => item.label },
+        { header: cols.item, cell: (item) => item.label },
         {
-          header: t.amount,
-          cell: (item) => formatEur(item.amountEur),
+          header: cols.amount,
+          cell: (item) => fmt.eur(item.amountEur),
           numeric: true,
         },
         {
-          header: t.perResident,
-          cell: (item) => formatEurCents(item.perResidentEur),
+          header: cols.perResident,
+          cell: (item) => fmt.eurCents(item.perResidentEur),
           numeric: true,
         },
         {
-          header: t.share,
-          cell: (item) => formatShare(item.amountEur / total),
+          header: cols.share,
+          cell: (item) => fmt.share(item.amountEur / total),
           numeric: true,
         },
       ]}
@@ -52,36 +63,47 @@ function BudgetFigure({
           key: item.code,
           label: item.label,
           value: item.amountEur,
-          display: formatEur(item.amountEur),
-          detail: hr.page.perResident(formatEurCents(item.perResidentEur)),
+          display: fmt.eur(item.amountEur),
+          detail: msg.page.perResident(fmt.eurCents(item.perResidentEur)),
         }))}
       />
     </Figure>
   );
 }
 
-export function BudgetSection({ page }: { page: MunicipalityPage }) {
+export function BudgetSection({
+  locale,
+  page,
+}: {
+  locale: Locale;
+  page: MunicipalityPage;
+}) {
+  const msg = getMessages(locale);
   const budget = page.budget;
-  if (!budget) return <Notice>{hr.missing.budget}</Notice>;
+  if (!budget) return <Notice>{msg.missing.budget}</Notice>;
   return (
     <>
-      <p>{hr.budget.intro(budget.year)}</p>
+      <p>{msg.budget.intro(budget.year)}</p>
       {budget.revenueByType.length ? (
         <BudgetFigure
-          title={hr.budget.revenueByType}
+          locale={locale}
+          title={msg.budget.revenueByType}
           items={budget.revenueByType}
-          summary={hr.budget.revenueSummary}
+          labels={msg.budget.revenueLabels}
+          summary={msg.budget.revenueSummary}
         />
       ) : null}
       {budget.expenditureByFunction.length ? (
         <BudgetFigure
-          title={hr.budget.expenditureByFunction}
+          locale={locale}
+          title={msg.budget.expenditureByFunction}
           items={budget.expenditureByFunction}
-          summary={hr.budget.functionSummary}
-          note={hr.budget.functionNote}
+          labels={msg.budget.functionLabels}
+          summary={msg.budget.functionSummary}
+          note={msg.budget.functionNote}
         />
       ) : null}
-      <SourceNote page={page} runIds={[budget.sourceRunId]} />
+      <SourceNote locale={locale} page={page} runIds={[budget.sourceRunId]} />
     </>
   );
 }

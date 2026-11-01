@@ -1,9 +1,10 @@
 /**
  * Croatian UI text. Every user-facing string lives in messages/: short strings here,
- * long prose as one component per language (hr-methodology.tsx). English and the
- * simple-language mode (tasks E1, E2) are new files there, not component edits.
+ * long prose as one component per edition (methodology/, accessibility/). English
+ * (en.ts) and simple language (hr-simple.ts) have the same shape: `Messages`.
  */
 import type { MunicipalityPage } from "@/lib/contract";
+import type { Locale } from "@/lib/i18n";
 
 type UnitType = MunicipalityPage["type"];
 
@@ -45,6 +46,15 @@ export const hr = {
       home: "Početna",
       methodology: "Kako računamo",
       sources: "Izvori podataka",
+      accessibility: "Pristupačnost",
+    },
+    // Links to the other editions, in the words of this one.
+    editions: {
+      label: "Jezik",
+      links: {
+        "hr-simple": "Jednostavni jezik",
+        en: "English",
+      } as Partial<Record<Locale, string>>,
     },
     footer: {
       about:
@@ -77,10 +87,6 @@ export const hr = {
     UnitType,
     string
   >,
-  unitTypeLower: { grad: "grad", opcina: "općina" } satisfies Record<
-    UnitType,
-    string
-  >,
   unitTypePlural: { grad: "gradovi", opcina: "općine" } satisfies Record<
     UnitType,
     string
@@ -94,7 +100,7 @@ export const hr = {
 
   page: {
     breadcrumb: "Putokaz",
-    county: (county: string) => `${county} županija`,
+    county: (county: string): string => `${county} županija`,
     population: (total: string, year: number, estimate: boolean) =>
       `${total} stanovnika (${estimate ? "procjena" : "popis"} ${year}.)`,
     contents: "Na ovoj stranici",
@@ -126,6 +132,10 @@ export const hr = {
       `Najviše se troši na ${top.toLowerCase()} (${share} rashoda raspoređenih po namjeni).`,
     functionNote:
       "Rashodi po namjeni ne uključuju novac koji grad ili općina prenosi vlastitim ustanovama (vrtićima, knjižnicama…); taj se novac ovdje vidi kod ustanove koja ga troši.",
+    // Labels by code when an edition words them differently from the data
+    // (official Croatian names); empty means the data's own label.
+    revenueLabels: {} as Record<string, string>,
+    functionLabels: {} as Record<string, string>,
     columns: {
       item: "Stavka",
       amount: "Iznos",
@@ -195,6 +205,8 @@ export const hr = {
     recipients: "Najveći primatelji",
     recipientsSummary: (name: string, amount: string) =>
       `Najviše novca primio je ${name} (${amount}).`,
+    // The categories are the publisher's own words; other languages say so.
+    labelsNote: "",
     privacy:
       "Isplate fizičkim osobama prikazujemo samo zbirno, bez imena, kako propisuju pravila o objavi i zaštiti osobnih podataka.",
     columns: {
@@ -245,7 +257,8 @@ export const hr = {
   figure: {
     showTable: "Prikaži podatke kao tablicu",
     source: "Izvor",
-    sourceLink: (title: string, date: string) => `${title}, preuzeto ${date}`,
+    // Follows the source title, which is set apart for its lang attribute.
+    retrieved: (date: string) => `preuzeto ${date}`,
   },
 
   sources: {
@@ -259,12 +272,15 @@ export const hr = {
       licence: "Licenca",
     },
     generated: (date: string) => `Podaci na stranici složeni su ${date}`,
+    // Licence descriptions by source id when an edition words them differently
+    // from the data (which is in Croatian); empty means the data's own text.
+    licences: {} as Record<string, string>,
     status: {
       failed: "zadnje preuzimanje nije uspjelo; prikazujemo prethodne podatke",
       skipped: "još ne preuzimamo: čekamo pristup izvoru",
       unavailable: "izvor nije dostupan u strojno čitljivom obliku",
     },
   },
-} as const;
+};
 
 export type Messages = typeof hr;

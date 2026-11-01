@@ -1,7 +1,8 @@
 import { Notice } from "@/components/Notice";
 import { SourceNote } from "@/components/SourceNote";
 import type { Facility, MunicipalityPage } from "@/lib/contract";
-import { hr } from "@/messages/hr";
+import type { Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
 import styles from "./FacilitiesSection.module.css";
 
 const ORDER: Facility["type"][] = ["school", "kindergarten", "health"];
@@ -15,13 +16,20 @@ function osmLink(facility: Facility): string {
  * Facilities as a text list grouped by type (D9). The list is the content; a map is
  * an optional extra (SPEC: "the map is optional, the list is not").
  */
-export function FacilitiesSection({ page }: { page: MunicipalityPage }) {
-  if (!page.facilities.length) return <Notice>{hr.missing.facilities}</Notice>;
+export function FacilitiesSection({
+  locale,
+  page,
+}: {
+  locale: Locale;
+  page: MunicipalityPage;
+}) {
+  const msg = getMessages(locale);
+  if (!page.facilities.length) return <Notice>{msg.missing.facilities}</Notice>;
   const runIds = [...new Set(page.facilities.map((f) => f.sourceRunId))];
 
   return (
     <>
-      <p>{hr.facilities.intro(page.facilities.length)}</p>
+      <p>{msg.facilities.intro(page.facilities.length)}</p>
       <div className={styles.groups}>
         {ORDER.map((type) => {
           const items = page.facilities.filter((f) => f.type === type);
@@ -33,7 +41,7 @@ export function FacilitiesSection({ page }: { page: MunicipalityPage }) {
               aria-labelledby={`ustanove-${type}`}
             >
               <h3 id={`ustanove-${type}`}>
-                {hr.facilities.types[type]}{" "}
+                {msg.facilities.types[type]}{" "}
                 <span className={styles.count}>({items.length})</span>
               </h3>
               <ul className={styles.list}>
@@ -41,9 +49,9 @@ export function FacilitiesSection({ page }: { page: MunicipalityPage }) {
                   <li key={`${index}-${facility.name}`}>
                     <span className={styles.name}>{facility.name}</span>
                     <span className={styles.address}>
-                      {facility.address ?? hr.facilities.noAddress} ·{" "}
+                      {facility.address ?? msg.facilities.noAddress} ·{" "}
                       <a href={osmLink(facility)} rel="external">
-                        {hr.facilities.mapLink}
+                        {msg.facilities.mapLink}
                         <span className="visually-hidden">
                           : {facility.name}
                         </span>
@@ -56,7 +64,7 @@ export function FacilitiesSection({ page }: { page: MunicipalityPage }) {
           );
         })}
       </div>
-      <SourceNote page={page} runIds={runIds} />
+      <SourceNote locale={locale} page={page} runIds={runIds} />
     </>
   );
 }

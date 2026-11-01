@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useId, useState, useSyncExternalStore } from "react";
 
 import type { SearchEntry } from "@/lib/contract";
-import { formatInteger } from "@/lib/format";
+import { getFormat } from "@/lib/format";
 import { municipalityPath } from "@/lib/paths";
 import { filterEntries } from "@/lib/search";
-import { hr } from "@/messages/hr";
+import type { Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
 import styles from "./MunicipalitySearch.module.css";
 
 const noSubscription = () => () => {};
@@ -17,12 +18,16 @@ const noSubscription = () => () => {};
  * search box filters the list by name (diacritics optional) or postcode.
  */
 export function MunicipalitySearch({
+  locale,
   entries,
   caption,
 }: {
+  locale: Locale;
   entries: SearchEntry[];
   caption: string;
 }) {
+  const msg = getMessages(locale);
+  const fmt = getFormat(locale);
   const [query, setQuery] = useState("");
   // false while rendering on the server, true once hydrated in the browser
   const enhanced = useSyncExternalStore(
@@ -33,14 +38,14 @@ export function MunicipalitySearch({
   const inputId = useId();
   const hintId = useId();
   const shown = filterEntries(entries, query);
-  const t = hr.home.columns;
+  const cols = msg.home.columns;
 
   return (
-    <div>
+    <div data-search-list>
       {enhanced ? (
         <div className={styles.search} role="search">
           <label htmlFor={inputId} className={styles.label}>
-            {hr.home.searchLabel}
+            {msg.home.searchLabel}
           </label>
           <input
             id={inputId}
@@ -52,12 +57,12 @@ export function MunicipalitySearch({
             autoComplete="off"
           />
           <p id={hintId} className={styles.hint}>
-            {hr.home.searchHint}
+            {msg.home.searchHint}
           </p>
           <p className={styles.count} role="status" aria-live="polite">
             {shown.length
-              ? hr.home.resultsCount(shown.length)
-              : hr.home.noResults}
+              ? msg.home.resultsCount(shown.length)
+              : msg.home.noResults}
           </p>
         </div>
       ) : null}
@@ -67,12 +72,12 @@ export function MunicipalitySearch({
           <caption className={styles.caption}>{caption}</caption>
           <thead>
             <tr>
-              <th scope="col">{t.name}</th>
-              <th scope="col">{t.type}</th>
+              <th scope="col">{cols.name}</th>
+              <th scope="col">{cols.type}</th>
               <th scope="col" className="num">
-                {t.population}
+                {cols.population}
               </th>
-              <th scope="col">{t.postcodes}</th>
+              <th scope="col">{cols.postcodes}</th>
             </tr>
           </thead>
           <tbody>
@@ -80,14 +85,14 @@ export function MunicipalitySearch({
               <tr key={entry.slug}>
                 <td>
                   <Link
-                    href={municipalityPath(entry.slug)}
+                    href={municipalityPath(locale, entry.slug)}
                     className={styles.name}
                   >
                     {entry.name}
                   </Link>
                 </td>
-                <td>{hr.unitType[entry.type]}</td>
-                <td className="num">{formatInteger(entry.population)}</td>
+                <td>{msg.unitType[entry.type]}</td>
+                <td className="num">{fmt.integer(entry.population)}</td>
                 <td className={styles.postcodes}>
                   {entry.postcodes.join(", ")}
                 </td>
