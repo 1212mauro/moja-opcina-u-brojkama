@@ -19,8 +19,8 @@ Task breakdown derived from [SPEC.md](SPEC.md). This file is the single place wh
 | Milestone | Target | Done when | Status |
 | --- | --- | --- | --- |
 | MVP-1 Data in hand | End of week 1 | Pilots chosen, master table built, all raw files downloaded and documented (A, B) | 🟨 |
-| MVP-2 First complete page | End of week 2 | One pilot municipality has a full page from real data (C, D1–D5) | ⬜ |
-| MVP-3 All pilots, all features | End of week 3 | 5 pilots live with every MVP feature (C, D, F1–F2) | ⬜ |
+| MVP-2 First complete page | End of week 2 | One pilot municipality has a full page from real data (C, D1–D5) | ✅ |
+| MVP-3 All pilots, all features | End of week 3 | 5 pilots live with every MVP feature (C, D, F1–F2) | ✅ |
 | MVP-4 Submission | End of week 4 | Accessible, bilingual, deployed, tested with residents, video recorded (E, F, G) | ⬜ |
 | v1-M3 Pilot data live | M3 | Production pipeline publishing pilot data | ⬜ |
 | v1-M5 Beta | M5 | All 556 units on the beta site | ⬜ |
@@ -100,10 +100,10 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 ### F. Deployment — weeks 3–4 (~16 h)
 
-- [ ] F1 GitHub Actions workflow that runs the pipeline and publishes the generated JSON (~6h, needs C11) — 🚧 nightly fetch runs (`.github/workflows/fetch.yml`); publishing the JSON comes with C11
-- [ ] F2 Deploy the static site to GitHub Pages (base path, 404 page) (~5h, needs A4)
+- [x] F1 GitHub Actions workflow that runs the pipeline and publishes the generated JSON (~6h, needs C11) — nightly `fetch.yml`, then `deploy.yml` exports and publishes
+- [x] F2 Deploy the static site to GitHub Pages (base path, 404 page) (~5h, needs A4) — https://1212mauro.github.io/moja-opcina-u-brojkama/
 - [x] F3 Source-status section showing when each source was last refreshed (~3h, needs C1) — /izvori/
-- [ ] F4 Smoke-test the deployed site: every pilot page, both languages, all links (~2h)
+- [ ] F4 Smoke-test the deployed site: every pilot page, both languages, all links (~2h) — 🚧 Croatian done (31 pages, 12 assets, no broken links); English after E1
 
 ### G. Testing and demo — week 4 (~38 h)
 

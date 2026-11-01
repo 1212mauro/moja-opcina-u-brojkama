@@ -23,6 +23,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Known publisher refusals are reported as "pending access" instead of failing the nightly job.
 - Website: home page with municipality list and search (name without diacritics, or postcode); a page for each of the 28 municipalities with key figures, budget by revenue type and function, peer comparison, procurement, monthly payments, facilities and sources; methodology and source-status pages. Charts are server-rendered with a summary sentence and a data table, work without JavaScript, and meet WCAG AA contrast in light and dark mode.
 - County map on the home page (every municipality a link, keyboard-navigable, no JavaScript needed) and a locator map on each municipality page.
+- Deployment to GitHub Pages (https://1212mauro.github.io/moja-opcina-u-brojkama/) after every successful nightly data build and every website change, with a Croatian 404 page.
 
 ### Changed
 
