@@ -103,7 +103,7 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 - [x] F1 GitHub Actions workflow that runs the pipeline and publishes the generated JSON (~6h, needs C11) — nightly `fetch.yml`, then `deploy.yml` exports and publishes
 - [x] F2 Deploy the static site to GitHub Pages (base path, 404 page) (~5h, needs A4) — https://1212mauro.github.io/moja-opcina-u-brojkama/
 - [x] F3 Source-status section showing when each source was last refreshed (~3h, needs C1) — /izvori/
-- [ ] F4 Smoke-test the deployed site: every pilot page, both languages, all links (~2h) — 🚧 Croatian done (31 pages, 12 assets, no broken links); English after E1
+- [x] F4 Smoke-test the deployed site: every pilot page, both languages, all links (~2h) — 93 pages in three editions, 13 assets, no broken links
 
 ### G. Testing and demo — week 4 (~38 h)
 
