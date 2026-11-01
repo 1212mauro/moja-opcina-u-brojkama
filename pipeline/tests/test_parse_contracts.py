@@ -4,14 +4,17 @@ from pathlib import Path
 
 import polars as pl
 import pytest
+from openpyxl import load_workbook
 
 from opcina_pipeline.parse import contracts as c
 from opcina_pipeline.tables import CONTRACT, HRK_PER_EUR
 
 # Trimmed copies of public registers of Grad Ivanec (old EOJN export, Ivanec's own
-# data.gov.hr files) and an API file shaped like tests/fixtures/eojn; laid out like
-# data/raw/.
+# data.gov.hr files), an API file shaped like tests/fixtures/eojn, a TED award notice of
+# Breznički Hum (contact persons removed) and a copy of it made joint with a second
+# buyer; laid out like data/raw/.
 RAW = Path(__file__).parent / "fixtures" / "parse_contracts"
+TED_NOTICES = RAW / "contracts_ted" / "notices"
 IVANEC = "84121580205"
 BREZNICKI_HUM = "35774913576"
 VRTIC_IVANEC = "37103102119"
@@ -35,7 +38,8 @@ def runs_log(tmp_path) -> Path:
     lines = [
         {"id": "contracts_eojn-1", "source": "contracts_eojn", "status": "ok"},
         {"id": "contracts_eojn_legacy-1", "source": "contracts_eojn_legacy", "status": "ok"},
-        {"id": "contracts_ivanec-1", "source": "contracts_ivanec", "status": "unchanged"},
+        {"id": "contracts_municipal-1", "source": "contracts_municipal", "status": "unchanged"},
+        {"id": "contracts_ted-1", "source": "contracts_ted", "status": "ok"},
     ]
     path.write_text("".join(json.dumps(line) + "\n" for line in lines), encoding="utf-8")
     return path
@@ -126,7 +130,7 @@ def test_value_eur_is_the_net_value_even_with_a_vat_typo():
 
 
 def test_parse_grid_reads_the_new_eojn_export():
-    df = c.parse_grid(RAW / "contracts_ivanec" / "registar-2024.xlsx")
+    df = c.parse_grid(RAW / "contracts_municipal" / IVANEC / "registar-2024.xlsx")
     assert df.height == 3  # the trailing empty row is skipped
     aris = df.filter(pl.col("contract_number") == "876/23").row(0, named=True)
     assert (aris["record_id"], aris["eojn_id"]) == ("eojn-2620", "2620")
@@ -155,11 +159,43 @@ def test_parse_api_records_skips_reversed_contracts():
     assert hum["procedure"] == "Otvoreni postupak"
 
 
-def test_parse_ivanec_dir_skips_other_layouts():
-    df, skipped = c.parse_ivanec_dir(RAW / "contracts_ivanec")
-    assert skipped == ["evidencija-2015.xlsx"]
+def test_parse_grid_finds_the_header_below_a_title_row(tmp_path):
+    # Lepoglava's exports put the register's title above the header.
+    workbook = load_workbook(RAW / "contracts_municipal" / IVANEC / "registar-2024.xlsx")
+    workbook["Analytics"].insert_rows(1)
+    workbook["Analytics"]["A1"] = "REGISTAR SKLOPLJENIH UGOVORA U 2024. GODINI"
+    workbook.save(tmp_path / "titled.xlsx")
+    assert c.parse_grid(tmp_path / "titled.xlsx").height == 3
+
+
+def test_parse_municipal_dir_reads_each_publisher_folder():
+    df, skipped = c.parse_municipal_dir(RAW / "contracts_municipal")
+    assert skipped == [f"{IVANEC}/evidencija-2015.xlsx"]
     assert set(df["system"]) == {"municipal"}
     assert df.height == 4 + 3
+
+
+def test_parse_ted_notice_gives_one_row_per_signed_contract():
+    rows = c.parse_ted_notice(TED_NOTICES / "209718-2025.xml")
+    assert [r["record_id"] for r in rows] == ["209718-2025:CON-0001", "209718-2025:CON-0002"]
+    lot1, lot2 = rows
+    assert {lot1["buyer_oib"], lot2["buyer_oib"]} == {BREZNICKI_HUM}
+    # A consortium: every member named, the first one's OIB kept.
+    assert lot1["supplier_name"] == "LABOS d.o.o.; CONTECH d.o.o.; ROMING CONSTRUCTIONS d.o.o."
+    assert lot1["supplier_oib"] == "48114293272"
+    assert (lot1["signed_on"], lot1["value_eur"]) == (date(2024, 10, 9), 169000.0)
+    assert lot1["contract_number"] == "2186-24-02-24-21 za grupu 1"
+    assert lot1["procedure"] == "Otvoreni postupak"
+    # Two lots: the lot's own name follows the procedure's.
+    lot_name = lot2["subject"].split(": ")[-1]
+    assert lot_name.startswith("Usluga kontrole glavnog i izvedbenog projekta za projekt")
+    assert (lot2["supplier_name"], lot2["value_eur"]) == ("StruDes d.o.o.", 9800.0)
+    assert lot2["value_with_vat_eur"] is None  # TED gives values without VAT only
+
+
+def test_parse_ted_notice_skips_joint_procurement():
+    # Several buyers: eForms does not say which one signed which contract.
+    assert c.parse_ted_notice(TED_NOTICES / "999999-2025.xml") == []
 
 
 # --- deduplication and the table ----------------------------------------------------
@@ -207,6 +243,19 @@ def test_rows_without_number_match_on_parties_date_and_value():
     assert sorted(kept["record_id"].to_list()) == ["1", "y"]
 
 
+def test_ted_rows_match_a_register_row_signed_the_same_day():
+    row = dict.fromkeys(c.PARSED)
+    a = {**row, "system": "eojn_legacy", "record_id": "a", "buyer_oib": IVANEC}
+    a.update(contract_number="12/24", supplier_oib="11111111111", signed_on=date(2024, 5, 6))
+    ted = {**a, "system": "ted", "record_id": "t", "contract_number": "KLASA: 406-01/24"}
+    other_day = {**ted, "record_id": "u", "signed_on": date(2024, 5, 7)}
+    # A register row is never matched by day: lots of one supplier share a day.
+    same_day = {**a, "system": "municipal", "record_id": "m", "contract_number": "13/24"}
+    kept, dropped = c.deduplicate(pl.DataFrame([a, ted, other_day, same_day], schema=c.PARSED))
+    assert sorted(kept["record_id"].to_list()) == ["a", "m", "u"]
+    assert dropped.select("record_id", "reason").rows() == [("t", "dup_of:eojn_legacy")]
+
+
 def test_combine_contracts_builds_the_contract_table(buyers, runs_log):
     parsed, run_ids, _ = c.parse_all(RAW, runs_log)
     df = c.combine_contracts(parsed, buyers, run_ids)
@@ -217,7 +266,10 @@ def test_combine_contracts_builds_the_contract_table(buyers, runs_log):
         "eojn": 2,
         "eojn_legacy": 6,
         "municipal": 1,
+        "ted": 2,
     }
+    ted = df.filter(pl.col("system") == "ted")
+    assert set(ted["source_run_id"]) == {"contracts_ted-1"}
     hum = df.filter(pl.col("buyer_oib") == BREZNICKI_HUM).row(0, named=True)
     assert hum["contract_key"] == "eojn:1001"
     assert (hum["dzs_code"], hum["buyer_kind"]) == ("01511", "unit")
@@ -240,6 +292,6 @@ def test_without_the_api_the_municipal_grid_row_is_kept(buyers, runs_log):
     parsed, run_ids, _ = c.parse_all(RAW, runs_log)
     without_api = parsed.filter(pl.col("system") != "eojn")
     df = c.combine_contracts(without_api, buyers, run_ids)
-    assert set(df["system"]) == {"eojn_legacy", "municipal"}
+    assert set(df["system"]) == {"eojn_legacy", "municipal", "ted"}
     # The NET COMPUTERS order now comes from Ivanec's own grid.
     assert "municipal:eojn-246843" in df["contract_key"].to_list()

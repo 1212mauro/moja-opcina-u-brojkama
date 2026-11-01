@@ -27,7 +27,8 @@ export function MethodologyText({ leadClass }: { leadClass: string }) {
         </li>
         <li>
           <strong>Ugovori za kupnju:</strong> popis ugovora na državnoj stranici
-          za javnu nabavu (EOJN).
+          za javnu nabavu (EOJN), popisi koje mjesta sama objavljuju i, za
+          velike kupnje od 2024., europska stranica TED.
         </li>
         <li>
           <strong>Plaćanja:</strong> popisi plaćanja koje gradovi i općine

@@ -12,7 +12,7 @@ from opcina_pipeline.fetch.base import FETCHERS, FetchContext, Outcome, append_r
 from opcina_pipeline.fetch.http import ConditionalCache, PoliteClient
 
 # Modules that register fetchers with @fetcher; importing them fills FETCHERS.
-FETCHER_MODULES = ["minfin", "stats", "dgu", "ckan", "osm", "payments", "eojn"]
+FETCHER_MODULES = ["minfin", "stats", "dgu", "ckan", "osm", "payments", "eojn", "ted"]
 
 # Hosts that rate-limit aggressively get a longer pause between requests.
 HOST_INTERVALS = {
@@ -20,6 +20,8 @@ HOST_INTERVALS = {
     "eojn.nn.hr": 3.0,
     "overpass-api.de": 5.0,
     "overpass.kumi.systems": 5.0,
+    "api.ted.europa.eu": 1.0,
+    "ted.europa.eu": 1.0,
 }
 
 

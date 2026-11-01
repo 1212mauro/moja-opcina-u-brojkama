@@ -131,15 +131,21 @@ file = "payments"
 # Which platform each municipality publishes on: pipeline/config/payments.toml
 months = 13
 
-[contracts_ivanec]
-title = "Registar sklopljenih ugovora i njihovo izvršenje (Grad Ivanec)"
-publisher = "Grad Ivanec"
-page = "https://data.gov.hr/ckan/dataset/247c96e7-fcce-42e5-8119-334f702f8c61"
-url = "https://data.gov.hr/ckan/api/3/action/package_show?id=247c96e7-fcce-42e5-8119-334f702f8c61"
+[contracts_municipal]
+title = "Registri ugovora gradova i općina (data.gov.hr)"
+publisher = "Gradovi i općine (Ivanec, Lepoglava, Varaždinske Toplice)"
+page = "https://data.gov.hr/"
+url = "https://data.gov.hr/ckan/api/3/action/package_show"
 licence = "Otvorena dozvola Republike Hrvatske"
-file = "contracts_ivanec"
-ckan_dataset = "247c96e7-fcce-42e5-8119-334f702f8c61"
+file = "contracts_municipal"
 formats = ["XLSX"]
+# Registers that publishers in scope put on data.gov.hr themselves; files land in
+# a folder named after the publisher's OIB, which is the buyer of every row.
+datasets = [
+  { oib = "84121580205", name = "Grad Ivanec", ckan_dataset = "247c96e7-fcce-42e5-8119-334f702f8c61" },
+  { oib = "79368224789", name = "Grad Lepoglava", ckan_dataset = "69435ebb-9985-4795-b976-1cadd9d3ab1d" },
+  { oib = "54177232254", name = "Grad Varaždinske Toplice", ckan_dataset = "21f0a9ff-a3cc-411b-8e79-700f33b600bd" },
+]
 
 [contracts_eojn_legacy]
 title = "Registar ugovora, stari EOJN RH (2018-2023)"
@@ -158,3 +164,11 @@ page = "https://eojn.hr/"
 url = "https://eojn.hr/api/public/eProcurementData/"
 licence = "Javno objavljeni podaci (licenca nije navedena)"
 file = "contracts_eojn/contracts.jsonl"
+
+[contracts_ted]
+title = "TED: obavijesti o dodjeli ugovora (od 2024)"
+publisher = "Ured za publikacije Europske unije"
+page = "https://ted.europa.eu/"
+url = "https://api.ted.europa.eu/v3/notices/search"
+licence = "Ponovna uporaba uz navođenje izvora (Odluka Komisije 2011/833/EU)"
+file = "contracts_ted"

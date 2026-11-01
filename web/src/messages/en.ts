@@ -288,7 +288,7 @@ export const en: Messages = {
       `The data on this site was compiled on ${date}`,
     status: {
       failed: "the last download failed; showing the previous data",
-      skipped: "not downloaded yet: waiting for access to the source",
+      skipped: "not downloaded: the source requires special permission",
       unavailable: "the source is not available in a machine-readable form",
     },
     licences: {
@@ -308,7 +308,8 @@ export const en: Messages = {
       kindergartens: "Open Licence of the Republic of Croatia",
       osm_facilities: "ODbL 1.0",
       payments: "The publishing towns and municipalities state no licence",
-      contracts_ivanec: "Open Licence of the Republic of Croatia",
+      contracts_municipal: "Open Licence of the Republic of Croatia",
+      contracts_ted: "Reuse with attribution (Commission Decision 2011/833/EU)",
       contracts_eojn_legacy: "Publicly available data (no licence stated)",
       contracts_eojn: "Publicly available data (no licence stated)",
     },

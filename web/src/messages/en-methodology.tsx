@@ -27,7 +27,10 @@ export function MethodologyText({ leadClass }: { leadClass: string }) {
         </li>
         <li>
           <strong>Public procurement:</strong> the contract registers of the
-          Electronic Public Procurement Classifieds (EOJN RH).
+          Electronic Public Procurement Classifieds (EOJN RH), the registers
+          towns and municipalities publish themselves on data.gov.hr, and, for
+          larger contracts since 2024, contract award notices in the Official
+          Journal of the EU (TED).
         </li>
         <li>
           <strong>Payments:</strong> the monthly reports of payments from the

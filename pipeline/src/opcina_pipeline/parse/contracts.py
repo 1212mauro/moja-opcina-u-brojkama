@@ -1,29 +1,36 @@
 """Public procurement contracts (tasks C3, C5, C6) -> the ``contract`` table.
 
-Three inputs, one row per contract:
+Four inputs, one row per contract:
 
 - ``contracts_eojn_legacy``: one old-EOJN register export per buyer,
   ``<oib>.xlsx`` (or ``<oib>_<partner id>.xlsx``), sheet ``RPT_Ugovor``. The buyer is
   the file's OIB. Header on row 14 from column B, merged cells, a footer of notes.
   Supplier name and OIB share one cell; amounts are text such as ``25.000,00 HRK``
   whose currency follows the record's last update, so it is read per cell.
-- ``contracts_ivanec``: Grad Ivanec's own registers on data.gov.hr. 2018-2023 in the
-  ``RPT_Ugovor`` layout, 2024 onwards as the new EOJN's ``Analytics`` grid (buyer and
-  supplier OIB in their own columns, numeric EUR, contract URL with the EOJN id).
-  Other layouts (the 2015 "Evidencija ugovora" sheets: every contract the town signed,
-  gross values only, formulas as text) are skipped and logged.
+- ``contracts_municipal``: registers that towns and municipalities publish themselves
+  on data.gov.hr, in ``<publisher OIB>/`` folders. Old exports use the ``RPT_Ugovor``
+  layout, 2024 onwards the new EOJN's ``Analytics`` grid (buyer and supplier OIB in
+  their own columns, numeric EUR, contract URL with the EOJN id). Other layouts (the
+  2015 "Evidencija ugovora" sheets: every contract the town signed, gross values only,
+  formulas as text) are skipped and logged.
 - ``contracts_eojn``: ``contracts.jsonl`` from the new EOJN API, one
-  ``ContractRegisterViewModel`` per line.
+  ``ContractRegisterViewModel`` per line (only once an API key is set).
+- ``contracts_ted``: contract award notices on TED (eForms XML), 2024 onwards, for
+  procurement above the EU thresholds. One row per signed contract; its value is the
+  winning tender's (without VAT), or a framework agreement's re-estimated value. Joint
+  procurement notices are skipped: eForms does not say which buyer signed which contract.
 
 Amounts: ``value_eur`` is the value without VAT (``Iznos bez PDV-a``), so a wrong VAT
 figure in a register never changes totals. Kuna amounts are converted once at the
 fixed rate (``to_eur``); the published text and its currency are kept.
 
 Deduplication (C6): the same contract can be in several systems. Systems are taken in
-priority order eojn > eojn_legacy > municipal; a row is dropped when a higher-priority
-system already has a contract with the same EOJN contract id, the same buyer and
-normalised contract number, or, for rows without a number, the same buyer, supplier
-OIB, signing date and net value. Inside one system only exact duplicate rows collapse:
+priority order eojn > eojn_legacy > municipal > ted; a row is dropped when a
+higher-priority system already has a contract with the same EOJN contract id, the same
+buyer and normalised contract number, or, for rows without a number, the same buyer,
+supplier OIB, signing date and net value. TED numbers contracts its own way, so a TED
+row is also dropped when another system has a contract of the same buyer with the same
+supplier signed on the same day. Inside one system only exact duplicate rows collapse:
 registers reuse a contract number for separate lots or annual orders.
 """
 
@@ -31,6 +38,7 @@ import hashlib
 import json
 import logging
 import re
+import xml.etree.ElementTree as ET
 from collections.abc import Iterable
 from datetime import date, datetime
 from pathlib import Path
@@ -46,15 +54,14 @@ from opcina_pipeline.text import ascii_fold
 
 log = logging.getLogger(__name__)
 
-IVANEC_OIB = "84121580205"
-
 # Highest priority first: the new EOJN is the live register, the old one its archive,
-# a municipality's own file only a cross-check.
-SYSTEMS = ("eojn", "eojn_legacy", "municipal")
+# a municipality's own file a cross-check, TED only the contracts above EU thresholds.
+SYSTEMS = ("eojn", "eojn_legacy", "municipal", "ted")
 SOURCE_OF_SYSTEM = {
     "eojn": "contracts_eojn",
     "eojn_legacy": "contracts_eojn_legacy",
-    "municipal": "contracts_ivanec",
+    "municipal": "contracts_municipal",
+    "ted": "contracts_ted",
 }
 
 # Columns of the parsed rows, before the buyer join; ``vat_eur`` and ``eojn_id`` only
@@ -361,16 +368,20 @@ EOJN_CONTRACT_URL = re.compile(r"/contract-eo/(\d+)")
 
 
 def parse_grid(path: Path, system: str = "municipal") -> pl.DataFrame:
-    """A new-EOJN contract grid export (sheet ``Analytics``, header on row 1)."""
+    """A new-EOJN contract grid export (sheet ``Analytics``).
+
+    The header is row 1 as exported; some publishers add a title row above it.
+    """
     rows = _sheet_rows(path, GRID_SHEET)
-    header = [_text(c) for c in rows[0]]
+    start = next((i for i, row in enumerate(rows[:5]) if GRID_COLUMNS["url"] in map(_text, row)), 0)
+    header = [_text(c) for c in rows[start]]
     index = {}
     for field, title in GRID_COLUMNS.items():
         if title not in header:
             raise ValueError(f"grid has no column {title!r}")
         index[field] = header.index(title)
     out = []
-    for row in rows[1:]:
+    for row in rows[start + 1 :]:
         record = {field: row[i] for field, i in index.items()}
         url = _text(record["url"])
         if not url:
@@ -471,6 +482,127 @@ def parse_api_file(path: Path) -> pl.DataFrame:
 
 
 # ---------------------------------------------------------------------------
+# TED contract award notices (eForms XML)
+# ---------------------------------------------------------------------------
+
+EFORMS = {
+    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+    "cac": "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
+    "efac": "http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1",
+    "efbc": "http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1",
+}
+
+
+def _x(node: ET.Element | None, path: str) -> str | None:
+    return _text(node.findtext(path, namespaces=EFORMS)) if node is not None else None
+
+
+def _amount(node: ET.Element | None) -> Money | None:
+    if node is None or not _text(node.text):
+        return None
+    return to_eur(float(node.text), node.get("currencyID") or "EUR")
+
+
+def parse_ted_notice(path: Path) -> list[dict]:
+    """Signed contracts of one award notice; ``[]`` for a joint procurement."""
+    root = ET.parse(path).getroot()
+    result = root.find(".//efac:NoticeResult", EFORMS)
+    buyers = root.findall("cac:ContractingParty", EFORMS)
+    if result is None or len(buyers) != 1:
+        return []
+
+    # ORG-xxxx -> (name, OIB); a company can list several ids (e.g. "TED94" and its OIB).
+    orgs: dict[str | None, tuple[str | None, str | None]] = {}
+    for company in root.iterfind(".//efac:Organizations/efac:Organization/efac:Company", EFORMS):
+        ids = [e.text for e in company.iterfind("cac:PartyLegalEntity/cbc:CompanyID", EFORMS)]
+        orgs[_x(company, "cac:PartyIdentification/cbc:ID")] = (
+            _x(company, "cac:PartyName/cbc:Name"),
+            next((oib for oib in map(find_oib, ids) if oib), None),
+        )
+    buyer = _x(buyers[0], "cac:Party/cac:PartyIdentification/cbc:ID")
+
+    project = root.find("cac:ProcurementProject", EFORMS)
+    title = _x(project, "cbc:Name")
+    lots = {
+        _x(lot, "cbc:ID"): _x(lot, "cac:ProcurementProject/cbc:Name")
+        for lot in root.iterfind("cac:ProcurementProjectLot", EFORMS)
+    }
+    procedure = _x(root, "cac:TenderingProcess/cbc:Description") or _x(
+        root, "cac:TenderingProcess/cbc:ProcedureCode"
+    )
+    cpv = parse_cpv(_x(project, "cac:MainCommodityClassification/cbc:ItemClassificationCode"))
+
+    # TPA-xxxx -> its tenderers (ORG-xxxx); TEN-xxxx -> the tender.
+    parties = {
+        _x(tp, "cbc:ID"): [_x(t, "cbc:ID") for t in tp.iterfind("efac:Tenderer", EFORMS)]
+        for tp in result.iterfind("efac:TenderingParty", EFORMS)
+    }
+    tenders = {_x(t, "cbc:ID"): t for t in result.iterfind("efac:LotTender", EFORMS)}
+    # Framework agreements carry their value on the lot result, not on the tender.
+    framework: dict[str | None, ET.Element | None] = {}
+    for lot_result in result.iterfind("efac:LotResult", EFORMS):
+        value = lot_result.find("efac:FrameworkAgreementValues/efbc:ReestimatedValueAmount", EFORMS)
+        for tender in lot_result.iterfind("efac:LotTender", EFORMS):
+            framework[_x(tender, "cbc:ID")] = value
+
+    rows = []
+    for contract in result.iterfind("efac:SettledContract", EFORMS):
+        chosen = [
+            tenders[t]
+            for t in (_x(ref, "cbc:ID") for ref in contract.iterfind("efac:LotTender", EFORMS))
+            if t in tenders
+        ]
+        if not chosen:
+            continue
+        values = [
+            _amount(t.find("cac:LegalMonetaryTotal/cbc:PayableAmount", EFORMS))
+            or _amount(framework.get(_x(t, "cbc:ID")))
+            for t in chosen
+        ]
+        net = round(sum(v.eur for v in values if v), 2) if all(values) else None
+        suppliers = [
+            orgs.get(org, (None, None))
+            for org in parties.get(_x(chosen[0], "efac:TenderingParty/cbc:ID"), [])
+        ]
+        lot = None
+        if len(lots) > 1:
+            names = [lots.get(_x(t, "efac:TenderLot/cbc:ID")) for t in chosen]
+            lot = "; ".join(n for n in names if n and n != title) or None
+        rows.append(
+            {
+                "system": "ted",
+                "record_id": f"{path.stem}:{_x(contract, 'cbc:ID')}",
+                "eojn_id": None,
+                "buyer_oib": orgs.get(buyer, (None, None))[1],
+                "subject": f"{title}: {lot}" if title and lot else title or lot,
+                "cpv": cpv,
+                "procedure": procedure,
+                "contract_number": _x(contract, "efac:ContractReference/cbc:ID"),
+                "supplier_name": "; ".join(n for n, _ in suppliers if n) or None,
+                "supplier_oib": suppliers[0][1] if suppliers else None,
+                "signed_on": parse_date(_x(contract, "cbc:IssueDate")),
+                "value_eur": net,
+                "value_with_vat_eur": None,
+                "vat_eur": None,
+                "value_original": f"{_hr_number(net)} EUR" if net is not None else None,
+                "currency_original": "EUR" if net is not None else None,
+            }
+        )
+    return rows
+
+
+def parse_ted_dir(folder: Path) -> pl.DataFrame:
+    """Every notice in ``notices/`` (``<publication number>.xml``)."""
+    rows = []
+    for path in sorted((folder / "notices").glob("*.xml")):
+        parsed = parse_ted_notice(path)
+        if not parsed:
+            log.info("contracts_ted: %s has no single-buyer contract", path.name)
+        rows.extend(parsed)
+    return _frame(rows)
+
+
+# ---------------------------------------------------------------------------
 # Inputs
 # ---------------------------------------------------------------------------
 
@@ -500,18 +632,19 @@ def parse_municipal_file(path: Path, buyer_oib: str) -> pl.DataFrame | None:
     return None
 
 
-def parse_ivanec_dir(folder: Path) -> tuple[pl.DataFrame, list[str]]:
-    """Ivanec's own registers; also returns the files skipped as another layout."""
+def parse_municipal_dir(folder: Path) -> tuple[pl.DataFrame, list[str]]:
+    """Every publisher's own registers (``<oib>/*.xlsx``); also the files skipped."""
     frames, skipped = [], []
-    for path in sorted(folder.glob("*.xlsx")):
+    for path in sorted(folder.glob("*/*.xlsx")):
+        name = f"{path.parent.name}/{path.name}"
         try:
-            df = parse_municipal_file(path, IVANEC_OIB)
+            df = parse_municipal_file(path, path.parent.name)
         except ValueError as error:
-            log.warning("contracts_ivanec: skipped %s: %s", path.name, error)
+            log.warning("contracts_municipal: skipped %s: %s", name, error)
             df = None
         if df is None:
-            log.warning("contracts_ivanec: skipped %s: not an EOJN register layout", path.name)
-            skipped.append(path.name)
+            log.warning("contracts_municipal: skipped %s: not an EOJN register layout", name)
+            skipped.append(name)
         else:
             frames.append(df)
     return (pl.concat(frames) if frames else _frame([])), skipped
@@ -542,6 +675,13 @@ def _match_keys(row: dict) -> list[tuple]:
     return keys
 
 
+def _day_key(row: dict) -> tuple | None:
+    """Same buyer, supplier and signing day: how a TED row finds its register row."""
+    if row["supplier_oib"] and row["signed_on"]:
+        return ("day", row["buyer_oib"], row["supplier_oib"], row["signed_on"])
+    return None
+
+
 CONTENT = [c for c in PARSED if c != "record_id"]
 
 
@@ -560,11 +700,14 @@ def deduplicate(parsed: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
         new: dict[tuple, str] = {}
         for row in part.iter_rows(named=True):
             keys = _match_keys(row)
-            hit = next((seen[k] for k in keys if k in seen), None)
+            day = _day_key(row)
+            # Every row registers its day key, but only TED rows are matched by it.
+            lookup = keys + [day] if system == "ted" and day else keys
+            hit = next((seen[k] for k in lookup if k in seen), None)
             keep.append(hit is None)
             reasons.append(f"dup_of:{hit}" if hit else None)
             if hit is None:
-                new.update({k: system for k in keys})
+                new.update({k: system for k in keys + ([day] if day else [])})
         seen.update({k: v for k, v in new.items() if k not in seen})
     ordered = pl.concat([rows.filter(pl.col("system") == s) for s in SYSTEMS])
     ordered = ordered.with_columns(
@@ -633,8 +776,10 @@ def parse_all(
             frames.append(parse_api_file(path))
         elif system == "eojn_legacy":
             frames.append(parse_legacy_dir(path))
+        elif system == "ted":
+            frames.append(parse_ted_dir(path))
         else:
-            municipal, skipped = parse_ivanec_dir(path)
+            municipal, skipped = parse_municipal_dir(path)
             frames.append(municipal)
         run_ids[key] = latest_run_id(key, runs_log)
     return (pl.concat(frames) if frames else _frame([])), run_ids, skipped

@@ -278,3 +278,44 @@ def test_known_refusal_is_reported_as_pending_access(tmp_path, monkeypatch):
     assert outcome.status == "failed"
     assert "02445 pending access (asked)" in outcome.message
     assert "01562 otvorenigrad: HTTPStatusError" in outcome.message
+
+
+# --- TED --------------------------------------------------------------------------------
+
+
+def test_ted_search_pages_and_downloads_each_notice_once(tmp_path, monkeypatch):
+    import json
+
+    import httpx
+
+    from opcina_pipeline.fetch import ted
+
+    monkeypatch.setattr(ted, "PAGE_SIZE", 2)
+    monkeypatch.setattr(
+        ted, "scope_buyers", lambda ctx: pl.DataFrame({"oib": ["35774913576", "13269011531"]})
+    )
+    (tmp_path / "notices").mkdir()
+    (tmp_path / "notices" / "5-2024.xml").write_text("<old/>")  # already on disk
+    pages = {1: ["5-2024", "193551-2024"], 2: ["7-2025"]}
+    queries, downloads = [], []
+
+    def handler(request):
+        if request.url.host == "api.ted.europa.eu":
+            body = json.loads(request.content)
+            queries.append(body)
+            notices = [{"publication-number": n} for n in pages[body["page"]]]
+            return httpx.Response(200, json={"notices": notices, "totalNoticeCount": 3})
+        downloads.append(request.url.path)
+        return httpx.Response(200, content=b"<ContractAwardNotice/>")
+
+    class Ctx(FakeCtx):
+        out_dir = tmp_path
+
+    outcome = ted.fetch_ted(Ctx(handler))
+
+    assert [q["page"] for q in queries] == [1, 2]
+    assert "organisation-identifier-buyer IN (13269011531 35774913576)" in queries[0]["query"]
+    assert "notice-type IN (can-standard can-social)" in queries[0]["query"]
+    assert downloads == ["/en/notice/193551-2024/xml", "/en/notice/7-2025/xml"]
+    assert outcome.status == "ok"
+    assert "3 award notices for 2 buyers, 2 new" in outcome.message
