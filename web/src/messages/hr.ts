@@ -236,6 +236,12 @@ export const hr = {
       "Za ovu jedinicu nismo pronašli škole, vrtiće ni zdravstvene ustanove.",
   },
 
+  notFound: {
+    title: "Stranica nije pronađena",
+    body: "Ova adresa ne postoji. Možda je pogrešno upisana ili je stranica premještena.",
+    home: "Pronađite svoju općinu ili grad na početnoj stranici",
+  },
+
   figure: {
     showTable: "Prikaži podatke kao tablicu",
     source: "Izvor",
