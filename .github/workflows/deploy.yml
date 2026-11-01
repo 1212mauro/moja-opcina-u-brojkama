@@ -1,0 +1,96 @@
+name: Deploy website
+
+# Publishes the site to GitHub Pages (tasks F1, F2) after every successful nightly
+# data build on main, after website changes reach main, or on demand.
+#
+# The data comes from the nightly job's cache (data/raw + data/interim): the
+# published tables are exported again here, so a website-only change deploys with
+# the latest good data without re-fetching every source.
+
+on:
+  workflow_run:
+    workflows: ["Fetch and build data"]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "pipeline/src/opcina_pipeline/export.py"
+      - "pipeline/src/opcina_pipeline/boundaries.py"
+      - "pipeline/src/opcina_pipeline/contract.py"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a newer one replaces a queued older one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # After a nightly run, deploy only if that run succeeded.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.lock
+      - run: pip install -c requirements.lock -e .
+        working-directory: pipeline
+
+      - name: Restore the nightly data
+        id: data
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            data/raw
+            data/interim
+          key: data-never-matches # always fall back to the newest data-* cache
+          restore-keys: data-
+          fail-on-cache-miss: true
+
+      - name: Export the website JSON from the published tables
+        working-directory: pipeline
+        run: opcina export
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+
+      - name: Build the static site
+        working-directory: web
+        env:
+          # The site lives under /<repository>/ on GitHub Pages.
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          # Never fall back to the CI fixture: missing real data must fail the build.
+          DATA_DIR: public/data
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: web/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

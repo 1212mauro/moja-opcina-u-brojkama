@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "gen:types": "json2ts -i ../contract/schema.json -o src/lib/contract.ts --unreachableDefinitions --additionalProperties false --bannerComment \"/* Generated from contract/schema.json by npm run gen:types. Do not edit by hand. */\"",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "postbuild": "node scripts/flatten-segment-prefetch.mjs out"
   },
   "dependencies": {
     "next": "16.4.2",
