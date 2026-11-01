@@ -90,13 +90,13 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 ### E. Language and accessibility — weeks 3–4 (~40 h)
 
-- [ ] E1 next-intl with Croatian (default) and English message files (~6h)
-- [ ] E2 Simple-language mode as a third message set, at roughly primary-school reading level (~8h, needs E1)
-- [ ] E3 Keyboard navigation, visible focus, skip link, 4.5:1 text contrast (~6h)
-- [ ] E4 axe-core accessibility checks in CI (~5h, needs A5)
-- [ ] E5 Screen-reader test with NVDA and VoiceOver on a full municipality page; fix findings (~8h)
+- [x] E1 next-intl with Croatian (default) and English message files (~6h) — typed message sets in `web/src/messages/` instead of next-intl (no runtime, fits the static export); English under `/en/`
+- [x] E2 Simple-language mode as a third message set, at roughly primary-school reading level (~8h, needs E1) — `/jednostavno/`
+- [x] E3 Keyboard navigation, visible focus, skip link, 4.5:1 text contrast (~6h) — contrast checked by axe in light and dark mode
+- [x] E4 axe-core accessibility checks in CI (~5h, needs A5) — `npm run a11y`: every page of every edition, light and dark
+- [ ] E5 Screen-reader test with NVDA and VoiceOver on a full municipality page; fix findings (~8h) — 🚧 test script in `docs/screen-reader-test.md`; needs a tester
 - [x] E6 Core content works without JavaScript (~3h) — everything but the search box is static HTML
-- [ ] E7 Draft the accessibility statement using the EU template (~4h)
+- [ ] E7 Draft the accessibility statement using the EU template (~4h) — 🚧 drafted in Croatian and English; published once a contact address is set in `web/src/lib/site.ts`
 
 ### F. Deployment — weeks 3–4 (~16 h)
 

@@ -1,8 +1,10 @@
-import { formatEurShort, formatMonth, formatMonthShort } from "@/lib/format";
-import { hr } from "@/messages/hr";
+import { getFormat } from "@/lib/format";
+import type { Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
 import styles from "./MonthlyColumns.module.css";
 
 type Props = {
+  locale: Locale;
   /** Calendar months in order, "YYYY-MM"; a month without data stays as a visible gap. */
   months: string[];
   totals: Map<string, number>;
@@ -19,7 +21,9 @@ const GAP = 2; // surface gap between adjacent columns
  * (aria-hidden); the figure's summary and table carry the same data. Each column
  * has a native tooltip (<title>) with the exact amount.
  */
-export function MonthlyColumns({ months, totals }: Props) {
+export function MonthlyColumns({ locale, months, totals }: Props) {
+  const msg = getMessages(locale);
+  const fmt = getFormat(locale);
   const max = Math.max(...months.map((m) => totals.get(m) ?? 0), 0);
   const slot = WIDTH / months.length;
   const plot = HEIGHT - TOP - BOTTOM;
@@ -50,7 +54,7 @@ export function MonthlyColumns({ months, totals }: Props) {
           if (value === undefined) {
             return (
               <g key={month}>
-                <title>{`${formatMonth(month)}: ${hr.payments.missingMonth}`}</title>
+                <title>{`${fmt.month(month)}: ${msg.payments.missingMonth}`}</title>
                 <text
                   className={styles.missing}
                   x={labelX}
@@ -65,7 +69,7 @@ export function MonthlyColumns({ months, totals }: Props) {
                   y={HEIGHT - 8}
                   textAnchor="middle"
                 >
-                  {formatMonthShort(month)}
+                  {fmt.monthShort(month)}
                 </text>
               </g>
             );
@@ -79,7 +83,7 @@ export function MonthlyColumns({ months, totals }: Props) {
           const path = `M${x},${y + height} V${y + r} Q${x},${y} ${x + r},${y} H${x + width - r} Q${x + width},${y} ${x + width},${y + r} V${y + height} Z`;
           return (
             <g key={month}>
-              <title>{`${formatMonth(month)}: ${formatEurShort(value)}`}</title>
+              <title>{`${fmt.month(month)}: ${fmt.eurShort(value)}`}</title>
               <path className={styles.column} d={path} />
               <text
                 className={styles.axis}
@@ -87,7 +91,7 @@ export function MonthlyColumns({ months, totals }: Props) {
                 y={HEIGHT - 8}
                 textAnchor="middle"
               >
-                {formatMonthShort(month)}
+                {fmt.monthShort(month)}
               </text>
             </g>
           );

@@ -5,17 +5,26 @@ import { Figure } from "@/components/Figure";
 import { Notice } from "@/components/Notice";
 import { SourceNote } from "@/components/SourceNote";
 import type { MunicipalityPage } from "@/lib/contract";
-import { formatEurCents, formatInteger } from "@/lib/format";
+import { getFormat } from "@/lib/format";
 import { municipalityPath } from "@/lib/paths";
-import { hr } from "@/messages/hr";
+import type { Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
 
-export function PeersSection({ page }: { page: MunicipalityPage }) {
+export function PeersSection({
+  locale,
+  page,
+}: {
+  locale: Locale;
+  page: MunicipalityPage;
+}) {
+  const msg = getMessages(locale);
+  const fmt = getFormat(locale);
   const peers = page.peers;
-  if (!peers) return <Notice>{hr.missing.peers}</Notice>;
+  if (!peers) return <Notice>{msg.missing.peers}</Notice>;
 
-  const intro = hr.peers.intro(
-    hr.unitTypePlural[page.type],
-    hr.band[page.band],
+  const intro = msg.peers.intro(
+    msg.unitTypePlural[page.type],
+    msg.band[page.band],
     page.county,
     peers.members.length,
   );
@@ -23,7 +32,7 @@ export function PeersSection({ page }: { page: MunicipalityPage }) {
     return (
       <>
         <p>{intro}</p>
-        <Notice>{hr.peers.alone}</Notice>
+        <Notice>{msg.peers.alone}</Notice>
       </>
     );
   }
@@ -35,71 +44,72 @@ export function PeersSection({ page }: { page: MunicipalityPage }) {
   const rank = peers.ranks.find(
     (r) => r.metric === "expenditurePerResidentEur",
   );
-  const t = hr.peers.columns;
+  const cols = msg.peers.columns;
   const runIds = page.budget ? [page.budget.sourceRunId] : [];
 
   return (
     <>
       <p>{intro}</p>
       <Figure
-        title={`${hr.peers.chartTitle}, ${peers.year}.`}
+        locale={locale}
+        title={`${msg.peers.chartTitle}, ${peers.year}.`}
         summary={
           rank
-            ? hr.peers.summary(page.name, hr.peers.rank(rank.rank, rank.of))
+            ? msg.peers.summary(page.name, msg.peers.rank(rank.rank, rank.of))
             : ""
         }
         rows={members}
         columns={[
           {
-            header: t.name,
+            header: cols.name,
             cell: (m) =>
               m.slug === page.slug ? (
                 <strong>{m.name}</strong>
               ) : (
-                <Link href={municipalityPath(m.slug)}>{m.name}</Link>
+                <Link href={municipalityPath(locale, m.slug)}>{m.name}</Link>
               ),
           },
           {
-            header: t.population,
-            cell: (m) => formatInteger(m.population),
+            header: cols.population,
+            cell: (m) => fmt.integer(m.population),
             numeric: true,
           },
           {
-            header: t.revenue,
+            header: cols.revenue,
             cell: (m) =>
               m.revenuePerResidentEur == null
                 ? "–"
-                : formatEurCents(m.revenuePerResidentEur),
+                : fmt.eurCents(m.revenuePerResidentEur),
             numeric: true,
           },
           {
-            header: t.expenditure,
+            header: cols.expenditure,
             cell: (m) =>
               m.expenditurePerResidentEur == null
                 ? "–"
-                : formatEurCents(m.expenditurePerResidentEur),
+                : fmt.eurCents(m.expenditurePerResidentEur),
             numeric: true,
           },
         ]}
-        note={hr.peers.context}
+        note={msg.peers.context}
       >
         <BarList
           compare
-          label={hr.peers.chartTitle}
+          label={msg.peers.chartTitle}
           bars={members.map((m) => ({
             key: m.slug,
             label:
-              m.slug === page.slug ? `${m.name} ${hr.peers.thisUnit}` : m.name,
+              m.slug === page.slug ? `${m.name} ${msg.peers.thisUnit}` : m.name,
             value: m.expenditurePerResidentEur ?? 0,
             display:
               m.expenditurePerResidentEur == null
                 ? "–"
-                : formatEurCents(m.expenditurePerResidentEur),
+                : fmt.eurCents(m.expenditurePerResidentEur),
             highlight: m.slug === page.slug,
           }))}
         />
       </Figure>
-      <SourceNote page={page} runIds={runIds} />
+      <SourceNote locale={locale} page={page} runIds={runIds} />
     </>
   );
 }

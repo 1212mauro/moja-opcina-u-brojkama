@@ -1,10 +1,12 @@
 import { loadBoundaries } from "@/lib/data";
 import { projectBoundaries } from "@/lib/geo";
 import { municipalityHref } from "@/lib/paths";
-import { hr } from "@/messages/hr";
+import type { Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
 import styles from "./CountyMap.module.css";
 
 type Props = {
+  locale: Locale;
   /** The municipality to mark (locator map on its own page). */
   highlight?: string;
   /** Visible heading and accessible name of the map. */
@@ -19,7 +21,8 @@ type Props = {
  * JavaScript and with a keyboard (Tab moves between municipalities in
  * alphabetical order). It is an extra: the same links are always in a list.
  */
-export function CountyMap({ highlight, title, width = 800 }: Props) {
+export function CountyMap({ locale, highlight, title, width = 800 }: Props) {
+  const msg = getMessages(locale);
   const map = projectBoundaries(loadBoundaries(), width);
   const shapes = [...map.shapes].sort((a, b) =>
     a.name.localeCompare(b.name, "hr"),
@@ -45,14 +48,14 @@ export function CountyMap({ highlight, title, width = 800 }: Props) {
                 className={`${className} ${styles.noData}`}
                 d={shape.d}
               >
-                <title>{`${shape.name}: ${hr.map.noData}`}</title>
+                <title>{`${shape.name}: ${msg.map.noData}`}</title>
               </path>
             );
           }
           return (
             <a
               key={shape.slug}
-              href={municipalityHref(shape.slug)}
+              href={municipalityHref(locale, shape.slug)}
               aria-label={shape.name}
               aria-current={shape.slug === highlight ? "page" : undefined}
             >

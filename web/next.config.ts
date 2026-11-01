@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   basePath,
   images: { unoptimized: true },
+  // One root layout per edition (hr, simple, en), so the 404 page needs its own.
+  experimental: { globalNotFound: true },
   // cacheComponents / partialPrefetching are omitted: Next.js refuses PPR in export mode.
 };
 

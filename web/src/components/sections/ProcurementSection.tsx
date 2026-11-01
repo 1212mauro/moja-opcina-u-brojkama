@@ -3,72 +3,77 @@ import { Figure } from "@/components/Figure";
 import { Notice } from "@/components/Notice";
 import { SourceNote } from "@/components/SourceNote";
 import type { MunicipalityPage } from "@/lib/contract";
-import {
-  formatDate,
-  formatEur,
-  formatInteger,
-  formatShare,
-} from "@/lib/format";
-import { hr } from "@/messages/hr";
+import { getFormat } from "@/lib/format";
+import { dataLang, type Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
 
-export function ProcurementSection({ page }: { page: MunicipalityPage }) {
+export function ProcurementSection({
+  locale,
+  page,
+}: {
+  locale: Locale;
+  page: MunicipalityPage;
+}) {
+  const msg = getMessages(locale);
+  const fmt = getFormat(locale);
   const procurement = page.procurement;
-  if (!procurement) return <Notice>{hr.missing.procurement}</Notice>;
-  const t = hr.procurement.columns;
+  if (!procurement) return <Notice>{msg.missing.procurement}</Notice>;
+  const cols = msg.procurement.columns;
   const top = procurement.topSuppliers[0];
 
   return (
     <>
       <p>
-        {hr.procurement.intro(
+        {msg.procurement.intro(
           procurement.contractCount,
-          formatInteger(procurement.contractCount),
-          procurement.dataFrom ? formatDate(procurement.dataFrom) : "–",
-          procurement.dataTo ? formatDate(procurement.dataTo) : "–",
+          fmt.integer(procurement.contractCount),
+          procurement.dataFrom ? fmt.date(procurement.dataFrom) : "–",
+          procurement.dataTo ? fmt.date(procurement.dataTo) : "–",
         )}
       </p>
       <p>
-        {hr.procurement.total}:{" "}
-        <strong>{formatEur(procurement.totalValueEur)}</strong>
+        {msg.procurement.total}:{" "}
+        <strong>{fmt.eur(procurement.totalValueEur)}</strong>
       </p>
 
       {top ? (
         <Figure
-          title={hr.procurement.topSuppliers}
+          locale={locale}
+          title={msg.procurement.topSuppliers}
           summary={
             // A share only makes sense of a positive total (amounts can be unpublished).
             procurement.totalValueEur > 0
-              ? hr.procurement.topSuppliersSummary(
+              ? msg.procurement.topSuppliersSummary(
                   top.name,
-                  formatShare(top.totalEur / procurement.totalValueEur),
+                  fmt.share(top.totalEur / procurement.totalValueEur),
                 )
-              : hr.procurement.topSupplierName(top.name)
+              : msg.procurement.topSupplierName(top.name)
           }
           rows={procurement.topSuppliers}
           columns={[
-            { header: t.supplier, cell: (s) => s.name },
+            { header: cols.supplier, cell: (s) => s.name },
             {
-              header: t.contracts,
-              cell: (s) => formatInteger(s.contracts),
+              header: cols.contracts,
+              cell: (s) => fmt.integer(s.contracts),
               numeric: true,
             },
             {
-              header: t.total,
-              cell: (s) => formatEur(s.totalEur),
+              header: cols.total,
+              cell: (s) => fmt.eur(s.totalEur),
               numeric: true,
             },
           ]}
         >
           <BarList
-            label={hr.procurement.topSuppliers}
+            label={msg.procurement.topSuppliers}
             bars={procurement.topSuppliers.map((s, i) => ({
               key: `${s.oib ?? s.name}-${i}`,
               label: s.name,
               value: s.totalEur,
-              display: formatEur(s.totalEur),
-              detail: hr.procurement.contractCount(
+              display: fmt.eur(s.totalEur),
+              detail: msg.procurement.contractCount(
                 s.contracts,
-                formatInteger(s.contracts),
+                fmt.integer(s.contracts),
               ),
             }))}
           />
@@ -77,27 +82,35 @@ export function ProcurementSection({ page }: { page: MunicipalityPage }) {
 
       {procurement.recentAwards.length ? (
         <Figure
-          title={hr.procurement.recent}
+          locale={locale}
+          title={msg.procurement.recent}
           rows={procurement.recentAwards}
           columns={[
             {
-              header: t.date,
-              cell: (a) => (a.signedOn ? formatDate(a.signedOn) : "–"),
+              header: cols.date,
+              cell: (a) => (a.signedOn ? fmt.date(a.signedOn) : "–"),
             },
-            { header: t.subject, cell: (a) => a.subject },
-            { header: t.supplier, cell: (a) => a.supplierName },
             {
-              header: t.value,
+              header: cols.subject,
+              cell: (a) => <span lang={dataLang(locale)}>{a.subject}</span>,
+            },
+            { header: cols.supplier, cell: (a) => a.supplierName },
+            {
+              header: cols.value,
               cell: (a) =>
                 a.valueEur == null
-                  ? hr.procurement.noValue
-                  : formatEur(a.valueEur),
+                  ? msg.procurement.noValue
+                  : fmt.eur(a.valueEur),
               numeric: true,
             },
           ]}
         />
       ) : null}
-      <SourceNote page={page} runIds={procurement.sourceRunIds} />
+      <SourceNote
+        locale={locale}
+        page={page}
+        runIds={procurement.sourceRunIds}
+      />
     </>
   );
 }

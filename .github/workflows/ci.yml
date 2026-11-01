@@ -45,3 +45,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      - name: Accessibility checks (axe-core, every page, light and dark)
+        run: |
+          npx playwright install --with-deps chromium
+          npm run a11y

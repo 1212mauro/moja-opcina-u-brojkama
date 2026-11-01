@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-import { hr } from "@/messages/hr";
+import type { Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
 import styles from "./Figure.module.css";
 
 export type Column<Row> = {
@@ -10,6 +11,7 @@ export type Column<Row> = {
 };
 
 type Props<Row> = {
+  locale: Locale;
   title: string;
   /** One plain sentence that says what the chart shows (every chart has one). */
   summary?: string;
@@ -22,6 +24,7 @@ type Props<Row> = {
 };
 
 export function Figure<Row>({
+  locale,
   title,
   summary,
   children,
@@ -29,6 +32,7 @@ export function Figure<Row>({
   columns,
   note,
 }: Props<Row>) {
+  const msg = getMessages(locale);
   const table = (
     <table>
       <thead>
@@ -73,7 +77,7 @@ export function Figure<Row>({
         <>
           {children}
           <details className={styles.details}>
-            <summary>{hr.figure.showTable}</summary>
+            <summary>{msg.figure.showTable}</summary>
             <div className={styles.tableWrap}>{table}</div>
           </details>
         </>

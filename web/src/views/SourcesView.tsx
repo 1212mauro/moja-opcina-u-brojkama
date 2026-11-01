@@ -1,21 +1,26 @@
 import type { Metadata } from "next";
 
 import { loadSourceStatus } from "@/lib/data";
-import { formatDate, formatInteger } from "@/lib/format";
-import { hr } from "@/messages/hr";
-import styles from "../prose.module.css";
+import { getFormat } from "@/lib/format";
+import { dataLang, type Locale } from "@/lib/i18n";
+import { getMessages } from "@/messages";
+import styles from "./prose.module.css";
 
-export const metadata: Metadata = { title: hr.site.nav.sources };
+export function sourcesMetadata(locale: Locale): Metadata {
+  return { title: getMessages(locale).site.nav.sources };
+}
 
 /** F3: every source and when it was last fetched. */
-export default function Sources() {
+export function SourcesView({ locale }: { locale: Locale }) {
+  const msg = getMessages(locale);
+  const fmt = getFormat(locale);
   const { runs, generatedAt } = loadSourceStatus();
-  const t = hr.sources.columns;
+  const t = msg.sources.columns;
   return (
     <article className={styles.prose}>
-      <h1>{hr.site.nav.sources}</h1>
-      <p className={styles.lead}>{hr.sources.intro}</p>
-      <p>{hr.sources.generated(formatDate(generatedAt))}</p>
+      <h1>{msg.site.nav.sources}</h1>
+      <p className={styles.lead}>{msg.sources.intro}</p>
+      <p>{msg.sources.generated(fmt.date(generatedAt))}</p>
       <div className={styles.wide}>
         <table>
           <thead>
@@ -33,26 +38,26 @@ export default function Sources() {
             {runs.map((run) => (
               <tr key={run.id}>
                 <td>
-                  <a href={run.url} rel="external">
+                  <a href={run.url} rel="external" lang={dataLang(locale)}>
                     {run.title}
                   </a>
                   {run.status !== "ok" ? (
                     <span className={styles.warning}>
                       {" "}
-                      — {hr.sources.status[run.status]}
+                      — {msg.sources.status[run.status]}
                     </span>
                   ) : null}
                 </td>
                 <td>{run.publisher}</td>
                 <td>
                   {run.status === "ok" || run.rowCount
-                    ? formatDate(run.fetchedAt)
+                    ? fmt.date(run.fetchedAt)
                     : "–"}
                 </td>
                 <td className="num">
-                  {run.rowCount ? formatInteger(run.rowCount) : "–"}
+                  {run.rowCount ? fmt.integer(run.rowCount) : "–"}
                 </td>
-                <td>{run.licence}</td>
+                <td>{msg.sources.licences[run.source] ?? run.licence}</td>
               </tr>
             ))}
           </tbody>
