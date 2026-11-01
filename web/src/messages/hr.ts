@@ -87,10 +87,6 @@ export const hr = {
     UnitType,
     string
   >,
-  unitTypeLower: { grad: "grad", opcina: "općina" } satisfies Record<
-    UnitType,
-    string
-  >,
   unitTypePlural: { grad: "gradovi", opcina: "općine" } satisfies Record<
     UnitType,
     string
@@ -261,7 +257,8 @@ export const hr = {
   figure: {
     showTable: "Prikaži podatke kao tablicu",
     source: "Izvor",
-    sourceLink: (title: string, date: string) => `${title}, preuzeto ${date}`,
+    // Follows the source title, which is set apart for its lang attribute.
+    retrieved: (date: string) => `preuzeto ${date}`,
   },
 
   sources: {

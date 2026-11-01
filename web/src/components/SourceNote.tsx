@@ -1,6 +1,6 @@
 import type { MunicipalityPage } from "@/lib/contract";
 import { getFormat } from "@/lib/format";
-import type { Locale } from "@/lib/i18n";
+import { dataLang, type Locale } from "@/lib/i18n";
 import { getMessages } from "@/messages";
 import styles from "./SourceNote.module.css";
 
@@ -28,7 +28,8 @@ export function SourceNote({
         <span key={run.id}>
           {i > 0 ? "; " : null}
           <a href={`#izvor-${run.id}`}>
-            {msg.figure.sourceLink(run.title, fmt.date(run.fetchedAt))}
+            <span lang={dataLang(locale)}>{run.title}</span>,{" "}
+            {msg.figure.retrieved(fmt.date(run.fetchedAt))}
           </a>
         </span>
       ))}

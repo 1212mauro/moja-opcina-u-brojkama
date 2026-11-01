@@ -79,7 +79,6 @@ export const en: Messages = {
   },
 
   unitType: { grad: "Town", opcina: "Municipality" },
-  unitTypeLower: { grad: "town", opcina: "municipality" },
   unitTypePlural: { grad: "towns", opcina: "municipalities" },
   band: {
     under_3k: "fewer than 3,000 residents",
@@ -272,7 +271,7 @@ export const en: Messages = {
   figure: {
     showTable: "Show the data as a table",
     source: "Source",
-    sourceLink: (title: string, date: string) => `${title}, retrieved ${date}`,
+    retrieved: (date: string) => `retrieved ${date}`,
   },
 
   sources: {

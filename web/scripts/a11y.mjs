@@ -70,6 +70,9 @@ for (const colorScheme of ["light", "dark"]) {
   const page = await context.newPage();
   for (const url of urls) {
     await page.goto(origin + url);
+    // The search box exists only after hydration: wait for it, so axe checks it too.
+    if (await page.$("[data-search-list]"))
+      await page.waitForSelector('input[type="search"]');
     const { violations } = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();

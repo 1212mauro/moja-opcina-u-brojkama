@@ -102,8 +102,13 @@ export const hrSimple: Messages = {
     alone:
       "U ovoj županiji nema drugog sličnog mjesta, pa ne možemo usporediti.",
     chartTitle: "Koliko potroši za svakog stanovnika",
-    summary: (name: string, rank: string) =>
-      `${name} za svakog stanovnika potroši ${rank}.`,
+    rank: (rank: number, of: number) =>
+      rank === 1
+        ? `od ${of} sličnih mjesta najviše troši za svakog stanovnika`
+        : rank === of
+          ? `od ${of} sličnih mjesta najmanje troši za svakog stanovnika`
+          : `je od ${of} sličnih mjesta na ${rank}. mjestu po tome koliko troši za svakog stanovnika`,
+    summary: (name: string, rank: string) => `${name} ${rank}.`,
     context:
       "Više potrošenog novca ne znači da je nešto dobro ili loše. Mjesta s puno turista, veliki gradovi i mjesta koja grade nešto veliko često troše više.",
     columns: {
@@ -120,9 +125,10 @@ export const hrSimple: Messages = {
     total: "Vrijednost svih ugovora (bez poreza PDV)",
     recent: "Zadnji ugovori",
     topSuppliers: "Od koga najviše kupuje",
+    // Suppliers are not always companies (associations, crafts, public bodies).
     topSuppliersSummary: (name: string, share: string) =>
-      `Najviše kupuje od tvrtke ${name}: ${share} vrijednosti svih ugovora.`,
-    topSupplierName: (name: string) => `Najviše kupuje od tvrtke ${name}.`,
+      `Najviše kupuje od: ${name} (${share} vrijednosti svih ugovora).`,
+    topSupplierName: (name: string) => `Najviše kupuje od: ${name}.`,
     noValue: "iznos nije objavljen",
     columns: {
       ...hr.procurement.columns,

@@ -41,7 +41,7 @@ export function MunicipalitySearch({
   const cols = msg.home.columns;
 
   return (
-    <div>
+    <div data-search-list>
       {enhanced ? (
         <div className={styles.search} role="search">
           <label htmlFor={inputId} className={styles.label}>
