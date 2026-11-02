@@ -122,3 +122,14 @@ def test_no_category_chart_when_the_publisher_labels_nothing():
         conform(pl.DataFrame(mixed), "payment"), datetime(2026, 3, 1, tzinfo=UTC)
     )
     assert [c.label for c in section.by_category] == ["Usluge tekućeg održavanja", "Ostalo"]
+
+
+def test_the_unit_paying_itself_is_not_a_recipient():
+    # Kipos lists what it does not itemise under the municipality's own name and OIB.
+    own = {**payment("2026-01", 1_000_000, name="OPĆINA PRIMJER"), "recipient_oib": "11111111119"}
+    rows = [own, payment("2026-01", 10)]
+    section = payments_section(
+        conform(pl.DataFrame(rows), "payment"), datetime(2026, 3, 1, tzinfo=UTC), "11111111119"
+    )
+    assert [r.name for r in section.top_recipients] == ["Tvrtka d.o.o."]
+    assert section.months[0].total_eur == 1_000_010  # still money paid out
