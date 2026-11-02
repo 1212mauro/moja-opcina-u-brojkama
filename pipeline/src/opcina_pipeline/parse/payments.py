@@ -473,10 +473,38 @@ def parse_html_links(folder: Path) -> pl.DataFrame:
     return pl.concat(frames) if frames else pl.DataFrame(schema=RAW_COLUMNS)
 
 
+def parse_proracunhr(folder: Path) -> pl.DataFrame:
+    """Proracun.hr ``<year>.json`` files (Lepoglava, Visoko).
+
+    ``{"data": [{"datum", "stranka", "mjesto", "posta", "oib", "iznos_eur", "iznos_kn",
+    "vrsta_rashoda", "opis"}]}``. ``vrsta_rashoda`` is "3239 Label" or blank (Lepoglava
+    leaves it blank); the payer is not named, as every row is the municipality's own.
+    """
+    rows = []
+    for path in sorted(folder.glob("*.json")):
+        for row in json.loads(path.read_text(encoding="utf-8"))["data"]:
+            economic_code, economic_label = split_code(row.get("vrsta_rashoda"))
+            rows.append(
+                {
+                    "paid_on": parse_date(row["datum"]),
+                    "payer_name": None,
+                    "recipient_name": _clean(row.get("stranka")),
+                    "recipient_oib": _clean(row.get("oib")),
+                    "economic_code": economic_code,
+                    "economic_label": economic_label,
+                    "function_code": None,
+                    "description": None,  # "opis" names people; see the module docstring
+                    "amount_eur": parse_amount(row.get("iznos_eur")),
+                }
+            )
+    return pl.DataFrame(rows, schema=RAW_COLUMNS)
+
+
 PARSERS: dict[str, Callable[[Path], pl.DataFrame]] = {
     "otvorenigrad": parse_otvorenigrad,
     "kipos": parse_kipos,
     "html_links": parse_html_links,
+    "proracunhr": parse_proracunhr,
 }
 
 

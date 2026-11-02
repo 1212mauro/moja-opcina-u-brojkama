@@ -375,6 +375,23 @@ def test_kipos_accepts_a_plain_list(tmp_path):
     assert P.parse_kipos(tmp_path).height == 6
 
 
+# --- proracun.hr ------------------------------------------------------------------------
+
+
+def test_proracunhr():
+    df = P.finish(P.parse_proracunhr(FIXTURES / "proracunhr"), "02291", RUN)
+    assert df.height == 4
+    assert df["description"].is_null().all()  # "opis" names people
+    gama, aggregate, person, state = df.iter_rows(named=True)
+    assert (gama["recipient_name"], gama["recipient_oib"]) == ("GAMA D.O.O.", "44444444446")
+    assert gama["economic_code"] is None  # Lepoglava leaves the category blank
+    # The platform's own label for individuals, and a person published by name and OIB.
+    assert aggregate["natural_person"] and aggregate["recipient_name"] is None
+    assert person["natural_person"] and person["recipient_oib"] is None
+    assert (state["economic_code"], state["economic_label"]) == ("3239", "Ostale usluge")
+    assert state["amount_eur"] == 515.94
+
+
 # --- Breznički Hum ODS -----------------------------------------------------------------
 
 

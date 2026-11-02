@@ -53,7 +53,7 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 - [x] B5 Download DZS Census 2021 and the latest population estimates; check settlement → municipality roll-up (~5h)
 - [x] B6 Get DGU administrative boundaries (WFS/GeoJSON) for the pilot county and simplify the polygons for the browser (~5h) — DGU ATOM feed, pyproj, coverage simplification (`opcina boundaries`)
 - [x] B7 Collect school, kindergarten and health facility lists for the pilots from data.gov.hr; use OpenStreetMap (Overpass) where none exist (~6h)
-- [x] B8 Find 1–2 pilots that publish monthly payment disclosures as CSV/XLSX and download the last 12 months (~4h, needs B1) — 4 of 5 pilots (Varaždin is behind reCAPTCHA)
+- [x] B8 Find 1–2 pilots that publish monthly payment disclosures as CSV/XLSX and download the last 12 months (~4h, needs B1) — all 5 pilots; pilots changed on 2 Nov 2026 to units whose payments are open (docs/pilots.md)
 - [x] B9 Build a postcode → municipality lookup for the pilots (~2h, needs B2)
 - [x] B10 Document every source in `docs/sources.md`: URL, publisher, licence, date fetched, known quirks (~3h)
 

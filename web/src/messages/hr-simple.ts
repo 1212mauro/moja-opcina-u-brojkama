@@ -28,7 +28,7 @@ export const hrSimple: Messages = {
     intro:
       "Ovdje vidite koliko novca ima vaš grad ili općina, na što ga troši i što kupuje. Vidite i usporedbu sa sličnim mjestima.",
     searchHint:
-      "Upišite ime mjesta, npr. „Ludbreg”, ili poštanski broj, npr. „42230”",
+      "Upišite ime mjesta, npr. „Lepoglava”, ili poštanski broj, npr. „42250”",
     noResults: "Nema grada ni općine s tim imenom ili brojem.",
   },
 
@@ -169,7 +169,7 @@ export const hrSimple: Messages = {
     peers: "Ne možemo usporediti jer nemamo podatke o novcu.",
     procurement: "Za ovo mjesto nismo našli ugovore za kupnju.",
     payments:
-      "Ovo mjesto ne objavljuje plaćanja tako da ih možemo sami preuzeti. Zato ih ne pokazujemo.",
+      "Za ovo mjesto još ne pokazujemo plaćanja. Pokazujemo ih samo kad ih mjesto objavi tako da ih svatko može preuzeti.",
     facilities: "Za ovo mjesto nismo našli škole, vrtiće ni liječnike.",
   },
 
