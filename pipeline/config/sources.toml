@@ -139,6 +139,8 @@ url = "https://data.gov.hr/ckan/api/3/action/package_show"
 licence = "Otvorena dozvola Republike Hrvatske"
 file = "contracts_municipal"
 formats = ["XLSX"]
+# Published tables from before the rename still cite runs of the old key.
+renamed_from = ["contracts_ivanec"]
 # Registers that publishers in scope put on data.gov.hr themselves; files land in
 # a folder named after the publisher's OIB, which is the buyer of every row.
 datasets = [

@@ -21,7 +21,7 @@ from pathlib import Path
 import polars as pl
 
 from opcina_pipeline.boundaries import write_boundaries
-from opcina_pipeline.config import config_path, load_sources, repo_root
+from opcina_pipeline.config import Source, config_path, load_sources, repo_root
 from opcina_pipeline.contract import (
     Budget,
     BudgetItem,
@@ -74,9 +74,20 @@ def read_runs(log_path: Path) -> dict[str, dict]:
     return runs
 
 
+def source_config(key: str) -> Source:
+    """A source by key, or by a former key (``renamed_from``), which old runs still cite."""
+    sources = load_sources()
+    if key in sources:
+        return sources[key]
+    for source in sources.values():
+        if key in source.options.get("renamed_from", []):
+            return source
+    raise KeyError(f"source {key!r} is not in sources.toml (nor any renamed_from)")
+
+
 def source_run(run: dict, row_count: int, attempt: dict | None = None) -> SourceRun:
     """``run`` gives date, hash and rows; ``attempt`` (default: the same run) the status."""
-    source = load_sources()[run["source"]]
+    source = source_config(run["source"])
     status = (attempt or run)["status"]
     return SourceRun(
         id=run["id"],

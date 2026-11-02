@@ -102,3 +102,9 @@ def test_procurement_without_any_signing_date_still_exports():
     )
     assert section.data_from is None and section.contract_count == 1
     assert section.recent_awards == []
+
+
+def test_old_runs_of_a_renamed_source_still_resolve():
+    from opcina_pipeline.export import source_config
+
+    assert source_config("contracts_ivanec").key == "contracts_municipal"
