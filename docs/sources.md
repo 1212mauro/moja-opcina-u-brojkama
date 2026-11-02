@@ -158,7 +158,7 @@ Contracts are fetched automatically for every buyer in scope: each municipality 
 | `contracts_eojn_legacy` | Old EOJN RH (`eojn.nn.hr`) | Public contract register form, buyer by buyer, Excel export | 2018 – early 2024, all buyers |
 | `contracts_eojn` | New EOJN RH (`eojn.hr`) | Official Open Data API with `X-API-Key` | 2024 onwards, all buyers, **once a key is set** |
 | `contracts_municipal` | Publishers' own registers on data.gov.hr | CKAN, one dataset per publisher (`datasets` in sources.toml) | Ivanec 2015–2026, Lepoglava 2018–2026, Varaždinske Toplice 2018–2023 |
-| `contracts_ted` | TED (EU Official Journal) | Anonymous search API + eForms XML per notice | 2024 onwards, contracts above EU thresholds, all buyers |
+| `contracts_ted` | TED (EU Official Journal) | Anonymous search API | 2024 onwards, single-contract award notices above EU thresholds, all buyers |
 
 **Old register (`contracts_eojn_legacy`).** `https://eojn.nn.hr/Spin/application/ipn/JavniReporti/RptRegistarUgovora.aspx` is public, and robots.txt there disallows only `/administrator`. It is an ASP.NET page with a ReportViewer:
 
@@ -171,7 +171,11 @@ There is no national or incremental export: a report needs a buyer, and "view al
 
 **Without permission, 2024 onwards.** The new EOJN register is open only through the keyed API below, and eojn.hr's robots.txt forbids everything else. Two open routes cover part of it:
 
-- **TED (`contracts_ted`).** Every procurement above the EU thresholds is also published on TED. The search API (`POST https://api.ted.europa.eu/v3/notices/search`) needs no key; the query is `organisation-identifier-buyer IN (<buyer OIBs>) AND notice-type IN (can-standard can-social) AND publication-date>=20240101`. Each notice's eForms XML (`https://ted.europa.eu/en/notice/<number>/xml`, allowed by robots.txt) links lot result → winning tender → signed contract → supplier, which the search API's flat fields cannot. Value: the tender's `PayableAmount` without VAT, or a framework agreement's re-estimated value. Joint procurement notices (one with 241 buyers) are skipped: eForms does not say which buyer signed which contract. Licence: reuse with attribution, Commission Decision 2011/833/EU. First run, 1 Nov 2026: 48 notices for the 67 buyers, 30 contracts kept (3 more were already in the old register).
+- **TED (`contracts_ted`).** Every procurement above the EU thresholds is also published on TED. The search API (`POST https://api.ted.europa.eu/v3/notices/search`) needs no key; the query is `organisation-identifier-buyer IN (<buyer OIBs>) AND notice-type IN (can-standard can-social) AND publication-date>=20240101`, and the fields the parser needs come back with it (`notices.jsonl`). Licence: reuse with attribution, Commission Decision 2011/833/EU.
+  - The notice pages and eForms XML on `ted.europa.eu` are behind an AWS WAF that answers GitHub Actions with a JavaScript challenge (HTTP 202, `x-amzn-waf-action: challenge`, empty body); a pipeline must not try to pass it, so only the API is used.
+  - The API's fields are flat lists per notice: with several contracts the winners come in an order unrelated to the contracts. Only notices with one buyer and one contract are used; joint procurements and multi-contract notices are skipped.
+  - Framework agreements have no tender value, only a ceiling, so their amount stays unknown rather than counting the ceiling as spending.
+  - First run, 2 Nov 2026: 48 notices for the 67 buyers, 28 usable, 25 kept after matching the registers.
 - **Publishers' own registers (`contracts_municipal`).** Searched data.gov.hr for every unit in the county (Nov 2026): Ivanec, Lepoglava and Varaždinske Toplice publish their registers as EOJN exports; Sveti Đurđ, Breznica and Maruševec publish other layouts or files on their own sites (not used yet). Lepoglava's grid has a title row above the header.
 - **Checked and not useful:** EOJN's monthly OCDS open-data files (`eojn.nn.hr/SPIN/application/ipn/Oglasnik/PreuzimanjeUgovoraOCD.aspx`, free, no registration) hold only the old system's register and updates to it, the same data as `contracts_eojn_legacy`; some files are not valid JSON (unescaped quotes). OpenTender's Croatian data ends in 2024 and is CC BY-NC-SA.
 
