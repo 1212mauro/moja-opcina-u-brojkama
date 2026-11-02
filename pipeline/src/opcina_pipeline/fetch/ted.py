@@ -12,9 +12,14 @@ allows the notice pages. So TED covers the largest new contracts without asking 
    not yet on disk: the eForms XML, which links each lot result to its winning tender,
    signed contract and supplier exactly (the search API's flat fields cannot be lined
    up per lot). A published notice never changes; corrections are new notices.
+   Every file must parse as XML: TED has answered with an empty body, and such a
+   file is deleted (and fetched again next run) rather than kept forever.
 
 Files: ``notices/<publication number>.xml``.
 """
+
+import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from opcina_pipeline.fetch.base import FetchContext, Outcome, fetcher
 from opcina_pipeline.fetch.eojn import scope_buyers
@@ -68,14 +73,31 @@ def fetch_ted(ctx: FetchContext) -> Outcome:
     numbers = search_notices(ctx, buyers["oib"].to_list())
     folder = ctx.out_dir / "notices"
     folder.mkdir(exist_ok=True)
-    files = []
+    files, broken = [], []
     for number in numbers:
         dest = folder / f"{number}.xml"
-        if dest.exists():
+        if _is_xml(dest):
             # Notices never change; listed anyway so the run log names every input.
             files.append(Download(dest, False, file_sha256(dest), dest.stat().st_size))
+            continue
+        download = ctx.client.download(NOTICE_XML_URL.format(number=number), dest)
+        if _is_xml(dest):
+            files.append(download)
         else:
-            files.append(ctx.client.download(NOTICE_XML_URL.format(number=number), dest))
+            dest.unlink(missing_ok=True)
+            broken.append(number)
     new = sum(f.changed for f in files)
     message = f"{len(numbers)} award notices for {buyers.height} buyers, {new} new"
+    if broken:
+        message += f"; not valid XML, retried next run: {', '.join(broken)}"
     return Outcome.from_downloads(files, message)
+
+
+def _is_xml(path: Path) -> bool:
+    if not path.exists():
+        return False
+    try:
+        ET.parse(path)
+    except ET.ParseError:
+        return False
+    return True
