@@ -260,11 +260,15 @@ def payments_section(payments: pl.DataFrame, as_of: datetime) -> Payments | None
     first_year, first_month = divmod(year * 12 + month - PAYMENT_MONTHS, 12)
     recent = payments.filter(pl.col("month") >= f"{first_year}-{first_month + 1:02d}")
     by_month = recent.group_by("month").agg(pl.col("amount_eur").sum()).sort("month")
+    # A publisher that labels no payment at all (Lepoglava) gets no category chart,
+    # rather than one "Ostalo" bar of 100%.
     categories = (
         recent.group_by("economic_label")
         .agg(pl.col("amount_eur").sum())
         .sort("amount_eur", descending=True)
         .head(TOP_CATEGORIES)
+        if recent["economic_label"].is_not_null().any()
+        else recent.select("economic_label", "amount_eur").clear()
     )
     recipients = (
         recent.filter(~pl.col("natural_person"), pl.col("recipient_name").is_not_null())

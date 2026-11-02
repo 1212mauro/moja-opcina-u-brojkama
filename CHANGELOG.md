@@ -29,6 +29,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Screen-reader test script (`docs/screen-reader-test.md`) and a draft accessibility statement (not yet published).
 - Procurement since 2024 without an API key: contract award notices from TED (EU Official Journal) for every buyer in scope, and the contract registers that towns publish on data.gov.hr (Ivanec, now also Lepoglava and Varaždinske Toplice; source `contracts_municipal` replaces `contracts_ivanec`).
 
+
 ### Changed
 
+- Pilots are now Lepoglava, Maruševec, Sveti Ilija, Jalžabet and Breznički Hum: every source of each, payments included, is open. Varaždin, Ivanec and Ludbreg publish payments only behind a CAPTCHA or on a platform that refuses GitHub's servers; their pages keep budget, procurement and facilities. Payments from proracun.hr are a new platform.
 - Procurement: the data.gov.hr file the spec cites as national is Grad Ivanec's own register; national access goes through eojn.hr (see `docs/sources.md`).

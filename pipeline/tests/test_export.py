@@ -108,3 +108,17 @@ def test_old_runs_of_a_renamed_source_still_resolve():
     from opcina_pipeline.export import source_config
 
     assert source_config("contracts_ivanec").key == "contracts_municipal"
+
+
+def test_no_category_chart_when_the_publisher_labels_nothing():
+    unlabelled = [{**payment("2026-01", 10), "economic_label": None, "economic_code": None}]
+    section = payments_section(
+        conform(pl.DataFrame(unlabelled), "payment"), datetime(2026, 3, 1, tzinfo=UTC)
+    )
+    assert section.by_category == []
+    # A few unlabelled rows among labelled ones still show, as "Ostalo".
+    mixed = unlabelled + [payment("2026-01", 20)]
+    section = payments_section(
+        conform(pl.DataFrame(mixed), "payment"), datetime(2026, 3, 1, tzinfo=UTC)
+    )
+    assert [c.label for c in section.by_category] == ["Usluge tekućeg održavanja", "Ostalo"]

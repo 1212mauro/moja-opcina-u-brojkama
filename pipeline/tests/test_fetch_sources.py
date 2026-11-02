@@ -320,3 +320,34 @@ def test_ted_search_pages_through_results_and_writes_one_file(tmp_path, monkeypa
     ]
     assert outcome.status == "ok"
     assert ted.fetch_ted(Ctx(handler)).status == "unchanged"
+
+
+def test_proracunhr_fetches_each_year_in_the_window(tmp_path, monkeypatch):
+    import httpx
+
+    from opcina_pipeline.fetch import payments
+
+    monkeypatch.setattr(payments, "_today", lambda: date(2026, 3, 5))
+    asked = []
+
+    def handler(request):
+        asked.append(dict(request.url.params))
+        return httpx.Response(200, json={"data": []})
+
+    (tmp_path / "2023.json").write_text('{"data": []}')  # left the window
+    files = payments.fetch_proracunhr(FakeCtx(handler, months=13), {"kid": 37}, tmp_path)
+
+    assert asked == [{"kid": "37", "g": "2025"}, {"kid": "37", "g": "2026"}]
+    assert [f.path.name for f in files] == ["2025.json", "2026.json"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["2025.json", "2026.json"]
+
+
+def test_proracunhr_refuses_an_html_answer(tmp_path, monkeypatch):
+    import httpx
+
+    from opcina_pipeline.fetch import payments
+
+    monkeypatch.setattr(payments, "_today", lambda: date(2026, 3, 5))
+    ctx = FakeCtx(lambda request: httpx.Response(200, json=[]), months=2)
+    with pytest.raises(ValueError, match="not the payments JSON"):
+        payments.fetch_proracunhr(ctx, {"kid": 37}, tmp_path)

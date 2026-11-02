@@ -4,31 +4,39 @@
 #   otvorenigrad  Otvoreni grad iTransparentnost API; `tenant` is the LC-Tenant header
 #   kipos         Kipos transparency portal; `base_url` is the municipality's subdomain
 #   html_links    files linked from one page; `page` and a regex `pattern` for the links
+#   proracunhr    proracun.hr payment list; `kid` is the municipality's id there
 #   unavailable   no machine-readable route; `reason` is shown on the coverage map
 #
 # `pending_access`: the publisher refuses our automated requests (HTTP 401/403) and
 # no other machine-readable copy exists. Such a refusal is reported, not failed; if
 # the publisher starts answering, the fetch succeeds again on its own.
 
-["04723"]  # Varaždin
-platform = "unavailable"
-reason = "Payments are published only on transparentni.varazdin.hr, a search form protected by reCAPTCHA, with no file or API export."
-
-["01562"]  # Ivanec
-platform = "otvorenigrad"
-tenant = "grad-ivanec"
-pending_access = "api.otvorenigrad.hr answers 403 to GitHub Actions; ivanec.hr and data.gov.hr only link to that portal (checked Nov 2026)"
-
-["02445"]  # Ludbreg
-platform = "otvorenigrad"
-tenant = "grad-ludbreg"
-pending_access = "api.otvorenigrad.hr answers 403 to GitHub Actions; ludbreg.hr has its own tables only up to Jan 2025 (checked Nov 2026)"
-
-["01651"]  # Jalžabet
-platform = "kipos"
-base_url = "https://transparentnost-jalzabet.kipos.hr"
+# Not configured: Ivanec and Ludbreg (Otvoreni grad, which refuses GitHub Actions with
+# HTTP 403). No other open copy of their payments exists (checked Nov 2026;
+# docs/sources.md), so they are not pilots. `pending_access` stays supported for a
+# publisher that refuses us but may start answering.
 
 ["01511"]  # Breznički Hum
 platform = "html_links"
 page = "https://www.breznicki-hum.hr/index.php/vazni-dokumenti/transparentnost"
 pattern = '/images/isplate_iz_proracuna/\d{4}/[^"]+\.ods'
+
+["04723"]  # Varaždin
+platform = "unavailable"
+reason = "Payments are published only on transparentni.varazdin.hr, a search form protected by reCAPTCHA, with no file or API export."
+
+["01651"]  # Jalžabet
+platform = "kipos"
+base_url = "https://transparentnost-jalzabet.kipos.hr"
+
+["02291"]  # Lepoglava
+platform = "proracunhr"
+kid = 37
+
+["02607"]  # Maruševec
+platform = "kipos"
+base_url = "https://transparentnost-marusevec.kipos.hr"
+
+["04383"]  # Sveti Ilija
+platform = "kipos"
+base_url = "https://transparentnost-sveti-ilija.kipos.hr"

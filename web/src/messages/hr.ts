@@ -69,7 +69,7 @@ export const hr = {
     intro:
       "Za svaku općinu i grad pokazujemo proračun, javnu nabavu, isplate i javne usluge na jednom mjestu te ih uspoređujemo sa sličnima u istoj županiji.",
     searchLabel: "Naziv ili poštanski broj",
-    searchHint: "Npr. „Ludbreg” ili „42230”",
+    searchHint: "Npr. „Lepoglava” ili „42250”",
     // "Rezultata: 2" avoids Croatian's number agreement (1 grad, 2 grada, 5 gradova).
     resultsCount: (n: number) => `Rezultata: ${n}`,
     noResults: "Nijedna općina ni grad ne odgovaraju upisanom pojmu.",
@@ -242,8 +242,7 @@ export const hr = {
     peers: "Usporedba nije dostupna jer nemamo podatke o proračunu.",
     procurement:
       "Za ovu jedinicu nismo pronašli objavljene ugovore javne nabave.",
-    payments:
-      "Ova jedinica ne objavljuje isplate u obliku koji možemo automatski preuzeti (npr. kao tablicu ili otvorene podatke), pa ih ne prikazujemo.",
+    payments: "Isplate iz proračuna za ovu jedinicu još ne prikazujemo.",
     facilities:
       "Za ovu jedinicu nismo pronašli škole, vrtiće ni zdravstvene ustanove.",
   },

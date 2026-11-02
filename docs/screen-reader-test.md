@@ -13,7 +13,7 @@ Automated checks (axe-core, `npm run a11y`, run in CI on every page of every edi
 
 Ask the tester to do each task without looking at the screen. Note where they hesitate, what they hear that confuses them, and how long each task takes.
 
-1. From the home page, find Ludbreg by typing in the search box. Is the number of results announced as it changes?
+1. From the home page, find Lepoglava by typing in the search box. Is the number of results announced as it changes?
 2. Open Jalžabet's page. Jump between headings (NVDA: H; VoiceOver: VO+Cmd+H). Is the page outline clear?
 3. How much did Jalžabet spend in total last year? (The key figures under the heading.)
 4. What does Jalžabet spend the most money on? (The summary sentence above the chart, then the bar list.)

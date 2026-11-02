@@ -375,6 +375,47 @@ def test_kipos_accepts_a_plain_list(tmp_path):
     assert P.parse_kipos(tmp_path).height == 6
 
 
+# --- proracun.hr ------------------------------------------------------------------------
+
+
+def test_proracunhr():
+    df = P.finish(P.parse_proracunhr(FIXTURES / "proracunhr"), "02291", RUN)
+    assert df.height == 4
+    assert df["description"].is_null().all()  # "opis" names people
+    gama, aggregate, person, state = df.iter_rows(named=True)
+    assert (gama["recipient_name"], gama["recipient_oib"]) == ("GAMA D.O.O.", "44444444446")
+    assert gama["economic_code"] is None  # Lepoglava leaves the category blank
+    # The platform's own label for individuals, and a person published by name and OIB.
+    assert aggregate["natural_person"] and aggregate["recipient_name"] is None
+    assert person["natural_person"] and person["recipient_oib"] is None
+    assert (state["economic_code"], state["economic_label"]) == ("3239", "Ostale usluge")
+    assert state["amount_eur"] == 515.94
+
+
+def test_proracunhr_falls_back_to_kuna_and_skips_rows_without_amount(tmp_path):
+    rows = [
+        {
+            "datum": "2026-01-05",
+            "stranka": "GAMA D.O.O.",
+            "oib": "44444444446",
+            "iznos_eur": "",
+            "iznos_kn": "753.45",
+            "vrsta_rashoda": "",
+        },
+        {
+            "datum": "2026-01-06",
+            "stranka": "GAMA D.O.O.",
+            "oib": "44444444446",
+            "iznos_eur": None,
+            "iznos_kn": None,
+            "vrsta_rashoda": "",
+        },
+    ]
+    (tmp_path / "2026.json").write_text(json.dumps({"data": rows}), encoding="utf-8")
+    df = P.parse_proracunhr(tmp_path)
+    assert df["amount_eur"].to_list() == [100.0]
+
+
 # --- Breznički Hum ODS -----------------------------------------------------------------
 
 

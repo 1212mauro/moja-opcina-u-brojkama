@@ -133,10 +133,39 @@ def _month_key(name: str) -> str:
     return f"{year}-{month}" if month.isdigit() and year.isdigit() else stem
 
 
+PRORACUNHR_DATA = "https://proracun.hr/dt_i_data.php"
+
+
+def fetch_proracunhr(ctx: FetchContext, entry: dict, dest: Path) -> list[Download]:
+    """Proracun.hr payment list: one JSON per year, the call its own table makes.
+
+    ``kid`` is the municipality's id on the platform (``isplate-lista?kid=37``). Every
+    year inside the configured month window is fetched again: a year file grows
+    until the year ends, and it is at most two requests.
+    """
+    years = sorted({start.year for start in month_starts(_today(), ctx.source.options["months"])})
+    # Years that left the window are removed: the page shows only the window anyway.
+    if dest.exists():
+        for old in dest.glob("*.json"):
+            if old.stem not in {str(y) for y in years}:
+                old.unlink()
+    files = []
+    for year in years:
+        download = ctx.client.download(
+            PRORACUNHR_DATA, dest / f"{year}.json", params={"kid": entry["kid"], "g": year}
+        )
+        body = json.loads(download.path.read_text(encoding="utf-8"))
+        if not isinstance(body, dict) or not isinstance(body.get("data"), list):
+            raise ValueError(f"proracun.hr kid={entry['kid']} {year}: not the payments JSON")
+        files.append(download)
+    return files
+
+
 PLATFORMS: dict[str, Callable[[FetchContext, dict, Path], list[Download]]] = {
     "otvorenigrad": fetch_otvorenigrad,
     "kipos": fetch_kipos,
     "html_links": fetch_html_links,
+    "proracunhr": fetch_proracunhr,
 }
 
 

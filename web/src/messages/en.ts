@@ -65,7 +65,7 @@ export const en: Messages = {
     intro:
       "For every municipality and town we show the budget, public procurement, payments and public services in one place, and compare them with similar ones in the same county.",
     searchLabel: "Name or postcode",
-    searchHint: "For example “Ludbreg” or “42230”",
+    searchHint: "For example “Lepoglava” or “42250”",
     resultsCount: (n: number) => `${n} ${plural(n, "result", "results")}`,
     noResults: "No municipality or town matches your search.",
     tableCaption: (name: string) => `Towns and municipalities: ${county(name)}`,
@@ -256,8 +256,7 @@ export const en: Messages = {
     budget: "We do not have budget data for this unit yet.",
     peers: "No comparison is available because we have no budget data.",
     procurement: "We found no published public contracts for this unit.",
-    payments:
-      "This unit does not publish its payments in a form we can download automatically (such as a spreadsheet or open data), so we do not show them.",
+    payments: "We do not show payments from the budget for this unit yet.",
     facilities:
       "We found no schools, kindergartens or health facilities in this unit.",
   },

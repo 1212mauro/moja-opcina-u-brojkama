@@ -127,17 +127,22 @@ The HZZO practice-locations file (`hzzo-net.hr/hackathon/…`) did not respond. 
 
 ## Monthly payments
 
-None of the pilots mirrors its payments on data.gov.hr, and none of the portals states a licence. `pipeline/config/payments.toml` maps each municipality to its platform; covering another municipality on a supported platform is a config entry. The fetcher keeps 13 months and re-checks only the 2 newest months (or files) on each run.
+None of the portals states a licence. `pipeline/config/payments.toml` maps each municipality to its platform; covering another municipality on a supported platform is a config entry. The fetcher keeps 13 months and re-checks the newest months (or files) on each run.
 
-| Pilot | Where | Format | Downloaded |
+| Pilot | Where | Format | Downloaded (2 Nov 2026) |
 | --- | --- | --- | --- |
-| Ludbreg | Otvoreni grad iTransparentnost | API: `GET https://api.otvorenigrad.hr/itransparentnost/isplate?lang=hr&format=csv&filters={"datum":{"values":["2025-10-01","2025-11-01"],"op":"BETWEEN"}}`, header `LC-Tenant: grad-ludbreg` (upper bound exclusive) | Oct 2025 – Sep 2026, 12 files |
-| Ivanec | Same platform, `LC-Tenant: grad-ivanec` | CSV | Oct 2025 – Sep 2026, 12 files |
-| Jalžabet | Kipos, `transparentnost-jalzabet.kipos.hr` | JSON from `dbapi.php?radim=search…`; the date filter is ignored, all years returned | 2022-01 – 2026-09, 7,676 rows |
-| Breznički Hum | Monthly ODS files under `/images/isplate_iz_proracuna/<year>/` | ODS | May 2025 – Apr 2026 (publishing lags ~6 months) |
-| Varaždin | `transparentni.varazdin.hr` (Infomare) | Search form behind reCAPTCHA v3 | **Not available.** No file, API or data.gov.hr mirror exists; CAPTCHAs are not circumvented. Recorded as `unavailable` in `payments.toml` and shown on the coverage map. |
+| Lepoglava | proracun.hr, `kid=37` | JSON per year from `GET https://proracun.hr/dt_i_data.php?kid=37&g=<year>`, the call the site's own table makes; no robots.txt. Fields `datum, stranka, mjesto, posta, oib, iznos_eur, iznos_kn, vrsta_rashoda, opis`. Lepoglava leaves `vrsta_rashoda` blank, so its page has no category chart. Individuals appear as "Uplata fizičkoj osobi". | Nov 2025 – Oct 2026 |
+| Maruševec | Kipos, `transparentnost-marusevec.kipos.hr` | JSON, as Jalžabet | 2022-01 – 2026-09, 9,401 rows |
+| Sveti Ilija | Kipos, `transparentnost-sveti-ilija.kipos.hr` | JSON, as Jalžabet | 2022-07 – 2026-09, 7,206 rows |
+| Jalžabet | Kipos, `transparentnost-jalzabet.kipos.hr` | JSON from `dbapi.php?radim=search…` (answers `[{"tableData": [...]}]`); the date filter is ignored, all years returned | 2022-01 – 2026-09 |
+| Breznički Hum | Monthly ODS files under `/images/isplate_iz_proracuna/<year>/` | ODS | publishing lags ~6 months |
 
-**Ivanec and Ludbreg from GitHub Actions.** `api.otvorenigrad.hr` answers HTTP 403 to GitHub's servers (it answers ordinary connections), so the nightly job reports them as `pending_access` and keeps the last good files. Other copies were searched for in Nov 2026: ivanec.hr and Ivanec's data.gov.hr entry only link to the Otvoreni grad portal; ludbreg.hr has its own monthly tables only up to January 2025; neither city mirrors payments on data.gov.hr. The block is not worked around.
+**Other open payment data in the county** (checked Nov 2026, not configured): Kipos portals of Cestica, Petrijanec, Vinica, Martijanec, Beretinec and Veliki Bukovec (all current to Sep 2026 except Martijanec, Dec 2025); Visoko on proracun.hr (`kid=24`); Breznica (XLSX) and Gornji Kneginec (CSV) via data.gov.hr. Each is one entry in `payments.toml` (the last two need a parser for their layouts).
+
+**Not open** (and so no longer pilots):
+
+- **Varaždin:** `transparentni.varazdin.hr` (Infomare), a search form behind reCAPTCHA v3, with no file, API or data.gov.hr mirror. CAPTCHAs are not circumvented.
+- **Ivanec, Ludbreg (and Novi Marof):** Otvoreni grad iTransparentnost (`api.otvorenigrad.hr/itransparentnost/isplate`, CSV per month, header `LC-Tenant: grad-<name>`). It answers HTTP 403 to GitHub's servers and ordinary connections otherwise. ivanec.hr and the cities' data.gov.hr entries only link to the portal, and ludbreg.hr has its own monthly tables only up to January 2025. The block is not worked around. The connector (`otvorenigrad`) stays in the code for a publisher on that platform that does answer.
 
 Layouts:
 
