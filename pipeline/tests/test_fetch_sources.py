@@ -276,7 +276,7 @@ def test_known_refusal_is_reported_as_pending_access(tmp_path, monkeypatch):
 
     # Ludbreg's refusal is known and pending; Ivanec's is new and still fails the source.
     assert outcome.status == "failed"
-    assert "02445 pending access (asked)" in outcome.message
+    assert "02445 refused by the publisher (asked)" in outcome.message
     assert "01562 otvorenigrad: HTTPStatusError" in outcome.message
 
 

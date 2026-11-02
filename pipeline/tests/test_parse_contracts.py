@@ -193,6 +193,16 @@ def test_parse_ted_notice_gives_one_row_per_signed_contract():
     assert lot2["value_with_vat_eur"] is None  # TED gives values without VAT only
 
 
+def test_parse_ted_dir_keeps_a_contract_once_across_notices(tmp_path):
+    # A later notice of the same procedure repeats contracts already reported.
+    (tmp_path / "notices").mkdir()
+    notice = (TED_NOTICES / "209718-2025.xml").read_bytes()
+    (tmp_path / "notices" / "209718-2025.xml").write_bytes(notice)
+    (tmp_path / "notices" / "10-2026.xml").write_bytes(notice)
+    df = c.parse_ted_dir(tmp_path)
+    assert df["record_id"].to_list() == ["209718-2025:CON-0001", "209718-2025:CON-0002"]
+
+
 def test_parse_ted_notice_skips_joint_procurement():
     # Several buyers: eForms does not say which one signed which contract.
     assert c.parse_ted_notice(TED_NOTICES / "999999-2025.xml") == []

@@ -18,6 +18,7 @@ Files: ``notices/<publication number>.xml``.
 
 from opcina_pipeline.fetch.base import FetchContext, Outcome, fetcher
 from opcina_pipeline.fetch.eojn import scope_buyers
+from opcina_pipeline.fetch.http import Download, file_sha256
 
 SEARCH_URL = "https://api.ted.europa.eu/v3/notices/search"
 NOTICE_XML_URL = "https://ted.europa.eu/en/notice/{number}/xml"
@@ -71,9 +72,10 @@ def fetch_ted(ctx: FetchContext) -> Outcome:
     for number in numbers:
         dest = folder / f"{number}.xml"
         if dest.exists():
-            continue
-        files.append(ctx.client.download(NOTICE_XML_URL.format(number=number), dest))
-    message = f"{len(numbers)} award notices for {buyers.height} buyers, {len(files)} new"
-    if not files:
-        return Outcome("unchanged", [], message)
+            # Notices never change; listed anyway so the run log names every input.
+            files.append(Download(dest, False, file_sha256(dest), dest.stat().st_size))
+        else:
+            files.append(ctx.client.download(NOTICE_XML_URL.format(number=number), dest))
+    new = sum(f.changed for f in files)
+    message = f"{len(numbers)} award notices for {buyers.height} buyers, {new} new"
     return Outcome.from_downloads(files, message)

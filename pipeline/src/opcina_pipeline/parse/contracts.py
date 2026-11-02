@@ -591,14 +591,29 @@ def parse_ted_notice(path: Path) -> list[dict]:
     return rows
 
 
+def _publication_order(path: Path) -> tuple[str, int]:
+    number, year = path.stem.split("-")
+    return year, int(number)
+
+
 def parse_ted_dir(folder: Path) -> pl.DataFrame:
-    """Every notice in ``notices/`` (``<publication number>.xml``)."""
-    rows = []
-    for path in sorted((folder / "notices").glob("*.xml")):
+    """Every notice in ``notices/`` (``<publication number>.xml``), oldest first.
+
+    A later notice of the same procedure (lots awarded at different times) can list
+    contracts an earlier one already reported; each contract is kept once, from the
+    first notice that names it (same buyer, contract number and supplier).
+    """
+    rows, seen = [], set()
+    for path in sorted((folder / "notices").glob("*.xml"), key=_publication_order):
         parsed = parse_ted_notice(path)
         if not parsed:
             log.info("contracts_ted: %s has no single-buyer contract", path.name)
-        rows.extend(parsed)
+        for row in parsed:
+            key = (row["buyer_oib"], row["contract_number"], row["supplier_oib"])
+            if row["contract_number"] and key in seen:
+                continue
+            seen.add(key)
+            rows.append(row)
     return _frame(rows)
 
 

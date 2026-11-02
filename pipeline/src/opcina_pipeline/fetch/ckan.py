@@ -70,6 +70,12 @@ def fetch_municipal_registers(ctx: FetchContext) -> Outcome:
     datasets = ctx.source.options["datasets"]
     files: list[Download] = []
     for dataset in datasets:
-        got, _ = download_dataset(ctx, dataset["ckan_dataset"], ctx.out_dir / dataset["oib"])
+        folder = ctx.out_dir / dataset["oib"]
+        got, _ = download_dataset(ctx, dataset["ckan_dataset"], folder)
+        # A resource the publisher removed or renamed must not be parsed again.
+        current = {f.path.name for f in got}
+        for stale in folder.iterdir():
+            if stale.is_file() and stale.name not in current:
+                stale.unlink()
         files += got
     return Outcome.from_downloads(files, f"{len(files)} files from {len(datasets)} publishers")
