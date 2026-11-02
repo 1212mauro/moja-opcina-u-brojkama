@@ -168,8 +168,7 @@ export const hrSimple: Messages = {
     budget: "Za ovo mjesto još nemamo podatke o novcu.",
     peers: "Ne možemo usporediti jer nemamo podatke o novcu.",
     procurement: "Za ovo mjesto nismo našli ugovore za kupnju.",
-    payments:
-      "Za ovo mjesto još ne pokazujemo plaćanja. Pokazujemo ih samo kad ih mjesto objavi tako da ih svatko može preuzeti.",
+    payments: "Za ovo mjesto još ne pokazujemo plaćanja.",
     facilities: "Za ovo mjesto nismo našli škole, vrtiće ni liječnike.",
   },
 

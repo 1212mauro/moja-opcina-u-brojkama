@@ -11,14 +11,19 @@
 # no other machine-readable copy exists. Such a refusal is reported, not failed; if
 # the publisher starts answering, the fetch succeeds again on its own.
 
-# Not configured: Varaždin (search form behind reCAPTCHA), Ivanec and Ludbreg
-# (Otvoreni grad, which refuses GitHub Actions with HTTP 403). No other open copy of
-# their payments exists (checked Nov 2026; docs/sources.md), so they are not pilots.
+# Not configured: Ivanec and Ludbreg (Otvoreni grad, which refuses GitHub Actions with
+# HTTP 403). No other open copy of their payments exists (checked Nov 2026;
+# docs/sources.md), so they are not pilots. `pending_access` stays supported for a
+# publisher that refuses us but may start answering.
 
 ["01511"]  # Breznički Hum
 platform = "html_links"
 page = "https://www.breznicki-hum.hr/index.php/vazni-dokumenti/transparentnost"
 pattern = '/images/isplate_iz_proracuna/\d{4}/[^"]+\.ods'
+
+["04723"]  # Varaždin
+platform = "unavailable"
+reason = "Payments are published only on transparentni.varazdin.hr, a search form protected by reCAPTCHA, with no file or API export."
 
 ["01651"]  # Jalžabet
 platform = "kipos"

@@ -256,8 +256,7 @@ export const en: Messages = {
     budget: "We do not have budget data for this unit yet.",
     peers: "No comparison is available because we have no budget data.",
     procurement: "We found no published public contracts for this unit.",
-    payments:
-      "We do not show payments from the budget for this unit yet. We show them only where the town or municipality publishes them as open data we can download without special permission.",
+    payments: "We do not show payments from the budget for this unit yet.",
     facilities:
       "We found no schools, kindergartens or health facilities in this unit.",
   },

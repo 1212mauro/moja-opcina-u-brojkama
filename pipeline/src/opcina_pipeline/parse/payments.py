@@ -33,7 +33,7 @@ import polars as pl
 from opcina_pipeline.config import load_sources
 from opcina_pipeline.fetch.payments import load_platforms
 from opcina_pipeline.master import read_register
-from opcina_pipeline.tables import PAYMENT, conform, interim_path, latest_run_id
+from opcina_pipeline.tables import HRK_PER_EUR, PAYMENT, conform, interim_path, latest_run_id
 from opcina_pipeline.text import ascii_fold
 
 # Columns every platform parser returns, before the shared rules are applied.
@@ -483,6 +483,11 @@ def parse_proracunhr(folder: Path) -> pl.DataFrame:
     rows = []
     for path in sorted(folder.glob("*.json")):
         for row in json.loads(path.read_text(encoding="utf-8"))["data"]:
+            amount = parse_amount(row.get("iznos_eur"))
+            if amount is None and parse_amount(row.get("iznos_kn")) is not None:
+                amount = round(parse_amount(row["iznos_kn"]) / HRK_PER_EUR, 2)
+            if amount is None:
+                continue  # a row with no amount at all says nothing about spending
             economic_code, economic_label = split_code(row.get("vrsta_rashoda"))
             rows.append(
                 {
@@ -494,7 +499,7 @@ def parse_proracunhr(folder: Path) -> pl.DataFrame:
                     "economic_label": economic_label,
                     "function_code": None,
                     "description": None,  # "opis" names people; see the module docstring
-                    "amount_eur": parse_amount(row.get("iznos_eur")),
+                    "amount_eur": amount,
                 }
             )
     return pl.DataFrame(rows, schema=RAW_COLUMNS)

@@ -144,6 +144,11 @@ def fetch_proracunhr(ctx: FetchContext, entry: dict, dest: Path) -> list[Downloa
     until the year ends, and it is at most two requests.
     """
     years = sorted({start.year for start in month_starts(_today(), ctx.source.options["months"])})
+    # Years that left the window are removed: the page shows only the window anyway.
+    if dest.exists():
+        for old in dest.glob("*.json"):
+            if old.stem not in {str(y) for y in years}:
+                old.unlink()
     files = []
     for year in years:
         download = ctx.client.download(

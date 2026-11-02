@@ -392,6 +392,30 @@ def test_proracunhr():
     assert state["amount_eur"] == 515.94
 
 
+def test_proracunhr_falls_back_to_kuna_and_skips_rows_without_amount(tmp_path):
+    rows = [
+        {
+            "datum": "2026-01-05",
+            "stranka": "GAMA D.O.O.",
+            "oib": "44444444446",
+            "iznos_eur": "",
+            "iznos_kn": "753.45",
+            "vrsta_rashoda": "",
+        },
+        {
+            "datum": "2026-01-06",
+            "stranka": "GAMA D.O.O.",
+            "oib": "44444444446",
+            "iznos_eur": None,
+            "iznos_kn": None,
+            "vrsta_rashoda": "",
+        },
+    ]
+    (tmp_path / "2026.json").write_text(json.dumps({"data": rows}), encoding="utf-8")
+    df = P.parse_proracunhr(tmp_path)
+    assert df["amount_eur"].to_list() == [100.0]
+
+
 # --- Breznički Hum ODS -----------------------------------------------------------------
 
 

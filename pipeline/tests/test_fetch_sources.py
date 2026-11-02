@@ -334,10 +334,12 @@ def test_proracunhr_fetches_each_year_in_the_window(tmp_path, monkeypatch):
         asked.append(dict(request.url.params))
         return httpx.Response(200, json={"data": []})
 
+    (tmp_path / "2023.json").write_text('{"data": []}')  # left the window
     files = payments.fetch_proracunhr(FakeCtx(handler, months=13), {"kid": 37}, tmp_path)
 
     assert asked == [{"kid": "37", "g": "2025"}, {"kid": "37", "g": "2026"}]
     assert [f.path.name for f in files] == ["2025.json", "2026.json"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["2025.json", "2026.json"]
 
 
 def test_proracunhr_refuses_an_html_answer(tmp_path, monkeypatch):

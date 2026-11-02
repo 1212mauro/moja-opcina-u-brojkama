@@ -242,8 +242,7 @@ export const hr = {
     peers: "Usporedba nije dostupna jer nemamo podatke o proračunu.",
     procurement:
       "Za ovu jedinicu nismo pronašli objavljene ugovore javne nabave.",
-    payments:
-      "Isplate iz proračuna za ovu jedinicu još ne prikazujemo. Prikazujemo ih samo gdje ih grad ili općina objavljuje kao otvorene podatke koje možemo preuzeti bez posebnog odobrenja.",
+    payments: "Isplate iz proračuna za ovu jedinicu još ne prikazujemo.",
     facilities:
       "Za ovu jedinicu nismo pronašli škole, vrtiće ni zdravstvene ustanove.",
   },
