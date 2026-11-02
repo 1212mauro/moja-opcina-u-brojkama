@@ -109,7 +109,7 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 
 - [ ] G1 Test with 3–5 residents: "find how much your municipality spends on kindergartens", timed against the 60-second target (~8h)
 - [ ] G2 Fix the findings from G1 (~8h)
-- [ ] G3 Data spot-check: compare 10 figures per pilot with the source files (~6h)
+- [x] G3 Data spot-check: compare 10 figures per pilot with the source files (~6h) — 50/50 agree (`docs/spot-check.md`, `scripts/spot_check.py`); found and fixed a municipality listed as its own top recipient
 - [ ] G4 Write the video script around one resident's question and how the app answers it (~4h)
 - [ ] G5 Record and edit the video (~8h)
 - [ ] G6 Submission: README, live demo link, screenshots (~4h)

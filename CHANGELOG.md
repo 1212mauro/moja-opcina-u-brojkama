@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Data spot-check script (`scripts/spot_check.py`) and report (`docs/spot-check.md`): 50 figures on the pilot pages checked against their source files.
 - Spec, task tracker (`TASKS.md`) and progress script.
 - Repository layout, EUPL-1.2 licence, README and contributing guide.
 - Python 3.12 pipeline package (`opcina-pipeline`) with ruff and pytest.
@@ -32,5 +33,6 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
+- Payments a municipality lists with itself as recipient (Kipos: everything it does not itemise) still count in totals but are no longer shown among the largest recipients.
 - Pilots are now Lepoglava, Maruševec, Sveti Ilija, Jalžabet and Breznički Hum: every source of each, payments included, is open. Varaždin, Ivanec and Ludbreg publish payments only behind a CAPTCHA or on a platform that refuses GitHub's servers; their pages keep budget, procurement and facilities. Payments from proracun.hr are a new platform.
 - Procurement: the data.gov.hr file the spec cites as national is Grad Ivanec's own register; national access goes through eojn.hr (see `docs/sources.md`).

@@ -246,12 +246,19 @@ def procurement_section(contracts: pl.DataFrame) -> Procurement | None:
     )
 
 
-def payments_section(payments: pl.DataFrame, as_of: datetime) -> Payments | None:
+def payments_section(
+    payments: pl.DataFrame, as_of: datetime, own_oib: str | None = None
+) -> Payments | None:
     """12 calendar months up to the newest complete published month.
 
     The month in progress is left out: it is still being published (by the 20th of
     the next month) and would look like a drop in spending. A month the publisher
     skipped stays a gap in ``months`` instead of pulling in an older month.
+
+    Payments the unit lists with itself as the recipient (``own_oib``: Kipos files what
+    it does not itemise that way, e.g. transfers to its own kindergarten or loan
+    repayments) count in the totals but not among the recipients: the unit did not
+    receive that money.
     """
     payments = payments.filter(pl.col("month") < f"{as_of:%Y-%m}")
     if payments.is_empty():
@@ -271,7 +278,11 @@ def payments_section(payments: pl.DataFrame, as_of: datetime) -> Payments | None
         else recent.select("economic_label", "amount_eur").clear()
     )
     recipients = (
-        recent.filter(~pl.col("natural_person"), pl.col("recipient_name").is_not_null())
+        recent.filter(
+            ~pl.col("natural_person"),
+            pl.col("recipient_name").is_not_null(),
+            pl.col("recipient_oib").ne_missing(own_oib) if own_oib else pl.lit(True),
+        )
         .group_by(pl.coalesce("recipient_oib", "recipient_name").alias("key"))
         .agg(
             pl.col("recipient_name").first(),
@@ -356,7 +367,7 @@ def build_pages(
             procurement_section(unit_rows["contract"]) if unit_rows["contract"].height else None
         )
         payments = (
-            payments_section(unit_rows["payment"], generated_at)
+            payments_section(unit_rows["payment"], generated_at, unit["oib"])
             if unit_rows["payment"].height
             else None
         )
