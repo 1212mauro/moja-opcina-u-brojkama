@@ -10,11 +10,11 @@ from opcina_pipeline.parse import contracts as c
 from opcina_pipeline.tables import CONTRACT, HRK_PER_EUR
 
 # Trimmed copies of public registers of Grad Ivanec (old EOJN export, Ivanec's own
-# data.gov.hr files), an API file shaped like tests/fixtures/eojn, a TED award notice of
-# Breznički Hum (contact persons removed) and a copy of it made joint with a second
-# buyer; laid out like data/raw/.
+# data.gov.hr files), an API file shaped like tests/fixtures/eojn, and TED search results
+# (real notices, two re-assigned to Breznički Hum, plus a joint copy and a repeat); laid
+# out like data/raw/.
 RAW = Path(__file__).parent / "fixtures" / "parse_contracts"
-TED_NOTICES = RAW / "contracts_ted" / "notices"
+TED_FILE = RAW / "contracts_ted" / "notices.jsonl"
 IVANEC = "84121580205"
 BREZNICKI_HUM = "35774913576"
 VRTIC_IVANEC = "37103102119"
@@ -175,37 +175,26 @@ def test_parse_municipal_dir_reads_each_publisher_folder():
     assert df.height == 4 + 3
 
 
-def test_parse_ted_notice_gives_one_row_per_signed_contract():
-    rows = c.parse_ted_notice(TED_NOTICES / "209718-2025.xml")
-    assert [r["record_id"] for r in rows] == ["209718-2025:CON-0001", "209718-2025:CON-0002"]
-    lot1, lot2 = rows
-    assert {lot1["buyer_oib"], lot2["buyer_oib"]} == {BREZNICKI_HUM}
-    # A consortium: every member named, the first one's OIB kept.
-    assert lot1["supplier_name"] == "LABOS d.o.o.; CONTECH d.o.o.; ROMING CONSTRUCTIONS d.o.o."
-    assert lot1["supplier_oib"] == "48114293272"
-    assert (lot1["signed_on"], lot1["value_eur"]) == (date(2024, 10, 9), 169000.0)
-    assert lot1["contract_number"] == "2186-24-02-24-21 za grupu 1"
-    assert lot1["procedure"] == "Otvoreni postupak"
-    # Two lots: the lot's own name follows the procedure's.
-    lot_name = lot2["subject"].split(": ")[-1]
-    assert lot_name.startswith("Usluga kontrole glavnog i izvedbenog projekta za projekt")
-    assert (lot2["supplier_name"], lot2["value_eur"]) == ("StruDes d.o.o.", 9800.0)
-    assert lot2["value_with_vat_eur"] is None  # TED gives values without VAT only
-
-
-def test_parse_ted_dir_keeps_a_contract_once_across_notices(tmp_path):
-    # A later notice of the same procedure repeats contracts already reported.
-    (tmp_path / "notices").mkdir()
-    notice = (TED_NOTICES / "209718-2025.xml").read_bytes()
-    (tmp_path / "notices" / "209718-2025.xml").write_bytes(notice)
-    (tmp_path / "notices" / "10-2026.xml").write_bytes(notice)
-    df = c.parse_ted_dir(tmp_path)
-    assert df["record_id"].to_list() == ["209718-2025:CON-0001", "209718-2025:CON-0002"]
-
-
-def test_parse_ted_notice_skips_joint_procurement():
-    # Several buyers: eForms does not say which one signed which contract.
-    assert c.parse_ted_notice(TED_NOTICES / "999999-2025.xml") == []
+def test_parse_ted_file_keeps_notices_with_one_buyer_and_one_contract():
+    df = c.parse_ted_file(TED_FILE)
+    # Skipped: the joint notice (two buyers), Breznički Hum's two-lot notice (winners
+    # cannot be tied to contracts), and a later notice repeating a contract.
+    assert df["record_id"].to_list() == [
+        "193551-2024:762767_392261",
+        "354862-2024:KLASA:406-01/23-01/18;URBROJ:2186-1-05-01/2-24-21",
+    ]
+    framework, single = df.iter_rows(named=True)
+    assert single["buyer_oib"] == BREZNICKI_HUM
+    assert single["subject"] == "Usluga upravljanja Sortirnicom Varaždin"
+    assert (single["supplier_name"], single["supplier_oib"]) == (
+        "EKO VARAŽDIN d.o.o.",
+        "23284746910",
+    )
+    assert (single["signed_on"], single["value_eur"]) == (date(2024, 6, 11), 1930454.0)
+    assert (single["cpv"], single["procedure"]) == ("70332200", "Otvoreni postupak")
+    assert single["value_with_vat_eur"] is None  # TED gives values without VAT only
+    # A framework agreement has only a ceiling, no tender value: the amount stays unknown.
+    assert framework["value_eur"] is None
 
 
 # --- deduplication and the table ----------------------------------------------------

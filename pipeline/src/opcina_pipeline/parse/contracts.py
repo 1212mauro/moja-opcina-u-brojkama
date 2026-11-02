@@ -15,10 +15,10 @@ Four inputs, one row per contract:
   formulas as text) are skipped and logged.
 - ``contracts_eojn``: ``contracts.jsonl`` from the new EOJN API, one
   ``ContractRegisterViewModel`` per line (only once an API key is set).
-- ``contracts_ted``: contract award notices on TED (eForms XML), 2024 onwards, for
-  procurement above the EU thresholds. One row per signed contract; its value is the
-  winning tender's (without VAT), or a framework agreement's re-estimated value. Joint
-  procurement notices are skipped: eForms does not say which buyer signed which contract.
+- ``contracts_ted``: contract award notices on TED, 2024 onwards, for procurement
+  above the EU thresholds, as the search API returns them (``notices.jsonl``). Only
+  notices with one buyer and one signed contract are used: the API's fields are flat
+  lists, so in other notices a winner or buyer cannot be tied to its contract.
 
 Amounts: ``value_eur`` is the value without VAT (``Iznos bez PDV-a``), so a wrong VAT
 figure in a register never changes totals. Kuna amounts are converted once at the
@@ -38,7 +38,6 @@ import hashlib
 import json
 import logging
 import re
-import xml.etree.ElementTree as ET
 from collections.abc import Iterable
 from datetime import date, datetime
 from pathlib import Path
@@ -482,138 +481,87 @@ def parse_api_file(path: Path) -> pl.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# TED contract award notices (eForms XML)
+# TED contract award notices (search API fields, notices.jsonl)
 # ---------------------------------------------------------------------------
 
-EFORMS = {
-    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
-    "cac": "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
-    "efac": "http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1",
-    "efbc": "http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1",
+# eForms procedure-type codes, worded as the EOJN registers word them.
+TED_PROCEDURES = {
+    "open": "Otvoreni postupak",
+    "restricted": "Ograničeni postupak",
+    "neg-w-call": "Pregovarački postupak s prethodnom objavom",
+    "neg-wo-call": "Pregovarački postupak bez prethodne objave",
+    "comp-dial": "Natjecateljski dijalog",
+    "innovation": "Partnerstvo za inovacije",
 }
 
 
-def _x(node: ET.Element | None, path: str) -> str | None:
-    return _text(node.findtext(path, namespaces=EFORMS)) if node is not None else None
+def _hrv(value: Any) -> Any:
+    """A multilingual TED field in Croatian (or the first language given)."""
+    if isinstance(value, dict):
+        return value.get("hrv", next(iter(value.values()), None))
+    return value
 
 
-def _amount(node: ET.Element | None) -> Money | None:
-    if node is None or not _text(node.text):
-        return None
-    return to_eur(float(node.text), node.get("currencyID") or "EUR")
+def parse_ted_notice(notice: dict) -> dict | None:
+    """The one signed contract of a notice; ``None`` when it cannot be attributed.
 
-
-def parse_ted_notice(path: Path) -> list[dict]:
-    """Signed contracts of one award notice; ``[]`` for a joint procurement."""
-    root = ET.parse(path).getroot()
-    result = root.find(".//efac:NoticeResult", EFORMS)
-    buyers = root.findall("cac:ContractingParty", EFORMS)
-    if result is None or len(buyers) != 1:
-        return []
-
-    # ORG-xxxx -> (name, OIB); a company can list several ids (e.g. "TED94" and its OIB).
-    orgs: dict[str | None, tuple[str | None, str | None]] = {}
-    for company in root.iterfind(".//efac:Organizations/efac:Organization/efac:Company", EFORMS):
-        ids = [e.text for e in company.iterfind("cac:PartyLegalEntity/cbc:CompanyID", EFORMS)]
-        orgs[_x(company, "cac:PartyIdentification/cbc:ID")] = (
-            _x(company, "cac:PartyName/cbc:Name"),
-            next((oib for oib in map(find_oib, ids) if oib), None),
-        )
-    buyer = _x(buyers[0], "cac:Party/cac:PartyIdentification/cbc:ID")
-
-    project = root.find("cac:ProcurementProject", EFORMS)
-    title = _x(project, "cbc:Name")
-    lots = {
-        _x(lot, "cbc:ID"): _x(lot, "cac:ProcurementProject/cbc:Name")
-        for lot in root.iterfind("cac:ProcurementProjectLot", EFORMS)
-    }
-    procedure = _x(root, "cac:TenderingProcess/cbc:Description") or _x(
-        root, "cac:TenderingProcess/cbc:ProcedureCode"
-    )
-    cpv = parse_cpv(_x(project, "cac:MainCommodityClassification/cbc:ItemClassificationCode"))
-
-    # TPA-xxxx -> its tenderers (ORG-xxxx); TEN-xxxx -> the tender.
-    parties = {
-        _x(tp, "cbc:ID"): [_x(t, "cbc:ID") for t in tp.iterfind("efac:Tenderer", EFORMS)]
-        for tp in result.iterfind("efac:TenderingParty", EFORMS)
-    }
-    tenders = {_x(t, "cbc:ID"): t for t in result.iterfind("efac:LotTender", EFORMS)}
-    # Framework agreements carry their value on the lot result, not on the tender.
-    framework: dict[str | None, ET.Element | None] = {}
-    for lot_result in result.iterfind("efac:LotResult", EFORMS):
-        value = lot_result.find("efac:FrameworkAgreementValues/efbc:ReestimatedValueAmount", EFORMS)
-        for tender in lot_result.iterfind("efac:LotTender", EFORMS):
-            framework[_x(tender, "cbc:ID")] = value
-
-    rows = []
-    for contract in result.iterfind("efac:SettledContract", EFORMS):
-        chosen = [
-            tenders[t]
-            for t in (_x(ref, "cbc:ID") for ref in contract.iterfind("efac:LotTender", EFORMS))
-            if t in tenders
-        ]
-        if not chosen:
-            continue
-        values = [
-            _amount(t.find("cac:LegalMonetaryTotal/cbc:PayableAmount", EFORMS))
-            or _amount(framework.get(_x(t, "cbc:ID")))
-            for t in chosen
-        ]
-        net = round(sum(v.eur for v in values if v), 2) if all(values) else None
-        suppliers = [
-            orgs.get(org, (None, None))
-            for org in parties.get(_x(chosen[0], "efac:TenderingParty/cbc:ID"), [])
-        ]
-        lot = None
-        if len(lots) > 1:
-            names = [lots.get(_x(t, "efac:TenderLot/cbc:ID")) for t in chosen]
-            lot = "; ".join(n for n in names if n and n != title) or None
-        rows.append(
-            {
-                "system": "ted",
-                "record_id": f"{path.stem}:{_x(contract, 'cbc:ID')}",
-                "eojn_id": None,
-                "buyer_oib": orgs.get(buyer, (None, None))[1],
-                "subject": f"{title}: {lot}" if title and lot else title or lot,
-                "cpv": cpv,
-                "procedure": procedure,
-                "contract_number": _x(contract, "efac:ContractReference/cbc:ID"),
-                "supplier_name": "; ".join(n for n, _ in suppliers if n) or None,
-                "supplier_oib": suppliers[0][1] if suppliers else None,
-                "signed_on": parse_date(_x(contract, "cbc:IssueDate")),
-                "value_eur": net,
-                "value_with_vat_eur": None,
-                "vat_eur": None,
-                "value_original": f"{_hr_number(net)} EUR" if net is not None else None,
-                "currency_original": "EUR" if net is not None else None,
-            }
-        )
-    return rows
-
-
-def _publication_order(path: Path) -> tuple[str, int]:
-    number, year = path.stem.split("-")
-    return year, int(number)
-
-
-def parse_ted_dir(folder: Path) -> pl.DataFrame:
-    """Every notice in ``notices/`` (``<publication number>.xml``), oldest first.
-
-    A later notice of the same procedure (lots awarded at different times) can list
-    contracts an earlier one already reported; each contract is kept once, from the
-    first notice that names it (same buyer, contract number and supplier).
+    The API gives each field as a flat list per notice, so with several contracts the
+    winners cannot be tied to their contract, and with several buyers (joint
+    procurement) the contract cannot be tied to its buyer.
     """
-    rows, seen = [], set()
-    for path in sorted((folder / "notices").glob("*.xml"), key=_publication_order):
-        parsed = parse_ted_notice(path)
-        if not parsed:
-            log.info("contracts_ted: %s has no single-buyer contract", path.name)
-        for row in parsed:
-            key = (row["buyer_oib"], row["contract_number"], row["supplier_oib"])
-            if row["contract_number"] and key in seen:
-                continue
+    buyers = notice.get("organisation-identifier-buyer") or []
+    contracts = notice.get("contract-identifier") or []
+    if len(buyers) != 1 or len(contracts) != 1:
+        return None
+    values = notice.get("tender-value") or []
+    currency = (notice.get("tender-value-cur") or ["EUR"])[0]
+    # Without a tender value (framework agreements give only a ceiling) the amount is unknown.
+    net = to_eur(sum(float(v) for v in values), currency) if values else None
+    names = [n for n in (_text(n) for n in _hrv(notice.get("winner-name")) or []) if n]
+    oibs = [o for o in map(find_oib, notice.get("winner-identifier") or []) if o]
+    dates = notice.get("contract-conclusion-date") or []
+    procedure = notice.get("procedure-type")
+    return {
+        "system": "ted",
+        "record_id": f"{notice['publication-number']}:{contracts[0]}",
+        "eojn_id": None,
+        "buyer_oib": find_oib(buyers[0]),
+        "subject": _text(_hrv(notice.get("title-proc"))),
+        "cpv": parse_cpv((notice.get("classification-cpv") or [None])[0]),
+        "procedure": TED_PROCEDURES.get(procedure, procedure),
+        "contract_number": _text(contracts[0]),
+        "supplier_name": "; ".join(names) or None,
+        # A consortium's members come in no particular order; the first OIB stands for it.
+        "supplier_oib": oibs[0] if oibs else None,
+        "signed_on": parse_date(dates[0]) if dates else None,
+        "value_eur": net.eur if net else None,
+        "value_with_vat_eur": None,  # TED gives values without VAT only
+        "vat_eur": None,
+        "value_original": net.original if net else None,
+        "currency_original": net.currency if net else None,
+    }
+
+
+def parse_ted_file(path: Path) -> pl.DataFrame:
+    """``notices.jsonl``, oldest notice first.
+
+    A later notice of the same procedure can repeat a contract an earlier one already
+    reported; each contract is kept once (same buyer, contract number and supplier).
+    """
+    rows, seen, skipped = [], set(), 0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = parse_ted_notice(json.loads(line))
+        if row is None:
+            skipped += 1
+            continue
+        key = (row["buyer_oib"], row["contract_number"], row["supplier_oib"])
+        if key not in seen:
             seen.add(key)
             rows.append(row)
+    if skipped:
+        log.info("contracts_ted: %d notices with several contracts or buyers skipped", skipped)
     return _frame(rows)
 
 
@@ -792,7 +740,7 @@ def parse_all(
         elif system == "eojn_legacy":
             frames.append(parse_legacy_dir(path))
         elif system == "ted":
-            frames.append(parse_ted_dir(path))
+            frames.append(parse_ted_file(path))
         else:
             municipal, skipped = parse_municipal_dir(path)
             frames.append(municipal)

@@ -283,7 +283,7 @@ def test_known_refusal_is_reported_as_pending_access(tmp_path, monkeypatch):
 # --- TED --------------------------------------------------------------------------------
 
 
-def test_ted_search_pages_and_downloads_each_notice_once(tmp_path, monkeypatch):
+def test_ted_search_pages_through_results_and_writes_one_file(tmp_path, monkeypatch):
     import json
 
     import httpx
@@ -294,19 +294,14 @@ def test_ted_search_pages_and_downloads_each_notice_once(tmp_path, monkeypatch):
     monkeypatch.setattr(
         ted, "scope_buyers", lambda ctx: pl.DataFrame({"oib": ["35774913576", "13269011531"]})
     )
-    (tmp_path / "notices").mkdir()
-    (tmp_path / "notices" / "5-2024.xml").write_text("<old/>")  # already on disk
-    pages = {1: ["5-2024", "193551-2024"], 2: ["7-2025"]}
-    queries, downloads = [], []
+    pages = {1: ["5-2025", "193551-2024"], 2: ["7-2024"]}
+    queries = []
 
     def handler(request):
-        if request.url.host == "api.ted.europa.eu":
-            body = json.loads(request.content)
-            queries.append(body)
-            notices = [{"publication-number": n} for n in pages[body["page"]]]
-            return httpx.Response(200, json={"notices": notices, "totalNoticeCount": 3})
-        downloads.append(request.url.path)
-        return httpx.Response(200, content=b"<ContractAwardNotice/>")
+        body = json.loads(request.content)
+        queries.append(body)
+        notices = [{"publication-number": n, "links": {"xml": {}}} for n in pages[body["page"]]]
+        return httpx.Response(200, json={"notices": notices, "totalNoticeCount": 3})
 
     class Ctx(FakeCtx):
         out_dir = tmp_path
@@ -316,34 +311,12 @@ def test_ted_search_pages_and_downloads_each_notice_once(tmp_path, monkeypatch):
     assert [q["page"] for q in queries] == [1, 2]
     assert "organisation-identifier-buyer IN (13269011531 35774913576)" in queries[0]["query"]
     assert "notice-type IN (can-standard can-social)" in queries[0]["query"]
-    assert downloads == ["/en/notice/193551-2024/xml", "/en/notice/7-2025/xml"]
+    lines = (tmp_path / "notices.jsonl").read_text(encoding="utf-8").splitlines()
+    # Oldest first, without the per-language links.
+    assert [json.loads(line) for line in lines] == [
+        {"publication-number": "7-2024"},
+        {"publication-number": "193551-2024"},
+        {"publication-number": "5-2025"},
+    ]
     assert outcome.status == "ok"
-    assert "3 award notices for 2 buyers, 2 new" in outcome.message
-
-
-def test_ted_notice_that_is_not_xml_is_dropped_and_fetched_again(tmp_path, monkeypatch):
-    import httpx
-
-    from opcina_pipeline.fetch import ted
-
-    monkeypatch.setattr(ted, "scope_buyers", lambda ctx: pl.DataFrame({"oib": ["35774913576"]}))
-    (tmp_path / "notices").mkdir()
-    (tmp_path / "notices" / "1-2025.xml").write_bytes(b"")  # an empty answer from a past run
-    downloads = []
-
-    def handler(request):
-        if request.url.host == "api.ted.europa.eu":
-            notices = [{"publication-number": n} for n in ("1-2025", "2-2025")]
-            return httpx.Response(200, json={"notices": notices, "totalNoticeCount": 2})
-        downloads.append(request.url.path)
-        body = b"<ContractAwardNotice/>" if "1-2025" in request.url.path else b""
-        return httpx.Response(200, content=body)
-
-    class Ctx(FakeCtx):
-        out_dir = tmp_path
-
-    outcome = ted.fetch_ted(Ctx(handler))
-
-    assert downloads == ["/en/notice/1-2025/xml", "/en/notice/2-2025/xml"]
-    assert sorted(p.name for p in (tmp_path / "notices").iterdir()) == ["1-2025.xml"]
-    assert "not valid XML, retried next run: 2-2025" in outcome.message
+    assert ted.fetch_ted(Ctx(handler)).status == "unchanged"
