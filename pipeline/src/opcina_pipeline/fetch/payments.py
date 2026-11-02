@@ -158,11 +158,11 @@ def fetch_payments(ctx: FetchContext) -> Outcome:
         try:
             unit_files = PLATFORMS[platform](ctx, entry, ctx.out_dir / code)
         except httpx.HTTPStatusError as error:
-            # A refusal we already know about and have asked the publisher to lift:
+            # A refusal we already know about (``pending_access`` in payments.toml):
             # reported, not failed, and the last downloaded files stay in place.
-            # Once access works the same call simply succeeds again.
+            # If the publisher starts answering, the same call simply succeeds again.
             if error.response.status_code in (401, 403) and entry.get("pending_access"):
-                notes.append(f"{code} pending access ({entry['pending_access']})")
+                notes.append(f"{code} refused by the publisher ({entry['pending_access']})")
             else:
                 failures.append(f"{code} {platform}: {type(error).__name__}: {error}")
             continue

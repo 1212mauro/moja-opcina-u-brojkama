@@ -7,8 +7,8 @@
 #   unavailable   no machine-readable route; `reason` is shown on the coverage map
 #
 # `pending_access`: the publisher refuses our automated requests (HTTP 401/403) and
-# we have asked for access. Such a refusal is reported, not failed; when access is
-# granted the fetch succeeds again on its own and this line can be removed.
+# no other machine-readable copy exists. Such a refusal is reported, not failed; if
+# the publisher starts answering, the fetch succeeds again on its own.
 
 ["04723"]  # Varaždin
 platform = "unavailable"
@@ -17,12 +17,12 @@ reason = "Payments are published only on transparentni.varazdin.hr, a search for
 ["01562"]  # Ivanec
 platform = "otvorenigrad"
 tenant = "grad-ivanec"
-pending_access = "api.otvorenigrad.hr answers 403 to GitHub Actions; access requested from the city, Oct 2026"
+pending_access = "api.otvorenigrad.hr answers 403 to GitHub Actions; ivanec.hr and data.gov.hr only link to that portal (checked Nov 2026)"
 
 ["02445"]  # Ludbreg
 platform = "otvorenigrad"
 tenant = "grad-ludbreg"
-pending_access = "api.otvorenigrad.hr answers 403 to GitHub Actions; access requested from the city, Oct 2026"
+pending_access = "api.otvorenigrad.hr answers 403 to GitHub Actions; ludbreg.hr has its own tables only up to Jan 2025 (checked Nov 2026)"
 
 ["01651"]  # Jalžabet
 platform = "kipos"

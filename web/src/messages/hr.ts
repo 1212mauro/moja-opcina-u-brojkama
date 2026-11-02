@@ -277,7 +277,7 @@ export const hr = {
     licences: {} as Record<string, string>,
     status: {
       failed: "zadnje preuzimanje nije uspjelo; prikazujemo prethodne podatke",
-      skipped: "još ne preuzimamo: čekamo pristup izvoru",
+      skipped: "ne preuzimamo: izvor traži posebno odobrenje",
       unavailable: "izvor nije dostupan u strojno čitljivom obliku",
     },
   },

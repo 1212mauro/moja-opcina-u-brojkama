@@ -137,6 +137,8 @@ None of the pilots mirrors its payments on data.gov.hr, and none of the portals 
 | Breznički Hum | Monthly ODS files under `/images/isplate_iz_proracuna/<year>/` | ODS | May 2025 – Apr 2026 (publishing lags ~6 months) |
 | Varaždin | `transparentni.varazdin.hr` (Infomare) | Search form behind reCAPTCHA v3 | **Not available.** No file, API or data.gov.hr mirror exists; CAPTCHAs are not circumvented. Recorded as `unavailable` in `payments.toml` and shown on the coverage map. |
 
+**Ivanec and Ludbreg from GitHub Actions.** `api.otvorenigrad.hr` answers HTTP 403 to GitHub's servers (it answers ordinary connections), so the nightly job reports them as `pending_access` and keeps the last good files. Other copies were searched for in Nov 2026: ivanec.hr and Ivanec's data.gov.hr entry only link to the Otvoreni grad portal; ludbreg.hr has its own monthly tables only up to January 2025; neither city mirrors payments on data.gov.hr. The block is not worked around.
+
 Layouts:
 
 - **Otvoreni grad (Ludbreg, Ivanec):** `Naziv isplatitelja;Datum;Primatelj;OIB;Mjesto;Proračunski korisnik;Valuta;Iznos na poziciji;Pozicija;Organizacijska klasifikacija;Programska klasifikacija;Izvor financiranja;Ekonomska klasifikacija;Funkcijska klasifikacija;Broj računa;Opis;…`. One row per budget position, so one payment can span several rows. Natural persons appear as `Fizičke osobe` with OIB `GDPR`. Classifications are "code name" in one string; the functional one is COFOG.
@@ -155,7 +157,8 @@ Contracts are fetched automatically for every buyer in scope: each municipality 
 | --- | --- | --- | --- |
 | `contracts_eojn_legacy` | Old EOJN RH (`eojn.nn.hr`) | Public contract register form, buyer by buyer, Excel export | 2018 – early 2024, all buyers |
 | `contracts_eojn` | New EOJN RH (`eojn.hr`) | Official Open Data API with `X-API-Key` | 2024 onwards, all buyers, **once a key is set** |
-| `contracts_ivanec` | Grad Ivanec on data.gov.hr | CKAN | Ivanec's own register, 2015–2026 (cross-check) |
+| `contracts_municipal` | Publishers' own registers on data.gov.hr | CKAN, one dataset per publisher (`datasets` in sources.toml) | Ivanec 2015–2026, Lepoglava 2018–2026, Varaždinske Toplice 2018–2023 |
+| `contracts_ted` | TED (EU Official Journal) | Anonymous search API + eForms XML per notice | 2024 onwards, contracts above EU thresholds, all buyers |
 
 **Old register (`contracts_eojn_legacy`).** `https://eojn.nn.hr/Spin/application/ipn/JavniReporti/RptRegistarUgovora.aspx` is public, and robots.txt there disallows only `/administrator`. It is an ASP.NET page with a ReportViewer:
 
@@ -165,6 +168,12 @@ Contracts are fetched automatically for every buyer in scope: each municipality 
 4. GET `ExportUrlBase` + `EXCELOPENXML` from the response: an xlsx with sheet `RPT_Ugovor` (CSV export returns 500).
 
 There is no national or incremental export: a report needs a buyer, and "view all data" errors. Steady state is two requests per buyer, 3 s apart (~20 minutes for 67 buyers), so the source has `refresh_days = 7`. Files whose cell values have not changed are left untouched. First run, 22 Oct 2026: Varaždin 772 rows, Ivanec 609, Jalžabet 153, Breznički Hum 25, Ludbreg 24; the Ivanec export contains every row of Ivanec's own data.gov.hr file plus 35 later updates.
+
+**Without permission, 2024 onwards.** The new EOJN register is open only through the keyed API below, and eojn.hr's robots.txt forbids everything else. Two open routes cover part of it:
+
+- **TED (`contracts_ted`).** Every procurement above the EU thresholds is also published on TED. The search API (`POST https://api.ted.europa.eu/v3/notices/search`) needs no key; the query is `organisation-identifier-buyer IN (<buyer OIBs>) AND notice-type IN (can-standard can-social) AND publication-date>=20240101`. Each notice's eForms XML (`https://ted.europa.eu/en/notice/<number>/xml`, allowed by robots.txt) links lot result → winning tender → signed contract → supplier, which the search API's flat fields cannot. Value: the tender's `PayableAmount` without VAT, or a framework agreement's re-estimated value. Joint procurement notices (one with 241 buyers) are skipped: eForms does not say which buyer signed which contract. Licence: reuse with attribution, Commission Decision 2011/833/EU. First run, 1 Nov 2026: 48 notices for the 67 buyers, 30 contracts kept (3 more were already in the old register).
+- **Publishers' own registers (`contracts_municipal`).** Searched data.gov.hr for every unit in the county (Nov 2026): Ivanec, Lepoglava and Varaždinske Toplice publish their registers as EOJN exports; Sveti Đurđ, Breznica and Maruševec publish other layouts or files on their own sites (not used yet). Lepoglava's grid has a title row above the header.
+- **Checked and not useful:** EOJN's monthly OCDS open-data files (`eojn.nn.hr/SPIN/application/ipn/Oglasnik/PreuzimanjeUgovoraOCD.aspx`, free, no registration) hold only the old system's register and updates to it, the same data as `contracts_eojn_legacy`; some files are not valid JSON (unescaped quotes). OpenTender's Croatian data ends in 2024 and is CC BY-NC-SA.
 
 **New register (`contracts_eojn`).** `eojn.hr` robots.txt is `Disallow: /` and its public grid needs a token scraped from the page, so the grid is not used. The official Open Data API (`/api/public/eContractRegister/contractsSearch`, `/api/public/eProcurementData/eventsForContractsByTime`, `getContractData`) needs an `X-API-Key`, requested from **eojn@nn.hr**. The fetcher walks 7-day windows from 2024-01-01 (resuming from `state.json` with a 1-day overlap), keeps contracts whose buyer OIB is in scope, and merges them by `contractId` into `contracts.jsonl`. Without `EOJN_API_KEY` it reports `skipped`. It is unit-tested against the API schema but **not yet tested live**.
 

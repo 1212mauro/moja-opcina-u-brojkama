@@ -30,7 +30,9 @@ export function MethodologyText({ leadClass }: { leadClass: string }) {
         </li>
         <li>
           <strong>Javna nabava:</strong> registri ugovora u Elektroničkom
-          oglasniku javne nabave (EOJN RH).
+          oglasniku javne nabave (EOJN RH), registri koje gradovi i općine sami
+          objavljuju na data.gov.hr te obavijesti o dodjeli ugovora u Službenom
+          listu Europske unije (TED) za veće nabave od 2024.
         </li>
         <li>
           <strong>Isplate:</strong> mjesečne objave isplata iz proračuna koje

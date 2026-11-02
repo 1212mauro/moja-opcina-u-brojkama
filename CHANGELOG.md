@@ -27,6 +27,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - English edition (`/en/`) and a simple-language Croatian edition (`/jednostavno/`), with a language link on every page to the same page in the other editions. Budget categories are translated by code; other names from the data stay in Croatian and are marked `lang="hr"` for screen readers.
 - Automated accessibility checks (axe-core, WCAG 2.1 A and AA) on every page of every edition, in light and dark mode, in CI.
 - Screen-reader test script (`docs/screen-reader-test.md`) and a draft accessibility statement (not yet published).
+- Procurement since 2024 without an API key: contract award notices from TED (EU Official Journal) for every buyer in scope, and the contract registers that towns publish on data.gov.hr (Ivanec, now also Lepoglava and Varaždinske Toplice; source `contracts_municipal` replaces `contracts_ivanec`).
 
 ### Changed
 
