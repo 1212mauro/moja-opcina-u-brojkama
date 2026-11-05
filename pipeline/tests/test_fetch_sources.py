@@ -368,3 +368,53 @@ def test_manual_platform_copies_cleaned_files_and_tolerates_none(tmp_path, monke
     assert [f.path.name for f in files] == ["2026-10.csv"] and files[0].changed
     assert sorted(p.name for p in dest.iterdir()) == ["2026-10.csv"]
     assert not payments.fetch_manual(None, {"folder": "manual"}, dest)[0].changed
+
+
+def test_official_export_replaces_hand_imported_months(tmp_path, monkeypatch):
+    import httpx
+
+    from opcina_pipeline import varazdin
+    from opcina_pipeline.fetch import payments
+    from opcina_pipeline.parse import payments as parse_payments
+
+    monkeypatch.setattr(payments, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(payments, "_today", lambda: date(2026, 11, 5))
+    monkeypatch.setattr(parse_payments, "known_business_oibs", lambda: frozenset())
+    (tmp_path / "manual").mkdir()
+    (tmp_path / "manual" / "2026-10.csv").write_text("hand-imported\n", encoding="utf-8")
+    entry = {"folder": "manual", "official_url": "https://grad.example/isplate/{year}-{month}.csv"}
+    dest = tmp_path / "raw" / "04723"
+    header = ";".join(varazdin.EXPORT_COLUMNS)
+    october = "1;20261030;GRAD VARAŽDIN;GAMA D.O.O.;42000;VARAŽDIN;;10,00;EUR;;3222 Materijal"
+    asked = []
+
+    def handler(request):
+        asked.append(request.url.path)
+        if request.url.path.endswith("2026-10.csv"):
+            return httpx.Response(200, text=f"{header}\r\n{october}\r\n")
+        return httpx.Response(200, text="<html>not yet</html>")
+
+    payments.fetch_manual(FakeCtx(handler, months=2), entry, dest)
+
+    assert asked == ["/isplate/2026-10.csv", "/isplate/2026-11.csv"]  # one request per month
+    assert "GAMA D.O.O." in (dest / "2026-10.csv").read_text(encoding="utf-8")
+    assert sorted(p.name for p in dest.iterdir()) == ["2026-10.csv"]
+
+    # The endpoint goes down: the last good official months stay.
+    payments.fetch_manual(FakeCtx(lambda r: httpx.Response(503), months=2), entry, dest)
+    assert "GAMA D.O.O." in (dest / "2026-10.csv").read_text(encoding="utf-8")
+
+
+def test_a_placeholder_endpoint_is_noted_not_failed(tmp_path, monkeypatch, capsys):
+    import httpx
+
+    from opcina_pipeline.fetch import payments
+    from opcina_pipeline.parse import payments as parse_payments
+
+    monkeypatch.setattr(payments, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(parse_payments, "known_business_oibs", lambda: frozenset())
+    (tmp_path / "manual").mkdir()
+    entry = {"folder": "manual", "official_url": "https://example.com/"}
+    ctx = FakeCtx(lambda request: httpx.Response(200, text="<!doctype html>"), months=1)
+    payments.fetch_manual(ctx, entry, tmp_path / "raw" / "04723")
+    assert "is not a payments export yet" in capsys.readouterr().out

@@ -33,6 +33,18 @@ Grad Varaždin publishes its payments only on [transparentni.varazdin.hr](https:
 
 4. **Commit and push** `pipeline/manual/payments/04723/`. The nightly run copies the files into the data and publishes them; Varaždin's page shows payments up to the newest imported month.
 
+## The official endpoint (once the city provides one)
+
+In November 2026 Varaždin was asked for an official, automatable CSV export. Its address goes in **one place**: `official_url` in Varaždin's entry (`["04723"]`) in `pipeline/config/payments.toml`. Until then the entry holds the placeholder `https://example.com/`.
+
+- **Fetching:** every run, local and nightly, fetches it. A URL with `{year}` and `{month}` (e.g. `https://…/isplate?godina={year}&mjesec={month}`) is fetched once per month for the last 13 months; `{month_int}` gives the month without a leading zero. A URL without them is fetched once.
+- **Cleaning:** the answer is read with the same reader as the hand-saved exports (`read_export`) and cleaned with the same privacy rules. The cleaned months go to `data/raw/payments/04723-official/clean/` (never into git), and they replace hand-imported months.
+- **Placeholder or not an export:** the run notes "official endpoint … is not a payments export yet" and carries on.
+- **Endpoint down:** the run keeps the last good months. Nothing fails, and nothing disappears from the site.
+- **If the official CSV has different columns:** adapt `EXPORT_COLUMNS` and `read_export` in `pipeline/src/opcina_pipeline/varazdin.py`. The test `test_official_export_replaces_hand_imported_months` shows the expected behaviour.
+
+Once the official export is live, the monthly routine above is no longer needed.
+
 ## Where it is wired in
 
 | What | Where |
@@ -42,7 +54,9 @@ Grad Varaždin publishes its payments only on [transparentni.varazdin.hr](https:
 | Inbox, never committed (it may hold personal data) | `data/inbox/varazdin/` (in `.gitignore`) |
 | Cleaned monthly files, committed | `pipeline/manual/payments/04723/` |
 | Varaždin's entry, platform `manual` | `pipeline/config/payments.toml` (`["04723"]`) |
-| Copy into the data on every run, import first if the inbox has files | `fetch_manual` in `pipeline/src/opcina_pipeline/fetch/payments.py` |
+| Copy into the data on every run, import first if the inbox has files, fetch `official_url` | `fetch_manual` and `_fetch_official` in `pipeline/src/opcina_pipeline/fetch/payments.py` |
+| Official endpoint address (placeholder now) | `official_url` in `pipeline/config/payments.toml` |
+| Official download and cleaning | `fetch_official` in `pipeline/src/opcina_pipeline/varazdin.py` |
 | Reading the cleaned files; the privacy rules run again | `parse_manual` in `pipeline/src/opcina_pipeline/parse/payments.py` |
 | Nightly run that publishes it | `.github/workflows/fetch.yml` → `deploy.yml` |
 

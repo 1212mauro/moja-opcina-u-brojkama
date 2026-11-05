@@ -30,6 +30,12 @@ pattern = '/images/isplate_iz_proracuna/\d{4}/[^"]+\.ods'
 platform = "manual"
 importer = "varazdin"
 folder = "pipeline/manual/payments/04723"
+# The official export the city was asked for (Nov 2026). Fetched on every run, nightly
+# included; its months replace hand-imported ones. `{year}` and `{month}` ("2026", "10")
+# or `{month_int}` ("10" without padding) make one request per month, else one request.
+# Until the real address is known this is a placeholder: its answer is not a payments
+# export, so the run notes that and carries on.
+official_url = "https://example.com/"
 
 ["01651"]  # Jalžabet
 platform = "kipos"

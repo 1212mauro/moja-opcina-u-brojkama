@@ -226,7 +226,7 @@ def import_inbox(
     known_oibs: frozenset[str] | None = None,
 ) -> ImportResult:
     """Clean every month found in the inbox (and in ``done/``) into ``out_dir``."""
-    from opcina_pipeline.parse.payments import finish, known_business_oibs
+    from opcina_pipeline.parse.payments import known_business_oibs
 
     inbox = inbox or repo_root() / INBOX
     out_dir = out_dir or repo_root() / CLEANED
@@ -247,18 +247,76 @@ def import_inbox(
             rows.setdefault(month, {}).setdefault(_content(row), row)
             if path in new_files:
                 touched.add(month)
+    months, warnings = write_cleaned({m: list(rows[m].values()) for m in touched}, out_dir, known)
+
+    done.mkdir(exist_ok=True)
+    for path in new_files:
+        shutil.move(path, done / path.name)
+    return ImportResult(months, warnings, [path.name for path in new_files])
+
+
+def write_cleaned(
+    rows_by_month: dict[str, list[ExportRow]], out_dir: Path, known: frozenset[str]
+) -> tuple[dict[str, int], list[str]]:
+    """Check each month and write what the site may publish to ``out_dir/<YYYY-MM>.csv``."""
+    from opcina_pipeline.parse.payments import finish
+
     out_dir.mkdir(parents=True, exist_ok=True)
     months, warnings = {}, []
-    for month in sorted(touched):
-        month_rows = list(rows[month].values())
+    for month in sorted(rows_by_month):
+        month_rows = rows_by_month[month]
         warnings += month_report(month, month_rows)
         cleaned = finish(raw_frame(month_rows), DZS_CODE, "manual", known)
         cleaned.select(CLEANED_COLUMNS).sort("paid_on", "payer_name", "recipient_name").write_csv(
             out_dir / f"{month}.csv"
         )
         months[month] = cleaned.height
+    return months, warnings
 
-    done.mkdir(exist_ok=True)
-    for path in new_files:
-        shutil.move(path, done / path.name)
-    return ImportResult(months, warnings, [path.name for path in new_files])
+
+# --- Official export endpoint -----------------------------------------------------------
+#
+# Varaždin was asked (Nov 2026) for an official, automatable export. Until it exists,
+# `official_url` in payments.toml points at a placeholder; a response that is not a
+# payments export is reported and skipped, so the nightly run does not fail over it.
+
+
+def official_urls(template: str, months: list[str]) -> dict[str, str]:
+    """One URL per month when ``template`` has ``{year}``/``{month}``, else one URL."""
+    if "{year}" in template or "{month}" in template:
+        return {m: template.format(year=m[:4], month=m[5:7], month_int=int(m[5:7])) for m in months}
+    return {"all": template}
+
+
+@dataclass
+class OfficialResult:
+    months: dict[str, int]  # month -> cleaned rows written
+    notes: list[str]
+    files: list  # raw downloads (fetch.http.Download), kept outside git
+
+
+def fetch_official(
+    client, template: str, months: list[str], raw_dir: Path, out_dir: Path, known: frozenset[str]
+) -> OfficialResult:
+    """Download the official export(s) into ``raw_dir`` and clean them into ``out_dir``.
+
+    The response must be the portal's CSV layout (``EXPORT_COLUMNS``); if the city's
+    official export turns out different, ``read_export`` is the place to adapt.
+    """
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    rows: dict[str, dict[tuple, ExportRow]] = {}
+    notes, files = [], []
+    for key, url in official_urls(template, months).items():
+        download = client.download(url, raw_dir / f"{key}.csv")
+        files.append(download)
+        try:
+            found = read_export(download.path)
+        except (ValueError, UnicodeDecodeError) as error:
+            notes.append(f"official endpoint {url} is not a payments export yet ({error})"[:300])
+            continue
+        for row in found:
+            rows.setdefault(f"{row.paid_on:%Y-%m}", {}).setdefault(_content(row), row)
+    written, warnings = write_cleaned(
+        {m: list(r.values()) for m, r in rows.items()}, out_dir, known
+    )
+    return OfficialResult(written, notes + warnings, files)
