@@ -9,5 +9,3 @@ out/
 *.egg-info/
 web/public/data/
 data/interim/
-# Exports saved by hand before cleaning (may contain personal data)
-data/inbox/

@@ -505,11 +505,11 @@ def parse_proracunhr(folder: Path) -> pl.DataFrame:
     return pl.DataFrame(rows, schema=RAW_COLUMNS)
 
 
-def parse_manual(folder: Path) -> pl.DataFrame:
-    """Cleaned monthly files (``opcina_pipeline.varazdin.CLEANED_COLUMNS``).
+def parse_official_csv(folder: Path) -> pl.DataFrame:
+    """Cleaned monthly files of an official export (``varazdin.CLEANED_COLUMNS``).
 
-    The privacy rules already ran at import; ``finish`` runs them again, so a rule made
-    stricter later also applies to months imported before it.
+    The privacy rules already ran when the export was cleaned; ``finish`` runs them again,
+    so a rule made stricter later also applies to months cleaned before it.
     """
     frames = []
     for path in sorted(folder.glob("*.csv")):
@@ -535,7 +535,7 @@ PARSERS: dict[str, Callable[[Path], pl.DataFrame]] = {
     "kipos": parse_kipos,
     "html_links": parse_html_links,
     "proracunhr": parse_proracunhr,
-    "manual": parse_manual,
+    "official_csv": parse_official_csv,
 }
 
 

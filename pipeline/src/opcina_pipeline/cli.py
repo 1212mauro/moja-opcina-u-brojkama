@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from opcina_pipeline import boundaries, master, postcodes, varazdin
+from opcina_pipeline import boundaries, master, postcodes
 from opcina_pipeline.config import config_path, load_scope, load_sources, repo_root, schema_path
 from opcina_pipeline.contract import Contract
 from opcina_pipeline.export import export
@@ -111,15 +111,6 @@ def main() -> None:
     commands.add_parser("export", help="write the website's JSON from published tables")
     build_cmd = commands.add_parser("build", help="parse + gate + export")
     build_cmd.add_argument("--accept", nargs="+", default=[], metavar="TABLE", help="see gate")
-    link_cmd = commands.add_parser(
-        "varazdin-link", help="print the Varaždin payments export link of a month, to open by hand"
-    )
-    link_cmd.add_argument("month", help="YYYY-MM")
-    link_cmd.add_argument("--pages", type=int, default=1, help="links for this many pages of 80")
-    commands.add_parser(
-        "import-varazdin",
-        help=f"clean the CSVs saved in {varazdin.INBOX.as_posix()}/ for publishing",
-    )
 
     args = parser.parse_args()
     if args.command == "schema":
@@ -151,24 +142,6 @@ def main() -> None:
         print(export())  # ...and every table that passed is still exported
         if not passed or any(r.startswith("failed") for r in parsed.values()):
             raise SystemExit(1)
-    elif args.command == "varazdin-link":
-        for page in range(1, args.pages + 1):
-            print(varazdin.export_link(args.month, page))
-        print(
-            f"\nSave each CSV into {varazdin.INBOX.as_posix()}/, then run: opcina import-varazdin"
-        )
-    elif args.command == "import-varazdin":
-        result = varazdin.import_inbox()
-        if not result.moved:
-            print(f"nothing to import: no CSV in {varazdin.INBOX.as_posix()}/")
-        for month, rows in result.months.items():
-            print(f"{month}: {rows} rows -> {varazdin.CLEANED.as_posix()}/{month}.csv")
-        for warning in result.warnings:
-            print(f"WARNING {warning}")
-        if result.moved:
-            print(
-                f"\nCommit {varazdin.CLEANED.as_posix()}/ and push; the nightly run publishes it."
-            )
 
 
 if __name__ == "__main__":

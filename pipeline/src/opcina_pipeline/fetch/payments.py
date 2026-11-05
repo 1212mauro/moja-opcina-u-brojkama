@@ -6,7 +6,6 @@ municipality on a supported platform is a config change. Files go to
 """
 
 import json
-import shutil
 from collections.abc import Callable
 from datetime import date
 from pathlib import Path, PurePosixPath
@@ -14,9 +13,9 @@ from urllib.parse import unquote, urlsplit
 
 import httpx
 
-from opcina_pipeline.config import config_path, repo_root
+from opcina_pipeline.config import config_path
 from opcina_pipeline.fetch.base import FetchContext, Outcome, fetcher
-from opcina_pipeline.fetch.http import Download, file_sha256
+from opcina_pipeline.fetch.http import Download
 from opcina_pipeline.fetch.links import find_links
 
 OTVORENIGRAD_API = "https://api.otvorenigrad.hr/itransparentnost/isplate"
@@ -162,65 +161,35 @@ def fetch_proracunhr(ctx: FetchContext, entry: dict, dest: Path) -> list[Downloa
     return files
 
 
-def fetch_manual(ctx: FetchContext, entry: dict, dest: Path) -> list[Download]:
-    """Cleaned monthly files committed to the repository (``folder``), copied into ``dest``.
+def fetch_official_csv(ctx: FetchContext, entry: dict, dest: Path) -> list[Download]:
+    """A publisher's official CSV export (``url``), cleaned into ``dest/<YYYY-MM>.csv``.
 
-    With ``importer = "varazdin"``, CSVs a person saved into the local inbox are cleaned
-    into ``folder`` first (``opcina_pipeline.varazdin``). The nightly job has no inbox and
-    only copies what was committed.
-
-    With ``official_url``, the publisher's official export is fetched on every run, local
-    and nightly, and cleaned into ``<dest>-official/clean/``; those months replace
-    hand-imported ones. A failed or not-yet-real endpoint keeps the last good months.
+    Fetched on every run, nightly included. ``{year}`` and ``{month}`` ("2026", "10") or
+    ``{month_int}`` in ``url`` make one request per month of the window, else one request.
+    An answer that is not a payments export (the placeholder) is noted, not failed; an
+    endpoint that is down keeps the last good months. Raw answers go to ``dest/raw/``.
     """
-    if entry.get("importer") == "varazdin":
-        from opcina_pipeline import varazdin
-
-        result = varazdin.import_inbox()
-        for month, rows in result.months.items():
-            print(f"  varazdin: {month} cleaned, {rows} rows")
-        for warning in result.warnings:
-            print(f"  varazdin: WARNING {warning}")
-
-    official_clean = dest.with_name(dest.name + "-official") / "clean"
-    out: list[Download] = []
-    if entry.get("official_url"):
-        out += _fetch_official(ctx, entry["official_url"], official_clean)
-
-    # Committed months first, then official ones over them.
-    sources = sorted((repo_root() / entry["folder"]).glob("*.csv"))
-    overrides = sorted(official_clean.glob("*.csv")) if official_clean.is_dir() else []
-    chosen = {p.name: p for p in sources} | {p.name: p for p in overrides}
-    # Before the first month is imported there is nothing to copy, and that is not an error.
-    dest.mkdir(parents=True, exist_ok=True)
-    for stale in dest.iterdir():
-        if stale.is_file() and stale.name not in chosen:
-            stale.unlink()
-    for name, path in sorted(chosen.items()):
-        target = dest / name
-        changed = not target.exists() or target.read_bytes() != path.read_bytes()
-        if changed:
-            shutil.copyfile(path, target)
-        out.append(Download(target, changed, file_sha256(target), target.stat().st_size))
-    return out
-
-
-def _fetch_official(ctx: FetchContext, template: str, clean_dir: Path) -> list[Download]:
     from opcina_pipeline import varazdin
     from opcina_pipeline.parse.payments import known_business_oibs
 
     months = [f"{m:%Y-%m}" for m in month_starts(_today(), ctx.source.options["months"])]
     try:
         result = varazdin.fetch_official(
-            ctx.client, template, months, clean_dir.parent / "raw", clean_dir, known_business_oibs()
+            ctx.client,
+            entry["url"],
+            months,
+            dest / "raw",
+            dest,
+            known_business_oibs(),
+            entry.get("max_rows"),
         )
     except httpx.HTTPError as error:
-        print(f"  varazdin: official endpoint failed, keeping the last good months ({error})")
+        print(f"  {dest.name}: official export failed, keeping the last good months ({error})")
         return []
     for month, rows in result.months.items():
-        print(f"  varazdin: official {month}, {rows} rows")
+        print(f"  {dest.name}: {month}, {rows} rows")
     for note in result.notes:
-        print(f"  varazdin: {note}")
+        print(f"  {dest.name}: {note}")
     return result.files
 
 
@@ -229,7 +198,7 @@ PLATFORMS: dict[str, Callable[[FetchContext, dict, Path], list[Download]]] = {
     "kipos": fetch_kipos,
     "html_links": fetch_html_links,
     "proracunhr": fetch_proracunhr,
-    "manual": fetch_manual,
+    "official_csv": fetch_official_csv,
 }
 
 

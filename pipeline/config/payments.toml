@@ -5,8 +5,7 @@
 #   kipos         Kipos transparency portal; `base_url` is the municipality's subdomain
 #   html_links    files linked from one page; `page` and a regex `pattern` for the links
 #   proracunhr    proracun.hr payment list; `kid` is the municipality's id there
-#   manual        cleaned files committed to the repository (`folder`), from exports a
-#                 person saved by hand; `importer` names the cleaning step
+#   official_csv  a publisher's official CSV export; `url` (see Varaždin below)
 #   unavailable   no machine-readable route; `reason` is shown on the coverage map
 #
 # `pending_access`: the publisher refuses our automated requests (HTTP 401/403) and
@@ -24,18 +23,14 @@ page = "https://www.breznicki-hum.hr/index.php/vazni-dokumenti/transparentnost"
 pattern = '/images/isplate_iz_proracuna/\d{4}/[^"]+\.ods'
 
 ["04723"]  # Varaždin
-# transparentni.varazdin.hr checks every search with reCAPTCHA v3, so nothing fetches
-# from it. A person saves the monthly CSV export into data/inbox/varazdin/; a local run
-# cleans it into `folder` (committed), which every run, the nightly one included, uses.
-platform = "manual"
-importer = "varazdin"
-folder = "pipeline/manual/payments/04723"
-# The official export the city was asked for (Nov 2026). Fetched on every run, nightly
-# included; its months replace hand-imported ones. `{year}` and `{month}` ("2026", "10")
-# or `{month_int}` ("10" without padding) make one request per month, else one request.
-# Until the real address is known this is a placeholder: its answer is not a payments
-# export, so the run notes that and carries on.
-official_url = "https://example.com/"
+# The city's access point for programmatic export (Grad Varaždin, reply of Nov 2026:
+# GetExport takes the search as URL parameters, exportType picks the format). Not the
+# portal's search, which reCAPTCHA checks. One request per month (`{year}`,
+# `{month_int}`): all payers (Uprave=0), euro (Valuta=191), payments (IsplataUplata=10),
+# up to `max_rows` records (uzmi), CSV (exportType=1). A full month is ~2,300 rows.
+platform = "official_csv"
+url = "https://transparentni.varazdin.hr/Pretraga/GetExport/Godine%3D{year}%26Mjeseci%3D{month_int}%26Uprave%3D0%26Poslovnice%3D%26VrsteIzdataka%3D%26GodinaIsplate%3D%26IbanIsplate%3D%26OIBPrimatelja%3D%26NazivPrimatelja%3D%26MjestoPrimatelja%3D%26PTTPrimatelja%3D%26OpisIsplate%3D%26IznosObveze%3D%26OpisKnjizenja%3D%26IznosIsplateOd%3D%26IznosIsplateDo%3D%26Valuta%3D191%26IsplataUplata%3D10%26preskoci%3D0%26uzmi%3D10000%26RazdobljeOd%3D%26RazdobljeDo%3D?exportType=1"
+max_rows = 10000
 
 ["01651"]  # Jalžabet
 platform = "kipos"
