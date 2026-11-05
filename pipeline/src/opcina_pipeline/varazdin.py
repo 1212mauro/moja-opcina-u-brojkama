@@ -118,6 +118,8 @@ def read_export(path: Path) -> list[ExportRow]:
     with path.open(encoding="utf-8-sig", newline="") as f:
         reader = csv.reader(f, delimiter=";")
         header = next(reader, None)
+        if header is None:
+            return []  # a page past the end of the month can come back empty
         if header != EXPORT_COLUMNS:
             raise ValueError(
                 f"{path.name}: not a transparentni.varazdin.hr export (header {header})"
@@ -229,18 +231,22 @@ def import_inbox(
     inbox = inbox or repo_root() / INBOX
     out_dir = out_dir or repo_root() / CLEANED
     done = inbox / "done"
-    new_files = sorted(inbox.glob("*.csv"))
+    # Any file name: browsers save the export as "GetExport", "*.tmp" or "*.csv". The
+    # header check in read_export decides what is an export.
+    new_files = sorted(p for p in inbox.glob("*") if p.is_file() and not p.name.startswith("."))
     if not new_files:
         return ImportResult({}, [], [])
     known = known_oibs if known_oibs is not None else known_business_oibs()
 
     rows: dict[str, dict[tuple, ExportRow]] = {}
-    for path in sorted(done.glob("*.csv")) + new_files:
+    touched: set[str] = set()  # only these months are rewritten; others stay as committed
+    old_files = sorted(p for p in done.glob("*") if p.is_file())
+    for path in old_files + new_files:
         for row in read_export(path):
-            rows.setdefault(f"{row.paid_on:%Y-%m}", {}).setdefault(_content(row), row)
-
-    # Only months the new files touch are rewritten; older months stay as committed.
-    touched = {f"{row.paid_on:%Y-%m}" for path in new_files for row in read_export(path)}
+            month = f"{row.paid_on:%Y-%m}"
+            rows.setdefault(month, {}).setdefault(_content(row), row)
+            if path in new_files:
+                touched.add(month)
     out_dir.mkdir(parents=True, exist_ok=True)
     months, warnings = {}, []
     for month in sorted(touched):

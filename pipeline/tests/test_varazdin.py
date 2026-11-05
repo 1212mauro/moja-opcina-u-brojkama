@@ -58,13 +58,15 @@ def test_import_cleans_dedups_and_reports_gaps(tmp_path):
     inbox.mkdir()
     export(inbox / "page1.csv", [ROW_1, ROW_2, ROW_3])
     export(inbox / "page1-again.csv", [ROW_1, ROW_2, ROW_3])  # the same page saved twice
-    export(inbox / "page2.csv", [ROW_5])  # row 4 never saved
+    export(inbox / "GetExport", [ROW_5])  # row 4 never saved; saved without an extension
 
     result = varazdin.import_inbox(inbox, out, known_oibs=frozenset({"44444444446"}))
 
     assert result.months == {"2026-10": 4}  # 7 rows saved, the repeated page collapses
-    assert sorted(result.moved) == ["page1-again.csv", "page1.csv", "page2.csv"]
-    assert not list(inbox.glob("*.csv")) and len(list((inbox / "done").glob("*.csv"))) == 3
+    assert sorted(result.moved) == ["GetExport", "page1-again.csv", "page1.csv"]
+    assert [p.name for p in inbox.iterdir()] == ["done"] and len(
+        list((inbox / "done").iterdir())
+    ) == 3
     assert any("rows 4 are missing" in w for w in result.warnings)
 
     cleaned = pl.read_csv(out / "2026-10.csv", infer_schema=False)
@@ -90,3 +92,8 @@ def test_import_rebuilds_a_month_from_all_saved_pages(tmp_path):
 def test_nothing_to_import(tmp_path):
     result = varazdin.import_inbox(tmp_path, tmp_path / "out", known_oibs=frozenset())
     assert (result.months, result.moved) == ({}, [])
+
+
+def test_an_empty_page_past_the_end_is_no_rows(tmp_path):
+    (tmp_path / "empty.csv").write_bytes(b"")
+    assert varazdin.read_export(tmp_path / "empty.csv") == []

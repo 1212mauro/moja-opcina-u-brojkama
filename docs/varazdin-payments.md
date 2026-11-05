@@ -13,7 +13,7 @@ Grad Varaždin publishes its payments only on [transparentni.varazdin.hr](https:
 
    These are the same links the portal's "CSV" button gives after a search: one per page of 80 payments, all payers (the city and its institutions). A month is about 12 pages; a page past the end is simply empty.
 
-2. **Save each CSV** into `data/inbox/varazdin/`, under any name. Saving a page twice is harmless.
+2. **Save each CSV** into `data/inbox/varazdin/`, under any name (the browser may call it `GetExport`; that is fine). Saving a page twice is harmless.
 
 3. **Import.**
 
