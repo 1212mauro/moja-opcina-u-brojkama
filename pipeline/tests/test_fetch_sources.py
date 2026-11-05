@@ -351,3 +351,20 @@ def test_proracunhr_refuses_an_html_answer(tmp_path, monkeypatch):
     ctx = FakeCtx(lambda request: httpx.Response(200, json=[]), months=2)
     with pytest.raises(ValueError, match="not the payments JSON"):
         payments.fetch_proracunhr(ctx, {"kid": 37}, tmp_path)
+
+
+def test_manual_platform_copies_cleaned_files_and_tolerates_none(tmp_path, monkeypatch):
+    from opcina_pipeline.fetch import payments
+
+    monkeypatch.setattr(payments, "repo_root", lambda: tmp_path)
+    folder = tmp_path / "manual"
+    folder.mkdir()
+    dest = tmp_path / "raw"
+    assert payments.fetch_manual(None, {"folder": "manual"}, dest) == []  # nothing imported yet
+
+    (folder / "2026-10.csv").write_text("paid_on\n", encoding="utf-8")
+    (dest / "2026-09.csv").write_text("old", encoding="utf-8")  # removed from the folder since
+    files = payments.fetch_manual(None, {"folder": "manual"}, dest)
+    assert [f.path.name for f in files] == ["2026-10.csv"] and files[0].changed
+    assert sorted(p.name for p in dest.iterdir()) == ["2026-10.csv"]
+    assert not payments.fetch_manual(None, {"folder": "manual"}, dest)[0].changed

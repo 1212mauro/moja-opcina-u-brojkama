@@ -141,7 +141,7 @@ None of the portals states a licence. `pipeline/config/payments.toml` maps each 
 
 **Not open** (and so no longer pilots):
 
-- **Varaždin:** `transparentni.varazdin.hr` (Infomare), a search form behind reCAPTCHA v3, with no file, API or data.gov.hr mirror. CAPTCHAs are not circumvented.
+- **Varaždin:** `transparentni.varazdin.hr` (Infomare): each search is checked with an invisible reCAPTCHA v3, and the CSV export holds one page of 80 rows. Nothing fetches from it. A person saves the monthly export pages by hand, and `opcina import-varazdin` cleans them into `pipeline/manual/payments/04723/` (platform `manual`); see [varazdin-payments.md](varazdin-payments.md). Its older data.gov.hr datasets (2019–2021 budget extracts) link to `otvoreni.varazdin.hr`, offline since 2023, or to a private network address (`192.168.100.11`); the files were never archived.
 - **Ivanec, Ludbreg (and Novi Marof):** Otvoreni grad iTransparentnost (`api.otvorenigrad.hr/itransparentnost/isplate`, CSV per month, header `LC-Tenant: grad-<name>`). It answers HTTP 403 to GitHub's servers and ordinary connections otherwise. ivanec.hr and the cities' data.gov.hr entries only link to the portal, and ludbreg.hr has its own monthly tables only up to January 2025. The block is not worked around. The connector (`otvorenigrad`) stays in the code for a publisher on that platform that does answer.
 
 Layouts:

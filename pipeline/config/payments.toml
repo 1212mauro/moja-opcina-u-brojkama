@@ -5,6 +5,8 @@
 #   kipos         Kipos transparency portal; `base_url` is the municipality's subdomain
 #   html_links    files linked from one page; `page` and a regex `pattern` for the links
 #   proracunhr    proracun.hr payment list; `kid` is the municipality's id there
+#   manual        cleaned files committed to the repository (`folder`), from exports a
+#                 person saved by hand; `importer` names the cleaning step
 #   unavailable   no machine-readable route; `reason` is shown on the coverage map
 #
 # `pending_access`: the publisher refuses our automated requests (HTTP 401/403) and
@@ -22,8 +24,12 @@ page = "https://www.breznicki-hum.hr/index.php/vazni-dokumenti/transparentnost"
 pattern = '/images/isplate_iz_proracuna/\d{4}/[^"]+\.ods'
 
 ["04723"]  # Varaždin
-platform = "unavailable"
-reason = "Payments are published only on transparentni.varazdin.hr, a search form protected by reCAPTCHA, with no file or API export."
+# transparentni.varazdin.hr checks every search with reCAPTCHA v3, so nothing fetches
+# from it. A person saves the monthly CSV export into data/inbox/varazdin/; a local run
+# cleans it into `folder` (committed), which every run, the nightly one included, uses.
+platform = "manual"
+importer = "varazdin"
+folder = "pipeline/manual/payments/04723"
 
 ["01651"]  # Jalžabet
 platform = "kipos"

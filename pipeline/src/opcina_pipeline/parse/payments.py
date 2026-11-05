@@ -505,11 +505,37 @@ def parse_proracunhr(folder: Path) -> pl.DataFrame:
     return pl.DataFrame(rows, schema=RAW_COLUMNS)
 
 
+def parse_manual(folder: Path) -> pl.DataFrame:
+    """Cleaned monthly files (``opcina_pipeline.varazdin.CLEANED_COLUMNS``).
+
+    The privacy rules already ran at import; ``finish`` runs them again, so a rule made
+    stricter later also applies to months imported before it.
+    """
+    frames = []
+    for path in sorted(folder.glob("*.csv")):
+        df = pl.read_csv(path, infer_schema=False)
+        frames.append(
+            df.select(
+                pl.col("paid_on").str.to_date("%Y-%m-%d"),
+                "payer_name",
+                "recipient_name",
+                "recipient_oib",
+                "economic_code",
+                "economic_label",
+                function_code=pl.lit(None, pl.Utf8),
+                description=pl.lit(None, pl.Utf8),
+                amount_eur=pl.col("amount_eur").cast(pl.Float64),
+            )
+        )
+    return pl.concat(frames) if frames else pl.DataFrame(schema=RAW_COLUMNS)
+
+
 PARSERS: dict[str, Callable[[Path], pl.DataFrame]] = {
     "otvorenigrad": parse_otvorenigrad,
     "kipos": parse_kipos,
     "html_links": parse_html_links,
     "proracunhr": parse_proracunhr,
+    "manual": parse_manual,
 }
 
 
