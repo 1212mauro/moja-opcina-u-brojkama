@@ -139,9 +139,9 @@ None of the portals states a licence. `pipeline/config/payments.toml` maps each 
 
 **Other open payment data in the county** (checked Nov 2026, not configured): Kipos portals of Cestica, Petrijanec, Vinica, Martijanec, Beretinec and Veliki Bukovec (all current to Sep 2026 except Martijanec, Dec 2025); Visoko on proracun.hr (`kid=24`); Breznica (XLSX) and Gornji Kneginec (CSV) via data.gov.hr. Each is one entry in `payments.toml` (the last two need a parser for their layouts).
 
-**Not open** (and so no longer pilots):
+**Not open, or open only through the city's export** (not pilots):
 
-- **Varaždin:** `transparentni.varazdin.hr` (Infomare), a search form behind reCAPTCHA v3, with no file, API or data.gov.hr mirror. CAPTCHAs are not circumvented.
+- **Varaždin:** `transparentni.varazdin.hr` (Infomare). The portal's search is checked with an invisible reCAPTCHA v3 and is not used. The city named `/Pretraga/GetExport/` as its access point for programmatic export (reply of Nov 2026), and the nightly run fetches one month per request from it (platform `official_csv`); see [varazdin-payments.md](varazdin-payments.md). Its older data.gov.hr datasets (2019–2021 budget extracts) link to `otvoreni.varazdin.hr`, offline since 2023, or to a private network address (`192.168.100.11`); the files were never archived.
 - **Ivanec, Ludbreg (and Novi Marof):** Otvoreni grad iTransparentnost (`api.otvorenigrad.hr/itransparentnost/isplate`, CSV per month, header `LC-Tenant: grad-<name>`). It answers HTTP 403 to GitHub's servers and ordinary connections otherwise. ivanec.hr and the cities' data.gov.hr entries only link to the portal, and ludbreg.hr has its own monthly tables only up to January 2025. The block is not worked around. The connector (`otvorenigrad`) stays in the code for a publisher on that platform that does answer.
 
 Layouts:

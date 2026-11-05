@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Varaždin payments, fetched nightly from the city's export access point (`/Pretraga/GetExport/`, named by the city in Nov 2026): 12 months, about 2,300 payments a month, cleaned with the same privacy rules (`docs/varazdin-payments.md`).
 - Data spot-check script (`scripts/spot_check.py`) and report (`docs/spot-check.md`): 50 figures on the pilot pages checked against their source files.
 - Spec, task tracker (`TASKS.md`) and progress script.
 - Repository layout, EUPL-1.2 licence, README and contributing guide.

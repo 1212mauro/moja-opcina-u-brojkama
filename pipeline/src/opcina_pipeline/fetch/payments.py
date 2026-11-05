@@ -161,11 +161,44 @@ def fetch_proracunhr(ctx: FetchContext, entry: dict, dest: Path) -> list[Downloa
     return files
 
 
+def fetch_official_csv(ctx: FetchContext, entry: dict, dest: Path) -> list[Download]:
+    """A publisher's official CSV export (``url``), cleaned into ``dest/<YYYY-MM>.csv``.
+
+    Fetched on every run, nightly included. ``{year}`` and ``{month}`` ("2026", "10") or
+    ``{month_int}`` in ``url`` make one request per month of the window, else one request.
+    An answer that is not a payments export (the placeholder) is noted, not failed; an
+    endpoint that is down keeps the last good months. Raw answers go to ``dest/raw/``.
+    """
+    from opcina_pipeline import varazdin
+    from opcina_pipeline.parse.payments import known_business_oibs
+
+    months = [f"{m:%Y-%m}" for m in month_starts(_today(), ctx.source.options["months"])]
+    try:
+        result = varazdin.fetch_official(
+            ctx.client,
+            entry["url"],
+            months,
+            dest / "raw",
+            dest,
+            known_business_oibs(),
+            entry.get("max_rows"),
+        )
+    except httpx.HTTPError as error:
+        print(f"  {dest.name}: official export failed, keeping the last good months ({error})")
+        return []
+    for month, rows in result.months.items():
+        print(f"  {dest.name}: {month}, {rows} rows")
+    for note in result.notes:
+        print(f"  {dest.name}: {note}")
+    return result.files
+
+
 PLATFORMS: dict[str, Callable[[FetchContext, dict, Path], list[Download]]] = {
     "otvorenigrad": fetch_otvorenigrad,
     "kipos": fetch_kipos,
     "html_links": fetch_html_links,
     "proracunhr": fetch_proracunhr,
+    "official_csv": fetch_official_csv,
 }
 
 

@@ -351,3 +351,48 @@ def test_proracunhr_refuses_an_html_answer(tmp_path, monkeypatch):
     ctx = FakeCtx(lambda request: httpx.Response(200, json=[]), months=2)
     with pytest.raises(ValueError, match="not the payments JSON"):
         payments.fetch_proracunhr(ctx, {"kid": 37}, tmp_path)
+
+
+def test_official_csv_fetches_each_month_and_keeps_good_months(tmp_path, monkeypatch):
+    import httpx
+
+    from opcina_pipeline import varazdin
+    from opcina_pipeline.fetch import payments
+    from opcina_pipeline.parse import payments as parse_payments
+
+    monkeypatch.setattr(payments, "_today", lambda: date(2026, 11, 5))
+    monkeypatch.setattr(parse_payments, "known_business_oibs", lambda: frozenset())
+    entry = {"url": "https://grad.example/isplate/{year}-{month}.csv"}
+    dest = tmp_path / "04723"
+    header = ";".join(varazdin.EXPORT_COLUMNS)
+    october = "1;20261030;GRAD VARAŽDIN;GAMA D.O.O.;42000;VARAŽDIN;;10,00;EUR;;3222 Materijal"
+    asked = []
+
+    def handler(request):
+        asked.append(request.url.path)
+        if request.url.path.endswith("2026-10.csv"):
+            return httpx.Response(200, text=header + "\r\n" + october + "\r\n")
+        return httpx.Response(200, text="")  # November: nothing published yet
+
+    payments.fetch_official_csv(FakeCtx(handler, months=2), entry, dest)
+
+    assert asked == ["/isplate/2026-10.csv", "/isplate/2026-11.csv"]  # one request per month
+    assert sorted(p.name for p in dest.glob("*.csv")) == ["2026-10.csv"]
+    assert "GAMA D.O.O." in (dest / "2026-10.csv").read_text(encoding="utf-8")
+
+    # The endpoint goes down: the last good months stay.
+    payments.fetch_official_csv(FakeCtx(lambda r: httpx.Response(503), months=2), entry, dest)
+    assert "GAMA D.O.O." in (dest / "2026-10.csv").read_text(encoding="utf-8")
+
+
+def test_the_placeholder_endpoint_is_noted_not_failed(tmp_path, monkeypatch, capsys):
+    import httpx
+
+    from opcina_pipeline.fetch import payments
+    from opcina_pipeline.parse import payments as parse_payments
+
+    monkeypatch.setattr(parse_payments, "known_business_oibs", lambda: frozenset())
+    ctx = FakeCtx(lambda request: httpx.Response(200, text="<!doctype html>"), months=1)
+    files = payments.fetch_official_csv(ctx, {"url": "https://example.com/"}, tmp_path / "04723")
+    assert len(files) == 1 and not list((tmp_path / "04723").glob("*.csv"))
+    assert "is not a payments export yet" in capsys.readouterr().out
