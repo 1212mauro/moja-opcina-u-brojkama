@@ -245,6 +245,9 @@ export const hr = {
     home: "Karta: kliknite grad ili općinu, ili ih odaberite iz popisa ispod.",
     locator: (name: string) => `Položaj: ${name} u županiji`,
     noData: "podaci još nisu dostupni",
+    legend: "Legenda karte",
+    legendOthers: "ostali gradovi i općine",
+    legendUnit: "grad ili općina s podacima",
   },
 
   missing: {

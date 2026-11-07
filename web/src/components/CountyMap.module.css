@@ -66,12 +66,43 @@
   stroke-width: 3;
 }
 
+/*
+ * H6: names. Hidden until their municipality is hovered or focused (rules written
+ * per municipality in CountyMap.tsx); the marked unit's name is always shown.
+ */
+.names {
+  pointer-events: none;
+}
 .label {
+  visibility: hidden;
   fill: var(--text-primary);
   font-size: 18px;
   font-weight: 700;
   paint-order: stroke;
   stroke: var(--surface-1);
   stroke-width: 4px;
-  pointer-events: none;
+}
+.labelShown {
+  visibility: visible;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.swatch {
+  width: 16px;
+  height: 12px;
+  flex: none;
 }
