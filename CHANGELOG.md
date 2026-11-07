@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Frontend design (`docs/design.md`): the home page puts search and the list first with the map beside them; each municipality page opens with one header card (name, key figures, locator map) and a section menu (sticky sidebar on desktop, chips on phones).
+- Wide tables scroll inside their card on phones, with edge fades and a keyboard-focusable region.
+- Screenshot script for visual QA (`web/scripts/screenshots.mjs`).
 - Varaždin payments, fetched nightly from the city's export access point (`/Pretraga/GetExport/`, named by the city in Nov 2026): 12 months, about 2,300 payments a month, cleaned with the same privacy rules (`docs/varazdin-payments.md`).
 - Data spot-check script (`scripts/spot_check.py`) and report (`docs/spot-check.md`): 50 figures on the pilot pages checked against their source files.
 - Spec, task tracker (`TASKS.md`) and progress script.

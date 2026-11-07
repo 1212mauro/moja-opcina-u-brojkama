@@ -67,7 +67,12 @@ export function MunicipalitySearch({
         </div>
       ) : null}
 
-      <div className={styles.tableWrap}>
+      <div
+        className={`table-scroll ${styles.tableWrap}`}
+        role="region"
+        aria-label={caption}
+        tabIndex={0}
+      >
         <table>
           <caption className={styles.caption}>{caption}</caption>
           <thead>

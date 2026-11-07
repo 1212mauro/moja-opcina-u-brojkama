@@ -64,111 +64,121 @@ export function MunicipalityView({
         </ol>
       </nav>
 
-      <header className={styles.header}>
-        <h1>
-          <span className={styles.kind}>{msg.unitType[page.type]}</span>{" "}
-          {page.name}
-        </h1>
-        <p className={styles.meta}>
-          {msg.page.county(page.county)} ·{" "}
-          {msg.page.population(
-            fmt.integer(page.population.total),
-            page.population.year,
-            page.population.kind === "estimate",
-          )}
-        </p>
-      </header>
+      {/* H2: one header card: who this is, the key figures, where it lies. */}
+      <div className={styles.headerCard}>
+        <header className={styles.header}>
+          <h1>
+            <span className={styles.kind}>{msg.unitType[page.type]}</span>{" "}
+            {page.name}
+          </h1>
+          <p className={styles.meta}>
+            {msg.page.county(page.county)} ·{" "}
+            {msg.page.population(
+              fmt.integer(page.population.total),
+              page.population.year,
+              page.population.kind === "estimate",
+            )}
+          </p>
+        </header>
 
-      <section aria-label={msg.page.keyFigures} className={styles.tiles}>
-        {budget ? (
-          <>
+        <section aria-label={msg.page.keyFigures} className={styles.tiles}>
+          {budget ? (
+            <>
+              <div className={styles.tile}>
+                <p className={styles.tileLabel}>
+                  {msg.page.revenue(budget.year)}
+                </p>
+                <p className={styles.tileValue}>
+                  {fmt.eurShort(budget.revenueTotalEur)}
+                </p>
+                <p className={styles.tileDetail}>
+                  {msg.page.perResident(
+                    fmt.eurCents(budget.revenuePerResidentEur),
+                  )}
+                </p>
+              </div>
+              <div className={styles.tile}>
+                <p className={styles.tileLabel}>
+                  {msg.page.expenditure(budget.year)}
+                </p>
+                <p className={styles.tileValue}>
+                  {fmt.eurShort(budget.expenditureTotalEur)}
+                </p>
+                <p className={styles.tileDetail}>
+                  {msg.page.perResident(
+                    fmt.eurCents(budget.expenditurePerResidentEur),
+                  )}
+                </p>
+              </div>
+            </>
+          ) : null}
+          {procurement ? (
             <div className={styles.tile}>
-              <p className={styles.tileLabel}>
-                {msg.page.revenue(budget.year)}
-              </p>
+              <p className={styles.tileLabel}>{msg.page.contracts}</p>
               <p className={styles.tileValue}>
-                {fmt.eurShort(budget.revenueTotalEur)}
+                {fmt.integer(procurement.contractCount)}
               </p>
-              <p className={styles.tileDetail}>
-                {msg.page.perResident(
-                  fmt.eurCents(budget.revenuePerResidentEur),
-                )}
-              </p>
+              {procurement.dataFrom ? (
+                <p className={styles.tileDetail}>
+                  {msg.page.contractsSince(fmt.date(procurement.dataFrom))}
+                </p>
+              ) : null}
             </div>
-            <div className={styles.tile}>
-              <p className={styles.tileLabel}>
-                {msg.page.expenditure(budget.year)}
-              </p>
-              <p className={styles.tileValue}>
-                {fmt.eurShort(budget.expenditureTotalEur)}
-              </p>
-              <p className={styles.tileDetail}>
-                {msg.page.perResident(
-                  fmt.eurCents(budget.expenditurePerResidentEur),
-                )}
-              </p>
-            </div>
-          </>
-        ) : null}
-        {procurement ? (
-          <div className={styles.tile}>
-            <p className={styles.tileLabel}>{msg.page.contracts}</p>
-            <p className={styles.tileValue}>
-              {fmt.integer(procurement.contractCount)}
-            </p>
-            {procurement.dataFrom ? (
-              <p className={styles.tileDetail}>
-                {msg.page.contractsSince(fmt.date(procurement.dataFrom))}
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-      </section>
-
-      <CountyMap
-        locale={locale}
-        highlight={page.slug}
-        title={msg.map.locator(page.name)}
-        width={400}
-      />
-
-      <nav aria-labelledby="sadrzaj-stranice" className={styles.toc}>
-        <h2 id="sadrzaj-stranice" className={styles.tocTitle}>
-          {msg.page.contents}
-        </h2>
-        <ul>
-          {SECTIONS.map((section) => (
-            <li key={section.id}>
-              <a href={`#${section.id}`}>{msg.sections[section.key]}</a>
-            </li>
-          ))}
-          <li>
-            <a href="#izvori">{msg.sections.sources}</a>
-          </li>
-        </ul>
-      </nav>
-
-      {SECTIONS.map(({ id, key, Component }) => (
-        <section
-          key={id}
-          id={id}
-          aria-labelledby={`${id}-naslov`}
-          className={styles.section}
-        >
-          <h2 id={`${id}-naslov`}>{msg.sections[key]}</h2>
-          <Component locale={locale} page={page} />
+          ) : null}
         </section>
-      ))}
 
-      <section
-        id="izvori"
-        aria-labelledby="izvori-naslov"
-        className={styles.section}
-      >
-        <h2 id="izvori-naslov">{msg.sections.sources}</h2>
-        <p>{msg.sources.intro}</p>
-        <SourcesTable locale={locale} runs={page.sources} />
-      </section>
+        <div className={styles.locator}>
+          <CountyMap
+            locale={locale}
+            highlight={page.slug}
+            title={msg.map.locator(page.name)}
+            width={400}
+          />
+        </div>
+      </div>
+
+      {/* H3: a sticky section menu beside the content on desktop, chips on phones. */}
+      <div className={styles.body}>
+        <nav aria-labelledby="sadrzaj-stranice" className={styles.toc}>
+          <h2 id="sadrzaj-stranice" className={styles.tocTitle}>
+            {msg.page.contents}
+          </h2>
+          <ul>
+            {SECTIONS.map((section) => (
+              <li key={section.id}>
+                <a href={`#${section.id}`}>{msg.sections[section.key]}</a>
+              </li>
+            ))}
+            <li>
+              <a href="#izvori">{msg.sections.sources}</a>
+            </li>
+          </ul>
+        </nav>
+
+        <div className={styles.content}>
+          {SECTIONS.map(({ id, key, Component }) => (
+            <section
+              key={id}
+              id={id}
+              aria-labelledby={`${id}-naslov`}
+              className={styles.section}
+            >
+              <h2 id={`${id}-naslov`}>{msg.sections[key]}</h2>
+              <Component locale={locale} page={page} />
+            </section>
+          ))}
+
+          <section
+            id="izvori"
+            aria-labelledby="izvori-naslov"
+            className={styles.section}
+          >
+            <h2 id="izvori-naslov">{msg.sections.sources}</h2>
+            <p>{msg.sources.intro}</p>
+            <SourcesTable locale={locale} runs={page.sources} />
+          </section>
+        </div>
+      </div>
     </article>
   );
 }

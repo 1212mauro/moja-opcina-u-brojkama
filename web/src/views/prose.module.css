@@ -19,8 +19,6 @@
 /* Tables may be wider than the reading column. */
 .wide {
   width: min(var(--content-width), calc(100vw - 2 * var(--space-4)));
-  overflow-x: auto;
-  background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
