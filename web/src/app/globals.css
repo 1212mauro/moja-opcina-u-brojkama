@@ -192,8 +192,53 @@ th.num {
   /* Every scroll region sits on a card; the fades blend into this colour. */
   background-color: var(--surface-1);
 }
-.table-scroll > table:has(th:nth-child(4)) {
+.table-scroll > table:not(.stack-table):has(th:nth-child(4)) {
   min-width: 36rem;
+}
+
+/*
+ * H7: a table that turns into a stacked list on phones, one card per row, each value
+ * under its column name. Explicit table roles in the markup keep it a table for
+ * screen readers after the display change; the visible names come from data-label
+ * and are hidden from them (the header cells already name each value).
+ */
+@media (max-width: 47.99rem) {
+  .stack-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .stack-table,
+  .stack-table tbody,
+  .stack-table tr,
+  .stack-table td {
+    display: block;
+  }
+  .stack-table tr {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stack-table tr:last-child {
+    border-bottom: none;
+  }
+  .stack-table td {
+    display: grid;
+    grid-template-columns: minmax(6rem, 2fr) 5fr;
+    gap: var(--space-3);
+    padding: var(--space-1) 0;
+    border: none;
+  }
+  .stack-table td.num {
+    text-align: left;
+  }
+  .stack-table td::before {
+    content: attr(data-label) / "";
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
 }
 
 .visually-hidden {
