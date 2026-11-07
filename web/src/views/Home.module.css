@@ -1,5 +1,27 @@
+/* H1: search and list first; the map beside them on desktop, last on phones. */
+.layout {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 64rem) {
+  .layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+    gap: var(--space-7);
+  }
+  .aside {
+    position: sticky;
+    top: var(--space-5);
+  }
+}
+
+.primary {
+  min-width: 0;
+}
+
 .hero {
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
   max-width: 44rem;
 }
 

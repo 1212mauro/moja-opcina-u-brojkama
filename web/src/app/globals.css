@@ -169,6 +169,33 @@ th.num {
   white-space: nowrap;
 }
 
+/*
+ * H4: a table wider than its card scrolls inside it instead of squeezing its columns
+ * (contracts, sources, budget on phones). Fades at the edges show there is more; they
+ * scroll with the content (attachment: local), so they appear only where something is
+ * hidden. The wrapper is a labelled, focusable region, so the keyboard can scroll it.
+ */
+.table-scroll {
+  overflow-x: auto;
+  background:
+    linear-gradient(to right, var(--surface-1) 30%, transparent),
+    linear-gradient(to left, var(--surface-1) 30%, transparent) 100% 0,
+    linear-gradient(to right, var(--border), transparent),
+    linear-gradient(to left, var(--border), transparent) 100% 0;
+  background-repeat: no-repeat;
+  background-size:
+    var(--space-6) 100%,
+    var(--space-6) 100%,
+    var(--space-3) 100%,
+    var(--space-3) 100%;
+  background-attachment: local, local, scroll, scroll;
+  /* Every scroll region sits on a card; the fades blend into this colour. */
+  background-color: var(--surface-1);
+}
+.table-scroll > table:has(th:nth-child(4)) {
+  min-width: 36rem;
+}
+
 .visually-hidden {
   position: absolute !important;
   width: 1px;

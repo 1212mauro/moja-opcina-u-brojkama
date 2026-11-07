@@ -72,13 +72,27 @@ export function Figure<Row>({
         <figcaption className={styles.summary}>{summary}</figcaption>
       ) : null}
       {!children ? (
-        <div className={styles.tableWrap}>{table}</div>
+        <div
+          className="table-scroll"
+          role="region"
+          aria-label={title}
+          tabIndex={0}
+        >
+          {table}
+        </div>
       ) : (
         <>
           {children}
           <details className={styles.details}>
             <summary>{msg.figure.showTable}</summary>
-            <div className={styles.tableWrap}>{table}</div>
+            <div
+              className="table-scroll"
+              role="region"
+              aria-label={title}
+              tabIndex={0}
+            >
+              {table}
+            </div>
           </details>
         </>
       )}

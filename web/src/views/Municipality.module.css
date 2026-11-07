@@ -14,31 +14,78 @@
   color: var(--text-muted);
 }
 
+/*
+ * H2: one header card. Phones stack name, key figures, map; from 48rem the map sits
+ * to the right of the name and the figures run along the bottom.
+ */
+.headerCard {
+  display: grid;
+  grid-template-areas:
+    "header"
+    "tiles"
+    "locator";
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+@media (min-width: 48rem) {
+  .headerCard {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+    grid-template-areas:
+      "header locator"
+      "tiles tiles";
+    padding: var(--space-6);
+  }
+}
+
 .header {
-  margin-bottom: var(--space-5);
+  grid-area: header;
+  align-self: center;
+}
+.header h1 {
+  margin-bottom: var(--space-2);
 }
 .kind {
   display: block;
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--text-secondary);
 }
 .meta {
+  margin: 0;
   color: var(--text-secondary);
+}
+
+.locator {
+  grid-area: locator;
+}
+/* The map's own figure margin is not needed inside the card. */
+.locator > figure {
+  margin: 0;
 }
 
 /* Key figures: the page's headline numbers, before any chart. */
 .tiles {
+  grid-area: tiles;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-3);
+}
+@media (min-width: 48rem) {
+  .tiles {
+    gap: var(--space-4);
+  }
 }
 .tile {
-  background: var(--surface-1);
+  background: var(--surface-0);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
 }
 .tile p {
   margin: 0;
@@ -48,32 +95,95 @@
   color: var(--text-secondary);
 }
 .tileValue {
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
   margin: var(--space-1) 0;
+}
+@media (min-width: 48rem) {
+  .tileValue {
+    font-size: var(--text-2xl);
+  }
 }
 .tileDetail {
   font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
+/*
+ * H3: the section menu. Phones get a row of chips that scrolls sideways; from 64rem
+ * it is a sticky list beside the sections.
+ */
+.body {
+  display: grid;
+  gap: var(--space-5);
+}
+@media (min-width: 64rem) {
+  .body {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-6);
+  }
+}
+
+.content {
+  min-width: 0;
+}
+
 .toc {
-  margin-bottom: var(--space-6);
+  min-width: 0;
 }
 .tocTitle {
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
   color: var(--text-secondary);
   margin-bottom: var(--space-2);
 }
 .toc ul {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
+  gap: var(--space-2);
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0 var(--space-2);
+  overflow-x: auto;
+}
+.toc a {
+  display: block;
+  white-space: nowrap;
+  padding: var(--space-1) var(--space-3);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+.toc a:hover {
+  background: var(--surface-2);
+}
+
+@media (min-width: 64rem) {
+  .toc {
+    position: sticky;
+    top: var(--space-5);
+  }
+  .toc ul {
+    flex-direction: column;
+    gap: var(--space-1);
+    overflow: visible;
+  }
+  .toc a {
+    white-space: normal;
+    background: none;
+    border: none;
+    border-left: 3px solid var(--border);
+    border-radius: 0;
+    padding: var(--space-1) var(--space-3);
+  }
+  .toc a:hover {
+    background: none;
+    border-left-color: var(--link);
+  }
 }
 
 .section {

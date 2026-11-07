@@ -114,6 +114,20 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 - [ ] G5 Record and edit the video (~8h)
 - [ ] G6 Submission: README, live demo link, screenshots (~4h)
 
+### H. Frontend design — week 4 (~30 h)
+
+Layout and hierarchy on top of the existing tokens, so a resident finds their town and an answer quickly (before G1). Plan and mocks: `docs/design.md`.
+
+- [x] H1 Home page: title, intro and search first, the full list under them; the county map beside them on desktop (sticky), last on phones (~4h)
+- [x] H2 Municipality header card: name, type, county and population with the locator map; key figures as one row of larger tiles (~4h)
+- [x] H3 Section navigation: sticky sidebar on desktop, scrollable chip row on phones (~3h)
+- [x] H4 Wide tables scroll inside their card on phones (keyboard-focusable region, edge fades) instead of squeezing (~3h)
+- [ ] H5 Key figures in context: spending per resident against similar units ("12 % više od prosjeka sličnih"), in all three editions (~4h)
+- [ ] H6 Map: name labels or a list on hover/focus, and a legend for units without data (~4h)
+- [ ] H7 Sources table as a stacked list on phones (~2h)
+- [ ] H8 Visual QA at 360 px, 768 px and 1280 px in light and dark mode, all three editions; screenshots for G6 (~4h)
+- [x] H9 Screenshot script for QA and submission (`web/scripts/screenshots.mjs`) (~2h)
+
 ---
 
 ## Production v1 (~6 months, ~1,100 person-hours, all 556 units)

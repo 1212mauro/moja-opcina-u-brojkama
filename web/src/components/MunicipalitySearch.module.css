@@ -1,6 +1,15 @@
+/* The page's primary action (H1): a card of its own above the list. */
 .search {
   margin-bottom: var(--space-5);
-  max-width: 32rem;
+  padding: var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+@media (min-width: 48rem) {
+  .search {
+    padding: var(--space-5);
+  }
 }
 
 .label {
@@ -38,8 +47,7 @@
 }
 
 .tableWrap {
-  overflow-x: auto;
-  background: var(--surface-1);
+  background-color: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }

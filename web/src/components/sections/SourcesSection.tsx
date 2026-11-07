@@ -15,7 +15,12 @@ export function SourcesTable({
   const fmt = getFormat(locale);
   const cols = msg.sources.columns;
   return (
-    <div style={{ overflowX: "auto" }}>
+    <div
+      className="table-scroll"
+      role="region"
+      aria-label={msg.sections.sources}
+      tabIndex={0}
+    >
       <table>
         <thead>
           <tr>

@@ -21,7 +21,12 @@ export function SourcesView({ locale }: { locale: Locale }) {
       <h1>{msg.site.nav.sources}</h1>
       <p className={styles.lead}>{msg.sources.intro}</p>
       <p>{msg.sources.generated(fmt.date(generatedAt))}</p>
-      <div className={styles.wide}>
+      <div
+        className={`table-scroll ${styles.wide}`}
+        role="region"
+        aria-label={msg.site.nav.sources}
+        tabIndex={0}
+      >
         <table>
           <thead>
             <tr>
