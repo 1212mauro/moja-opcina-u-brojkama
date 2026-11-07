@@ -21,26 +21,40 @@ export function SourcesTable({
       aria-label={msg.sections.sources}
       tabIndex={0}
     >
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">{cols.source}</th>
-            <th scope="col">{cols.publisher}</th>
-            <th scope="col">{cols.fetched}</th>
-            <th scope="col">{cols.licence}</th>
+      <table className="stack-table" role="table">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">
+              {cols.source}
+            </th>
+            <th role="columnheader" scope="col">
+              {cols.publisher}
+            </th>
+            <th role="columnheader" scope="col">
+              {cols.fetched}
+            </th>
+            <th role="columnheader" scope="col">
+              {cols.licence}
+            </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody role="rowgroup">
           {runs.map((run) => (
-            <tr key={run.id} id={`izvor-${run.id}`}>
-              <td>
+            <tr role="row" key={run.id} id={`izvor-${run.id}`}>
+              <td role="cell" data-label={cols.source}>
                 <a href={run.url} rel="external" lang={dataLang(locale)}>
                   {run.title}
                 </a>
               </td>
-              <td>{run.publisher}</td>
-              <td>{fmt.date(run.fetchedAt)}</td>
-              <td>{msg.sources.licences[run.source] ?? run.licence}</td>
+              <td role="cell" data-label={cols.publisher}>
+                {run.publisher}
+              </td>
+              <td role="cell" data-label={cols.fetched}>
+                {fmt.date(run.fetchedAt)}
+              </td>
+              <td role="cell" data-label={cols.licence}>
+                {msg.sources.licences[run.source] ?? run.licence}
+              </td>
             </tr>
           ))}
         </tbody>

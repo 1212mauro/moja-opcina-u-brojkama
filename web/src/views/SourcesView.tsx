@@ -27,42 +27,57 @@ export function SourcesView({ locale }: { locale: Locale }) {
         aria-label={msg.site.nav.sources}
         tabIndex={0}
       >
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">{t.source}</th>
-              <th scope="col">{t.publisher}</th>
-              <th scope="col">{t.fetched}</th>
-              <th scope="col" className="num">
+        <table className="stack-table" role="table">
+          <thead role="rowgroup">
+            <tr role="row">
+              <th role="columnheader" scope="col">
+                {t.source}
+              </th>
+              <th role="columnheader" scope="col">
+                {t.publisher}
+              </th>
+              <th role="columnheader" scope="col">
+                {t.fetched}
+              </th>
+              <th role="columnheader" scope="col" className="num">
                 {t.rows}
               </th>
-              <th scope="col">{t.licence}</th>
+              <th role="columnheader" scope="col">
+                {t.licence}
+              </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody role="rowgroup">
             {runs.map((run) => (
-              <tr key={run.id}>
-                <td>
-                  <a href={run.url} rel="external" lang={dataLang(locale)}>
-                    {run.title}
-                  </a>
-                  {run.status !== "ok" ? (
-                    <span className={styles.warning}>
-                      {" "}
-                      — {msg.sources.status[run.status]}
-                    </span>
-                  ) : null}
+              <tr role="row" key={run.id}>
+                <td role="cell" data-label={t.source}>
+                  {/* One element, so the stacked layout keeps it in one column. */}
+                  <span>
+                    <a href={run.url} rel="external" lang={dataLang(locale)}>
+                      {run.title}
+                    </a>
+                    {run.status !== "ok" ? (
+                      <span className={styles.warning}>
+                        {" "}
+                        — {msg.sources.status[run.status]}
+                      </span>
+                    ) : null}
+                  </span>
                 </td>
-                <td>{run.publisher}</td>
-                <td>
+                <td role="cell" data-label={t.publisher}>
+                  {run.publisher}
+                </td>
+                <td role="cell" data-label={t.fetched}>
                   {run.status === "ok" || run.rowCount
                     ? fmt.date(run.fetchedAt)
                     : "–"}
                 </td>
-                <td className="num">
+                <td role="cell" className="num" data-label={t.rows}>
                   {run.rowCount ? fmt.integer(run.rowCount) : "–"}
                 </td>
-                <td>{msg.sources.licences[run.source] ?? run.licence}</td>
+                <td role="cell" data-label={t.licence}>
+                  {msg.sources.licences[run.source] ?? run.licence}
+                </td>
               </tr>
             ))}
           </tbody>
