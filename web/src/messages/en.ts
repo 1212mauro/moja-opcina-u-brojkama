@@ -258,6 +258,9 @@ export const en: Messages = {
     home: "Map: select a town or municipality, or choose one from the list below.",
     locator: (name: string) => `Location of ${name} in the county`,
     noData: "data not yet available",
+    legend: "Map key",
+    legendOthers: "other towns and municipalities",
+    legendUnit: "town or municipality with data",
   },
 
   missing: {

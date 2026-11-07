@@ -123,7 +123,7 @@ Layout and hierarchy on top of the existing tokens, so a resident finds their to
 - [x] H3 Section navigation: sticky sidebar on desktop, scrollable chip row on phones (~3h)
 - [x] H4 Wide tables scroll inside their card on phones (keyboard-focusable region, edge fades) instead of squeezing (~3h)
 - [x] H5 Key figures in context: spending per resident against similar units ("12 % više od prosjeka sličnih"), in all three editions (~4h)
-- [ ] H6 Map: name labels or a list on hover/focus, and a legend for units without data (~4h)
+- [x] H6 Map: name labels or a list on hover/focus, and a legend for units without data (~4h)
 - [ ] H7 Sources table as a stacked list on phones (~2h)
 - [ ] H8 Visual QA at 360 px, 768 px and 1280 px in light and dark mode, all three editions; screenshots for G6 (~4h)
 - [x] H9 Screenshot script for QA and submission (`web/scripts/screenshots.mjs`) (~2h)
