@@ -99,6 +99,14 @@ export const en: Messages = {
     perResident: (value: string) => `${value} per resident`,
     contracts: "Public contracts",
     contractsSince: (from: string) => `since ${from}`,
+    vsPeers: (
+      direction: "more" | "less" | "same",
+      share: string,
+      only: string | null,
+    ) =>
+      direction === "same"
+        ? `per resident, about the same as ${only ?? "similar units on average"}`
+        : `per resident, ${share} ${direction} than ${only ?? "similar units on average"}`,
   },
 
   sections: {

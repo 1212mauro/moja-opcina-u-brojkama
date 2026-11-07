@@ -110,6 +110,16 @@ export const hr = {
     perResident: (value: string) => `${value} po stanovniku`,
     contracts: "Ugovori javne nabave",
     contractsSince: (from: string) => `od ${from}`,
+    // H5: a per-resident figure against similar units; `only` names the single
+    // other unit when there is just one.
+    vsPeers: (
+      direction: "more" | "less" | "same",
+      share: string,
+      only: string | null,
+    ) =>
+      direction === "same"
+        ? `po stanovniku podjednako kao ${only ?? "prosjek sličnih"}`
+        : `po stanovniku ${share} ${direction === "more" ? "više" : "manje"} ${only ? `nego ${only}` : "od prosjeka sličnih"}`,
   },
 
   sections: {
