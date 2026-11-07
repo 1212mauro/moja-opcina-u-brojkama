@@ -39,6 +39,14 @@ export const hrSimple: Messages = {
     expenditure: (year: number) => `Novac koji je potrošio ${year}.`,
     perResident: (value: string) => `${value} za svakog stanovnika`,
     contracts: "Ugovori za kupnju",
+    vsPeers: (
+      direction: "more" | "less" | "same",
+      share: string,
+      only: string | null,
+    ) =>
+      direction === "same"
+        ? `za svakog stanovnika otprilike kao ${only ?? "slična mjesta"}`
+        : `za svakog stanovnika ${share} ${direction === "more" ? "više" : "manje"} nego ${only ?? "slična mjesta u prosjeku"}`,
   },
 
   sections: {

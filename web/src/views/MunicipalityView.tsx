@@ -9,7 +9,8 @@ import { PeersSection } from "@/components/sections/PeersSection";
 import { ProcurementSection } from "@/components/sections/ProcurementSection";
 import { SourcesTable } from "@/components/sections/SourcesSection";
 import { loadPage, pageSlugs } from "@/lib/data";
-import { getFormat } from "@/lib/format";
+import { compareWithPeers } from "@/lib/peers";
+import { getFormat, type Format } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import { routePath } from "@/lib/paths";
 import { getMessages } from "@/messages";
@@ -96,6 +97,11 @@ export function MunicipalityView({
                     fmt.eurCents(budget.revenuePerResidentEur),
                   )}
                 </p>
+                <VsPeers
+                  comparison={compareWithPeers(page, "revenuePerResidentEur")}
+                  fmt={fmt}
+                  vsPeers={msg.page.vsPeers}
+                />
               </div>
               <div className={styles.tile}>
                 <p className={styles.tileLabel}>
@@ -109,6 +115,14 @@ export function MunicipalityView({
                     fmt.eurCents(budget.expenditurePerResidentEur),
                   )}
                 </p>
+                <VsPeers
+                  comparison={compareWithPeers(
+                    page,
+                    "expenditurePerResidentEur",
+                  )}
+                  fmt={fmt}
+                  vsPeers={msg.page.vsPeers}
+                />
               </div>
             </>
           ) : null}
@@ -180,5 +194,35 @@ export function MunicipalityView({
         </div>
       </div>
     </article>
+  );
+}
+
+/**
+ * H5: the tile's figure in context, linked to the comparison section. Plain text, no
+ * colour: spending more or less than similar units is neither good nor bad in itself.
+ */
+function VsPeers({
+  comparison,
+  fmt,
+  vsPeers,
+}: {
+  comparison: ReturnType<typeof compareWithPeers>;
+  fmt: Format;
+  vsPeers: ReturnType<typeof getMessages>["page"]["vsPeers"];
+}) {
+  if (!comparison) return null;
+  const { diff, only } = comparison;
+  const share = fmt.share(Math.abs(diff));
+  // Anything that rounds to 0 % reads as "about the same".
+  const direction =
+    Math.round(Math.abs(diff) * 100) === 0
+      ? "same"
+      : diff > 0
+        ? "more"
+        : "less";
+  return (
+    <p className={styles.tileCompare}>
+      <a href="#usporedba">{vsPeers(direction, share, only)}</a>
+    </p>
   );
 }
