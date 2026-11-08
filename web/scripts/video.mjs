@@ -9,9 +9,13 @@
  *   - <outDir>/predstavljanje.srt    the captions as subtitles
  *   - <outDir>/naracija.md           the narration with start times, to read aloud
  *
- *   npm run build && node scripts/video.mjs <outDir>
+ *   npm run build && node scripts/video.mjs <outDir> [voice.json]
+ *
+ * With voice.json (docs/video/glas.json: where each scene's speech starts in a voice
+ * recording), every scene starts when the voice gets to it, so the recording can be
+ * laid under the video in one piece, shifted by `voiceOffset` (printed at the end).
  */
-import { mkdirSync, renameSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { chromium } from "playwright";
@@ -26,6 +30,22 @@ const VIDEO = { width: 1920, height: 1080 };
 const ZOOM = 1.5;
 // Brisk Croatian narration: about 2.8 words a second (a normal speaking pace).
 const WORDS_PER_SECOND = 2.8;
+// With a voice recording: the first words start this long into the video, and each
+// later scene appears this long before its first words.
+const VOICE_LEAD = 0.6;
+const SCENE_LEAD = 0.25;
+const voice = process.argv[3]
+  ? JSON.parse(readFileSync(path.resolve(process.argv[3]), "utf-8"))
+  : null;
+const voiceOffset = voice ? VOICE_LEAD - voice.sceneStarts[0] : 0;
+// Target start of each scene in the video, and the end of the last.
+const targets = voice
+  ? [
+      0,
+      ...voice.sceneStarts.slice(1).map((t) => t + voiceOffset - SCENE_LEAD),
+      voice.speechEnd + voiceOffset + 2,
+    ]
+  : null;
 
 mkdirSync(outDir, { recursive: true });
 const site = await serveSite(path.resolve("out"));
@@ -104,8 +124,13 @@ async function scene(text, narration, actions, hold = 800, shows = "") {
   const start = now();
   await caption(text);
   await actions();
-  const spoken = narration.split(/\s+/).length / WORDS_PER_SECOND + 0.3;
-  await wait(Math.max(hold, (spoken - (now() - start)) * 1000));
+  if (targets) {
+    // Hold until the voice reaches the next scene.
+    await wait(Math.max(0, (targets[timeline.length + 1] - now()) * 1000));
+  } else {
+    const spoken = narration.split(/\s+/).length / WORDS_PER_SECOND + 0.3;
+    await wait(Math.max(hold, (spoken - (now() - start)) * 1000));
+  }
   timeline.push({ start, end: now(), caption: text, narration, shows });
 }
 
@@ -533,7 +558,7 @@ writeFileSync(
     "2. Snimajte mobitelom u tihoj prostoriji, oko 20 cm od usta. Na početku ostavite 2 sekunde tišine.",
     "3. Ako jedna snimka ne ide, snimite svaku scenu kao zasebnu datoteku (`01.m4a`, `02.m4a`…); svaka se postavi na svoje vrijeme.",
     "",
-    "Video se ponovno snima iz izgrađene stranice (`web/`): `npm run build && node scripts/video.mjs ../docs/video`, pa pretvorba u MP4 (ffmpeg, H.264). Tada se i ovaj scenarij piše iznova, sa stvarnim vremenima.",
+    "Video se ponovno snima iz izgrađene stranice (`web/`): `npm run build && node scripts/video.mjs ../docs/video`, pa pretvorba u MP4 (ffmpeg, H.264). Tada se i ovaj scenarij piše iznova, sa stvarnim vremenima. S glasom: `node scripts/video.mjs ../docs/video ../docs/video/glas.json` postavi svaku scenu na trenutak kad je glas dođe; snimka glasa zatim ide ispod videa u komadu, pomaknuta za `voiceOffset` koji skripta ispiše (ffmpeg: `-ss 5.52` na snimci, filtri `highpass`, `afftdn`, `loudnorm`).",
     "",
     "## Scene",
     "",
@@ -553,3 +578,9 @@ writeFileSync(
 );
 
 console.log(`video: ${webm} (${mmss(now())}), ${timeline.length} scenes`);
+if (targets) {
+  const late = timeline
+    .map((s, i) => [i + 1, +(s.start - targets[i]).toFixed(2)])
+    .filter(([, d]) => d > 0.05);
+  console.log(`voiceOffset ${voiceOffset.toFixed(2)} s; end ${now().toFixed(2)} s; scenes late: ${JSON.stringify(late)}`);
+}

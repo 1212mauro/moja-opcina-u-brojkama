@@ -1,0 +1,6 @@
+{
+  "note": "Where each scene's speech starts in the voice recording (seconds), from a timestamped transcript and the pauses; speechEnd is where the last word ends. video.mjs paces the scenes to these times when given this file.",
+  "recording": "Record (online-voice-recorder.com).mp3, 2:34, recorded 8 Nov 2026",
+  "sceneStarts": [6.12, 14.99, 26.66, 30.52, 37.72, 46.39, 52.44, 57.71, 63.08, 66.89, 71.67, 77.29, 80.51, 86.06, 97.81, 114.77, 120.38, 127.37, 137.9],
+  "speechEnd": 147.67
+}
