@@ -49,3 +49,5 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
           npm run a11y
+      - name: Layout checks (every page at 360, 768 and 1280 px)
+        run: npm run layout

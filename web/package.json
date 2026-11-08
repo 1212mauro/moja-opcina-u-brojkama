@@ -10,7 +10,9 @@
     "gen:types": "json2ts -i ../contract/schema.json -o src/lib/contract.ts --unreachableDefinitions --additionalProperties false --bannerComment \"/* Generated from contract/schema.json by npm run gen:types. Do not edit by hand. */\"",
     "typecheck": "next typegen && tsc --noEmit",
     "postbuild": "node scripts/flatten-segment-prefetch.mjs out",
-    "a11y": "node scripts/a11y.mjs out"
+    "a11y": "node scripts/a11y.mjs out",
+    "layout": "node scripts/layout.mjs out",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "next": "16.4.2",
