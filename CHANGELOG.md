@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Video presentation (G4/G5): a 2:20 walkthrough in Croatian, recorded from the built site with on-screen captions (`web/scripts/video.mjs`), with subtitles and a timed narration to read over it (`docs/video/`).
 - Frontend design (`docs/design.md`): the home page puts search and the list first with the map beside them; each municipality page opens with one header card (name, key figures, locator map) and a section menu (sticky sidebar on desktop, chips on phones).
 - Wide tables scroll inside their card on phones, with edge fades and a keyboard-focusable region.
 - Screenshot script for visual QA (`web/scripts/screenshots.mjs`).

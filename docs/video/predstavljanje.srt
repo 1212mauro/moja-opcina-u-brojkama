@@ -1,0 +1,51 @@
+1
+00:00:14,013 --> 00:00:22,209
+Upišite ime mjesta ili poštanski broj
+
+2
+00:00:22,209 --> 00:00:30,409
+Svaki grad i općina ima svoju stranicu
+
+3
+00:00:30,409 --> 00:00:39,920
+Najvažnije brojke odmah na vrhu
+
+4
+00:00:39,920 --> 00:00:49,419
+Usporedba sa sličnim mjestima
+
+5
+00:00:49,419 --> 00:00:57,178
+Odakle dolazi novac i na što se troši
+
+6
+00:00:57,178 --> 00:01:04,936
+Uz svaki grafikon i tablica s brojkama
+
+7
+00:01:04,936 --> 00:01:17,913
+Usporedba s gradovima iste veličine
+
+8
+00:01:17,913 --> 00:01:24,808
+Javna nabava: od koga grad kupuje
+
+9
+00:01:24,808 --> 00:01:32,573
+Isplate iz proračuna: kome grad plaća
+
+10
+00:01:32,573 --> 00:01:37,300
+Škole, vrtići i zdravstvo u blizini
+
+11
+00:01:37,300 --> 00:01:48,539
+Svaki broj ima izvor i datum preuzimanja
+
+12
+00:01:48,539 --> 00:01:58,961
+Jednostavnim jezikom, i na engleskom
+
+13
+00:01:58,961 --> 00:02:08,457
+Pristupačno: WCAG 2.1 AA, i na mobitelu
