@@ -24,8 +24,8 @@ const LIVE_URL = "https://1212mauro.github.io/moja-opcina-u-brojkama/";
 // full HD (recordings do not use the device pixel ratio, so zoom does the scaling).
 const VIDEO = { width: 1920, height: 1080 };
 const ZOOM = 1.5;
-// Calm Croatian narration: about 2.3 words a second, plus a short pause.
-const WORDS_PER_SECOND = 2.3;
+// Brisk Croatian narration: about 2.8 words a second (a normal speaking pace).
+const WORDS_PER_SECOND = 2.8;
 
 mkdirSync(outDir, { recursive: true });
 const site = await serveSite(path.resolve("out"));
@@ -100,11 +100,11 @@ async function caption(text) {
  * One scene: caption on, actions, then hold until the narration has had time to be
  * read aloud (at least `hold` ms after the actions). Timings go to the timeline.
  */
-async function scene(text, narration, actions, hold = 1500) {
+async function scene(text, narration, actions, hold = 800) {
   const start = now();
   await caption(text);
   await actions();
-  const spoken = narration.split(/\s+/).length / WORDS_PER_SECOND + 0.8;
+  const spoken = narration.split(/\s+/).length / WORDS_PER_SECOND + 0.3;
   await wait(Math.max(hold, (spoken - (now() - start)) * 1000));
   timeline.push({ start, end: now(), caption: text, narration });
 }
@@ -114,14 +114,14 @@ async function moveTo(locator) {
   const x = box.x + Math.min(box.width / 2, 120);
   const y = box.y + box.height / 2;
   await page.mouse.move(mouse.x, mouse.y);
-  await page.mouse.move(x, y, { steps: 25 });
+  await page.mouse.move(x, y, { steps: 12 });
   mouse = { x, y };
 }
 
 async function click(locator) {
   await locator.scrollIntoViewIfNeeded();
   await moveTo(locator);
-  await wait(300);
+  await wait(150);
   await page.mouse.down();
   await page.mouse.up();
 }
@@ -136,12 +136,12 @@ async function scrollToSelector(selector, offset = 24) {
     },
     [selector, offset],
   );
-  await wait(1400);
+  await wait(900);
 }
 
 async function scrollBy(dy) {
   await page.evaluate((d) => scrollBy({ top: d, behavior: "smooth" }), dy);
-  await wait(1200);
+  await wait(800);
 }
 
 /** A page of our own (title cards, the phones), sized in real pixels: no zoom. */
@@ -163,128 +163,128 @@ async function titleCard(heading, lines) {
 
 await scene(
   "",
-  "Ana živi u Lepoglavi. Zanima je koliko novca njezin grad ima, na što ga troši i kome plaća. Ti podaci su javni, ali razbacani po desetak službenih stranica i tablica.",
+  "Koliko novca ima vaš grad i na što ga troši? Podaci su javni, ali razbacani po desetak službenih stranica.",
   async () => {
     await titleCard("Moja općina u brojkama", [
       "Koliko novca ima vaše mjesto i na što ga troši?",
       "Jedna stranica za svaki grad i općinu, iz javnih podataka.",
     ]);
   },
-  6500,
+  2500,
 );
 
 await page.goto(site.origin + "/");
 await scene(
   "Upišite ime mjesta ili poštanski broj",
-  "Moja općina u brojkama skuplja ih na jedno mjesto. Ana upiše ime svog grada, ili poštanski broj.",
+  "Ovdje su na jednom mjestu. Upišite ime mjesta ili poštanski broj.",
   async () => {
     const input = page.locator('input[type="search"]');
     await click(input);
-    await page.keyboard.type("Lepo", { delay: 180 });
+    await page.keyboard.type("Lepo", { delay: 110 });
   },
-  1800,
+  800,
 );
 
 await scene(
   "Svaki grad i općina ima svoju stranicu",
-  "Za svaki od 28 gradova i općina Varaždinske županije postoji stranica. Može se odabrati i na karti.",
+  "Svaki grad i općina ima svoju stranicu.",
   async () => {
     await click(page.getByRole("link", { name: "Lepoglava" }).first());
     await page.waitForLoadState("networkidle");
   },
-  1200,
+  800,
 );
 
 await scene(
   "Najvažnije brojke odmah na vrhu",
-  "Na vrhu su najvažnije brojke: prihodi i rashodi grada u 2025., ukupno i po stanovniku, i broj ugovora javne nabave.",
+  "Na vrhu su prihodi, rashodi i broj ugovora javne nabave.",
   async () => {
     await moveTo(page.locator("section[aria-label] >> nth=0"));
   },
-  4500,
+  800,
 );
 
 await scene(
   "Usporedba sa sličnim mjestima",
-  "I odmah usporedba: po stanovniku Lepoglava troši 21 posto manje od sličnih gradova u županiji. Klik vodi na detaljnu usporedbu.",
+  "I usporedba: Lepoglava po stanovniku troši 21 posto manje od sličnih gradova.",
   async () => {
     await moveTo(page.getByRole("link", { name: /21 % manje/ }));
   },
-  4500,
+  800,
 );
 
 await scene(
   "Odakle dolazi novac i na što se troši",
-  "Proračun je prikazan jednostavnim stupcima: odakle novac dolazi, najviše od poreza, i na što se troši.",
+  "Proračun: odakle novac dolazi i na što se troši.",
   async () => {
     await scrollToSelector("#proracun");
     await scrollBy(420);
   },
-  3500,
+  1000,
 );
 
 await scene(
   "Uz svaki grafikon i tablica s brojkama",
-  "Uz svaki grafikon je i tablica s točnim iznosima, pa podatke mogu čitati i čitači zaslona.",
+  "Uz svaki grafikon je i tablica s točnim iznosima.",
   async () => {
     const more = page.locator("#proracun details summary").first();
     await click(more);
     await wait(600);
     await scrollBy(260);
   },
-  3000,
+  1000,
 );
 
 await scene(
   "Usporedba s gradovima iste veličine",
-  "Usporedba pokazuje Lepoglavu među gradovima iste veličine u županiji. Uz nju piše i što usporedba ne govori: više potrošenog novca nije samo po sebi ni dobro ni loše.",
+  "Usporedba s gradovima iste veličine u županiji.",
   async () => {
     await scrollToSelector("#usporedba");
   },
-  4500,
+  800,
 );
 
 await scene(
   "Javna nabava: od koga grad kupuje",
-  "Javna nabava: koliko ugovora je grad sklopio, s kojim dobavljačima najviše, i najnoviji ugovori.",
+  "Javna nabava: najveći dobavljači i najnoviji ugovori.",
   async () => {
     await scrollToSelector("#javna-nabava");
     await scrollBy(380);
   },
-  3500,
+  1000,
 );
 
 await scene(
   "Isplate iz proračuna: kome grad plaća",
-  "Isplate iz proračuna pokazuju kome grad plaća, mjesec po mjesec. Isplate privatnim osobama prikazujemo bez imena.",
+  "Isplate: kome grad plaća, mjesec po mjesec. Privatne osobe su bez imena.",
   async () => {
     await scrollToSelector("#isplate");
     await scrollBy(320);
   },
-  4000,
+  1500,
 );
 
 await scene(
   "Škole, vrtići i zdravstvo u blizini",
-  "Na kraju, škole, vrtići i ambulante na području grada.",
+  "Škole, vrtići i ambulante u gradu.",
   async () => {
     await scrollToSelector("#ustanove");
   },
-  3000,
+  1000,
 );
 
 await scene(
   "Svaki broj ima izvor i datum preuzimanja",
-  "Svaki broj ima izvor. Podatke preuzimamo automatski svake noći sa službenih stranica: Ministarstva financija, Državnog zavoda za statistiku, registra javne nabave i samih gradova.",
+  "Svaki broj ima izvor, a podaci se osvježavaju automatski svake noći.",
   async () => {
     await scrollToSelector("#izvori");
   },
-  4500,
+  800,
 );
 
 await scene(
   "Jednostavnim jezikom, i na engleskom",
-  "Stranica postoji i na jednostavnom jeziku, kratkim rečenicama i svakodnevnim riječima, te na engleskom.",
+  "Sve je i na jednostavnom jeziku, te na engleskom.",
   async () => {
     await page.evaluate(() => scrollTo({ top: 0, behavior: "smooth" }));
     await wait(1200);
@@ -292,17 +292,17 @@ await scene(
     await click(simple);
     await page.waitForLoadState("networkidle");
     await caption("Jednostavnim jezikom, i na engleskom");
-    await wait(2500);
+    await wait(1500);
     await click(page.getByRole("link", { name: "English" }));
     await page.waitForLoadState("networkidle");
     await caption("Jednostavnim jezikom, i na engleskom");
   },
-  3000,
+  1000,
 );
 
 await scene(
   "Pristupačno: WCAG 2.1 AA, i na mobitelu",
-  "Stranica radi na mobitelu i bez JavaScripta, u svijetlom i tamnom načinu, i prolazi automatske provjere pristupačnosti WCAG 2.1 AA.",
+  "Radi na mobitelu, u svijetlom i tamnom načinu, i zadovoljava WCAG 2.1 AA.",
   async () => {
     // Two phones side by side: the same page in light and dark mode.
     const phone = (scheme) =>
@@ -325,16 +325,16 @@ await scene(
     // Fade in once both phones have loaded, instead of showing empty frames.
     await page.evaluate(() => (document.body.style.opacity = "1"));
     await caption("Pristupačno: WCAG 2.1 AA, i na mobitelu");
-    await wait(2000);
+    await wait(1200);
     for (const frame of page.frames().slice(1))
       await frame.evaluate(() => scrollTo({ top: 260, behavior: "smooth" }));
   },
-  4000,
+  1500,
 );
 
 await scene(
   "",
-  "Danas za 28 gradova i općina Varaždinske županije, a cilj je svih 556 u Hrvatskoj. Sve je otvorenog koda i iz otvorenih podataka.",
+  "Danas 28 gradova i općina Varaždinske županije, a cilj je svih 556. Otvoreni podaci, otvoreni kod.",
   async () => {
     await titleCard("Moja općina u brojkama", [
       LIVE_URL.replace("https://", ""),
@@ -342,7 +342,7 @@ await scene(
       "Otvoreni podaci · otvoreni kod (EUPL-1.2)",
     ]);
   },
-  6500,
+  2500,
 );
 
 // --- Output ------------------------------------------------------------------------
@@ -381,7 +381,11 @@ writeFileSync(
   [
     "# Naracija za video predstavljanje",
     "",
-    `Trajanje snimke: ${mmss(now())}. Čitajte svaki odlomak od označenog vremena; ako ne stane, govorite malo brže ili ga skratite.`,
+    `Video: \`predstavljanje.mp4\` (${mmss(timeline.at(-1).end)}, 1920×1080, bez zvuka, s natpisima). Natpisi su i u \`predstavljanje.srt\`.`,
+    "",
+    "Čitajte svaki odlomak od označenog vremena, normalnim tempom govora; vremena su izračunata tako da tekst stane. Glas možete snimiti mobitelom ili u bilo kojem programu za video (npr. Clipchamp, CapCut, DaVinci Resolve) i staviti ga ispod videa.",
+    "",
+    "Video se ponovno snima iz izgrađene stranice (`web/`): `npm run build && node scripts/video.mjs ../docs/video`, pa pretvorba u MP4 (ffmpeg, H.264).",
     "",
     ...timeline.flatMap((s) => [
       `**${mmss(s.start)}–${mmss(s.end)}**${s.caption ? ` · natpis: „${s.caption}”` : ""}`,
