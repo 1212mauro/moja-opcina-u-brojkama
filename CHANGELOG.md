@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/); see [CONTRIBUTING.md](CONTRIBUTING.md#versioning) for how versions map to milestones.
+All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/); see [README → Versioning](README.md#versioning) for how versions map to milestones.
 
 ## [Unreleased]
 
@@ -12,7 +12,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
-- Video presentation (G4/G5): a 1:04 walkthrough in Croatian, recorded from the built site with on-screen captions (`web/scripts/video.mjs`), with subtitles and a timed narration to read over it (`docs/video/`).
+- Video presentation (G4/G5): a 1:50 walkthrough in Croatian, recorded from the built site with on-screen captions (`web/scripts/video.mjs`), with subtitles and a timed narration to read over it (`docs/video/`). It covers what the datathon rules ask for: problem, users, data sources, features, technical architecture, value and further development.
+- Solution documentation in Croatian for the datathon submission (`docs/prijava.md`): every dataset with publisher, link and licence, how they are linked, architecture, standards, prerequisites, limits, further development and the tools used (including AI). README links the live site, video and screenshots.
 - Frontend design (`docs/design.md`): the home page puts search and the list first with the map beside them; each municipality page opens with one header card (name, key figures, locator map) and a section menu (sticky sidebar on desktop, chips on phones).
 - Wide tables scroll inside their card on phones, with edge fades and a keyboard-focusable region.
 - Screenshot script for visual QA (`web/scripts/screenshots.mjs`).
@@ -23,7 +24,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Varaždin payments, fetched nightly from the city's export access point (`/Pretraga/GetExport/`, named by the city in Nov 2026): 12 months, about 2,300 payments a month, cleaned with the same privacy rules (`docs/varazdin-payments.md`).
 - Data spot-check script (`scripts/spot_check.py`) and report (`docs/spot-check.md`): 50 figures on the pilot pages checked against their source files.
 - Spec, task tracker (`TASKS.md`) and progress script.
-- Repository layout, EUPL-1.2 licence, README and contributing guide.
+- Repository layout, EUPL-1.2 licence and README (workflow and versioning, formerly in CONTRIBUTING.md, which is removed).
 - Python 3.12 pipeline package (`opcina-pipeline`) with ruff and pytest.
 - Next.js website configured for static export.
 - JSON data contract: Pydantic models → `contract/schema.json` → generated TypeScript types.

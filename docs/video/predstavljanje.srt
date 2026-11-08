@@ -1,51 +1,67 @@
 1
-00:00:07,308 --> 00:00:11,550
-Upišite ime mjesta ili poštanski broj
+00:00:07,097 --> 00:00:15,973
+Za koga je
 
 2
-00:00:11,550 --> 00:00:14,359
-Svaki grad i općina ima svoju stranicu
+00:00:16,082 --> 00:00:20,310
+Upišite ime mjesta ili poštanski broj
 
 3
-00:00:14,359 --> 00:00:18,242
-Najvažnije brojke odmah na vrhu
+00:00:20,310 --> 00:00:23,113
+Svaki grad i općina ima svoju stranicu
 
 4
-00:00:18,242 --> 00:00:22,828
-Usporedba sa sličnim mjestima
+00:00:23,113 --> 00:00:26,987
+Najvažnije brojke odmah na vrhu
 
 5
-00:00:22,828 --> 00:00:26,353
-Odakle dolazi novac i na što se troši
+00:00:26,987 --> 00:00:31,585
+Usporedba sa sličnim mjestima
 
 6
-00:00:26,353 --> 00:00:29,875
-Uz svaki grafikon i tablica s brojkama
+00:00:31,585 --> 00:00:35,104
+Odakle dolazi novac i na što se troši
 
 7
-00:00:29,875 --> 00:00:32,681
-Usporedba s gradovima iste veličine
+00:00:35,104 --> 00:00:38,629
+Uz svaki grafikon i tablica s brojkama
 
 8
-00:00:32,681 --> 00:00:35,801
-Javna nabava: od koga grad kupuje
+00:00:38,629 --> 00:00:41,443
+Usporedba s gradovima iste veličine
 
 9
-00:00:35,801 --> 00:00:40,401
-Isplate iz proračuna: kome grad plaća
+00:00:41,443 --> 00:00:44,537
+Javna nabava: od koga grad kupuje
 
 10
-00:00:40,401 --> 00:00:42,852
-Škole, vrtići i zdravstvo u blizini
+00:00:44,537 --> 00:00:49,130
+Isplate iz proračuna: kome grad plaća
 
 11
-00:00:42,852 --> 00:00:47,092
-Svaki broj ima izvor i datum preuzimanja
+00:00:49,130 --> 00:00:51,583
+Škole, vrtići i zdravstvo u blizini
 
 12
-00:00:47,092 --> 00:00:53,680
-Jednostavnim jezikom, i na engleskom
+00:00:51,583 --> 00:00:55,827
+Svaki broj ima izvor i datum preuzimanja
 
 13
-00:00:53,680 --> 00:00:58,630
+00:00:55,827 --> 00:01:06,136
+16 skupova otvorenih podataka
+
+14
+00:01:06,136 --> 00:01:21,802
+Tehnička arhitektura
+
+15
+00:01:21,802 --> 00:01:26,617
+Jednostavnim jezikom, i na engleskom
+
+16
+00:01:26,617 --> 00:01:31,569
 Pristupačno: WCAG 2.1 AA, i na mobitelu
+
+17
+00:01:31,569 --> 00:01:39,734
+Daljnji razvoj

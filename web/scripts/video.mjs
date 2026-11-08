@@ -150,14 +150,44 @@ async function setPage(html) {
   await page.evaluate(overlay, 1);
 }
 
+const CARD_STYLE = `margin:0;height:100vh;display:grid;place-content:center;gap:30px;
+  background:#f6f5f2;color:#0b0b0b;font-family:system-ui,'Segoe UI',sans-serif;text-align:center`;
+
 async function titleCard(heading, lines) {
   await setPage(`<!doctype html><html lang="hr"><meta charset="utf-8">
-    <body style="margin:0;height:100vh;display:grid;place-content:center;gap:30px;
-      background:#f6f5f2;color:#0b0b0b;font-family:system-ui,'Segoe UI',sans-serif;text-align:center">
+    <body style="${CARD_STYLE}">
       <h1 style="margin:0;font-size:84px">${heading}</h1>
       ${lines.map((l) => `<p style="margin:0;font-size:42px;color:#52514e">${l}</p>`).join("")}
     </body></html>`);
 }
+
+/** A card with a heading and free-form content (lists, the architecture diagram). */
+async function infoCard(heading, body) {
+  await setPage(`<!doctype html><html lang="hr"><meta charset="utf-8">
+    <style>
+      .grid { display:grid; grid-template-columns:repeat(2, 640px); gap:22px 40px;
+        text-align:left; margin:0 auto; }
+      .item { background:#fff; border:2px solid #dcdad3; border-radius:16px; padding:18px 26px; }
+      .item b { display:block; font-size:34px; }
+      .item span { font-size:28px; color:#52514e; }
+      .flow { display:flex; align-items:center; gap:14px; justify-content:center; }
+      .box { width:290px; min-height:170px; box-sizing:border-box; display:grid;
+        align-content:center; gap:8px; background:#fff; border:3px solid #1c5cab;
+        border-radius:18px; padding:16px; }
+      .box b { font-size:32px; } .box span { font-size:24px; color:#52514e; }
+      .arrow { font-size:56px; color:#1c5cab; }
+      .note { margin:0; font-size:32px; color:#52514e; }
+    </style>
+    <body style="${CARD_STYLE};padding-bottom:140px;box-sizing:border-box">
+      <h1 style="margin:0 0 10px;font-size:72px">${heading}</h1>
+      ${body}
+    </body></html>`);
+}
+
+const items = (list) =>
+  `<div class="grid">${list
+    .map(([b, s]) => `<div class="item"><b>${b}</b><span>${s}</span></div>`)
+    .join("")}</div>`;
 
 // --- The story ---------------------------------------------------------------------
 
@@ -171,6 +201,23 @@ await scene(
     ]);
   },
   2500,
+);
+
+await scene(
+  "Za koga je",
+  "Za stanovnike koji žele znati kamo ide njihov novac, za vijećnike, novinare i udruge, i za same općine koje se žele usporediti sa sličnima.",
+  async () => {
+    await infoCard(
+      "Za koga je?",
+      items([
+        ["Stanovnici", "kamo ide novac mog mjesta?"],
+        ["Vijećnici", "brojke prije sjednice o proračunu"],
+        ["Novinari i udruge", "nabava i isplate na jednom mjestu"],
+        ["Gradovi i općine", "usporedba sa sličnim mjestima"],
+      ]),
+    );
+  },
+  2000,
 );
 
 await page.goto(site.origin + "/");
@@ -283,11 +330,54 @@ await scene(
 );
 
 await scene(
+  "16 skupova otvorenih podataka",
+  "Podaci dolaze iz šesnaest skupova podataka: Ministarstva financija, javne nabave, Zavoda za statistiku, Geodetske uprave, Portala otvorenih podataka i samih gradova. Povezujemo ih preko šifre općine i OIB-a.",
+  async () => {
+    await infoCard(
+      "Izvori podataka",
+      items([
+        ["Ministarstvo financija", "proračuni 2019–2025, registar proračunskih korisnika"],
+        ["EOJN RH i TED", "ugovori javne nabave"],
+        ["Državni zavod za statistiku", "popis 2021. i procjene stanovništva"],
+        ["Državna geodetska uprava", "granice gradova i općina"],
+        ["data.gov.hr (MZOM)", "škole i dječji vrtići"],
+        ["Gradovi i općine", "isplate iz proračuna, registri ugovora"],
+      ]) +
+        `<p class="note">Povezano preko šifre općine (DZS) i OIB-a · još Eurostat, Hrvatska pošta, OpenStreetMap</p>`,
+    );
+  },
+  1500,
+);
+
+await scene(
+  "Tehnička arhitektura",
+  "Arhitektura je jednostavna. Svake noći program u Pythonu preuzima izvore, obrađuje ih i provjerava kvalitetu. Iz toga nastaje JSON za svaku općinu, a Next.js od njega gradi statičke stranice. Nema poslužitelja ni baze. Ako neki izvor ne radi, ostaju njegovi zadnji ispravni podaci.",
+  async () => {
+    const box = (b, s) => `<div class="box"><b>${b}</b><span>${s}</span></div>`;
+    const arrow = `<div class="arrow" aria-hidden="true">→</div>`;
+    await infoCard(
+      "Tehnička arhitektura",
+      `<div class="flow">${[
+        box("Izvori", "API, XLSX, CSV, GeoJSON"),
+        box("Python", "preuzimanje, obrada, kontrola kvalitete"),
+        box("JSON", "jedna datoteka po općini, JSON Schema"),
+        box("Next.js", "statičke stranice, rade i bez JavaScripta"),
+        box("GitHub Pages", "javna stranica"),
+      ].join(arrow)}</div>
+      <p class="note">Svake noći u GitHub Actions · bez poslužitelja i baze · otvoreni kod (EUPL-1.2)</p>`,
+    );
+  },
+  2000,
+);
+
+await scene(
   "Jednostavnim jezikom, i na engleskom",
   "Sve je i na jednostavnom jeziku, te na engleskom.",
   async () => {
-    await page.evaluate(() => scrollTo({ top: 0, behavior: "smooth" }));
-    await wait(1200);
+    // Back from the cards to the city page.
+    await page.goto(site.origin + "/opcina/lepoglava/");
+    await caption("Jednostavnim jezikom, i na engleskom");
+    await wait(1000);
     const simple = page.getByRole("link", { name: "Jednostavni jezik" });
     await click(simple);
     await page.waitForLoadState("networkidle");
@@ -333,8 +423,25 @@ await scene(
 );
 
 await scene(
+  "Daljnji razvoj",
+  "Sljedeći koraci: svih 556 gradova i općina, ugovori od 2024. preko API-ja javne nabave, isplate za više mjesta i testiranje sa stanovnicima.",
+  async () => {
+    await infoCard(
+      "Daljnji razvoj",
+      items([
+        ["Svih 556 gradova i općina", "isti program, sve županije"],
+        ["Ugovori od 2024.", "službeni API javne nabave (EOJN)"],
+        ["Isplate za više mjesta", "podrška za više portala na kojima ih gradovi objavljuju"],
+        ["Testiranje", "sa stanovnicima i čitačima zaslona"],
+      ]),
+    );
+  },
+  2000,
+);
+
+await scene(
   "",
-  "Danas 28 gradova i općina Varaždinske županije, a cilj je svih 556. Otvoreni podaci, otvoreni kod.",
+  "U minuti dobijete odgovor za koji biste inače pretražili desetak stranica. Danas 28 gradova i općina Varaždinske županije, a cilj je svih 556. Otvoreni podaci, otvoreni kod.",
   async () => {
     await titleCard("Moja općina u brojkama", [
       LIVE_URL.replace("https://", ""),
