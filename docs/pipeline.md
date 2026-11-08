@@ -30,7 +30,7 @@ Schemas are in `pipeline/src/opcina_pipeline/tables.py`. Every row carries `dzs_
 | `population` | `parse/population.py` | 448 | census 2021 + DZS estimates 2011–2025 |
 | `budget_line` | `parse/budget.py` | 224,560 | 28 units × 2019–2025; economic, COFOG and derived positions; layout in `config/budget_layout.toml` |
 | `contract` | `parse/contracts.py` | 5,379 | old EOJN register (61 buyers), Ivanec's own register, new EOJN API when a key is set |
-| `payment` | `parse/payments.py` | 15,540 | Ivanec, Ludbreg, Jalžabet, Breznički Hum |
+| `payment` | `parse/payments.py` | 43,569 (Nov 2026) | Lepoglava, Maruševec, Sveti Ilija, Jalžabet, Breznički Hum, Varaždin |
 | `facility` | `parse/facilities.py` | 199 | ministry school and kindergarten registries + OpenStreetMap |
 
 ## Rules that matter
