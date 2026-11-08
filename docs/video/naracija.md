@@ -1,83 +1,203 @@
-# Naracija za video predstavljanje
+# Scenarij video predstavljanja
 
-Video: `predstavljanje.mp4` (1:49, 1920×1080, bez zvuka, s natpisima). Natpisi su i u `predstavljanje.srt`.
+Video: `predstavljanje.mp4` (2:18, 1920×1080, s natpisima na zaslonu). Natpisi su i u `predstavljanje.srt`.
 
-Čitajte svaki odlomak od označenog vremena, normalnim tempom govora; vremena su izračunata tako da tekst stane. Glas možete snimiti mobitelom ili u bilo kojem programu za video (npr. Clipchamp, CapCut, DaVinci Resolve) i staviti ga ispod videa.
+Pravila Datathona traže da video obuhvati: opis problema, ciljne korisnike, korištene izvore podataka, funkcionalnosti, tehničku arhitekturu, korisničku vrijednost i mogućnosti daljnjeg razvoja. Uz vrijeme svake scene piše koji od tih dijelova pokriva.
 
-Video se ponovno snima iz izgrađene stranice (`web/`): `npm run build && node scripts/video.mjs ../docs/video`, pa pretvorba u MP4 (ffmpeg, H.264).
+## Kako snimiti glas
 
-**0:00–0:07**
+1. Pustite video bez zvuka i čitajte uz njega; svaka scena počinje u označeno vrijeme. Vremena su izračunata za normalan tempo govora, pa tekst stane bez žurbe.
+2. Snimajte mobitelom u tihoj prostoriji, oko 20 cm od usta. Na početku ostavite 2 sekunde tišine.
+3. Ako jedna snimka ne ide, snimite svaku scenu kao zasebnu datoteku (`01.m4a`, `02.m4a`…); svaka se postavi na svoje vrijeme.
 
-Koliko novca ima vaš grad i na što ga troši? Podaci su javni, ali razbacani po desetak službenih stranica.
+Video se ponovno snima iz izgrađene stranice (`web/`): `npm run build && node scripts/video.mjs ../docs/video`, pa pretvorba u MP4 (ffmpeg, H.264). Tada se i ovaj scenarij piše iznova, sa stvarnim vremenima.
 
-**0:07–0:15** · natpis: „Za koga je”
+## Scene
 
-Za stanovnike koji žele znati kamo ide njihov novac, za vijećnike, novinare i udruge, i za same općine koje se žele usporediti sa sličnima.
+### 1. 0:00–0:10 · Problem
 
-**0:16–0:20** · natpis: „Upišite ime mjesta ili poštanski broj”
+**Na zaslonu:** Naslovna kartica: „Moja općina u brojkama”, s pitanjem koje aplikacija rješava.
 
-Ovdje su na jednom mjestu. Upišite ime mjesta ili poštanski broj.
+**Govor:** Koliko novca ima vaš grad ili općina i na što ga troši? Ti su podaci javni, ali razbacani po desetak službenih stranica i tablica koje je teško čitati.
 
-**0:20–0:23** · natpis: „Svaki grad i općina ima svoju stranicu”
+### 2. 0:10–0:21 · Ciljni korisnici
 
-Svaki grad i općina ima svoju stranicu.
+**Na zaslonu:** Kartica „Za koga je?”: četiri skupine korisnika i što svaka dobiva.
 
-**0:23–0:26** · natpis: „Najvažnije brojke odmah na vrhu”
+**Natpis:** „Za koga je”
 
-Na vrhu su prihodi, rashodi i broj ugovora javne nabave.
+**Govor:** Moja općina u brojkama napravljena je za stanovnike koji žele znati kamo ide njihov novac, za vijećnike, novinare i udruge, i za same općine koje se žele usporediti sa sličnima.
 
-**0:26–0:31** · natpis: „Usporedba sa sličnim mjestima”
+### 3. 0:21–0:25 · Funkcionalnosti
 
-I usporedba: Lepoglava po stanovniku troši 21 posto manje od sličnih gradova.
+**Na zaslonu:** Početna stranica. Pokazivač klikne u tražilicu i upiše „Lepo”; popis se suzi na Lepoglavu.
 
-**0:31–0:35** · natpis: „Odakle dolazi novac i na što se troši”
+**Natpis:** „Upišite ime mjesta ili poštanski broj”
 
-Proračun: odakle novac dolazi i na što se troši.
+**Govor:** Na početnoj stranici upišete ime svog mjesta ili poštanski broj.
 
-**0:35–0:38** · natpis: „Uz svaki grafikon i tablica s brojkama”
+### 4. 0:25–0:30 · Funkcionalnosti
 
-Uz svaki grafikon je i tablica s točnim iznosima.
+**Na zaslonu:** Klik na Lepoglavu; otvara se stranica grada.
 
-**0:38–0:41** · natpis: „Usporedba s gradovima iste veličine”
+**Natpis:** „Svaki grad i općina ima svoju stranicu”
 
-Usporedba s gradovima iste veličine u županiji.
+**Govor:** Svaki od 28 gradova i općina Varaždinske županije ima svoju stranicu. Otvorimo Lepoglavu.
 
-**0:41–0:44** · natpis: „Javna nabava: od koga grad kupuje”
+### 5. 0:30–0:37 · Funkcionalnosti
 
-Javna nabava: najveći dobavljači i najnoviji ugovori.
+**Na zaslonu:** Zaglavlje stranice: ime, karta županije s označenom Lepoglavom i tri ključne brojke.
 
-**0:44–0:49** · natpis: „Isplate iz proračuna: kome grad plaća”
+**Natpis:** „Najvažnije brojke odmah na vrhu”
 
-Isplate: kome grad plaća, mjesec po mjesec. Privatne osobe su bez imena.
+**Govor:** Na vrhu su najvažnije brojke: koliko je grad prošle godine dobio i potrošio, i koliko je ugovora javne nabave sklopio.
 
-**0:49–0:51** · natpis: „Škole, vrtići i zdravstvo u blizini”
+### 6. 0:37–0:43 · Funkcionalnosti
 
-Škole, vrtići i ambulante u gradu.
+**Na zaslonu:** Pokazivač na poveznici „21 % manje nego slična mjesta” ispod rashoda.
 
-**0:51–0:55** · natpis: „Svaki broj ima izvor i datum preuzimanja”
+**Natpis:** „Usporedba sa sličnim mjestima”
 
-Svaki broj ima izvor, a podaci se osvježavaju automatski svake noći.
+**Govor:** Uz svaku brojku je i usporedba: Lepoglava po stanovniku troši 21 posto manje od sličnih gradova.
 
-**0:55–1:06** · natpis: „16 skupova otvorenih podataka”
+### 7. 0:43–0:50 · Funkcionalnosti
 
-Podaci dolaze iz šesnaest skupova podataka: Ministarstva financija, javne nabave, Zavoda za statistiku, Geodetske uprave, Portala otvorenih podataka i samih gradova. Povezujemo ih preko šifre općine i OIB-a.
+**Na zaslonu:** Pomicanje do odjeljka o proračunu: grafikoni prihoda po vrsti i rashoda po namjeni.
 
-**1:06–1:21** · natpis: „Tehnička arhitektura”
+**Natpis:** „Odakle dolazi novac i na što se troši”
+
+**Govor:** U dijelu o proračunu vidi se odakle novac dolazi i na što se troši, od obrazovanja do prometa.
+
+### 8. 0:50–0:56 · Funkcionalnosti
+
+**Na zaslonu:** Klik otvara tablicu s točnim iznosima ispod grafikona.
+
+**Natpis:** „Uz svaki grafikon i tablica s brojkama”
+
+**Govor:** Uz svaki grafikon je i tablica s točnim iznosima, pa brojke može pročitati i čitač zaslona.
+
+### 9. 0:56–1:01 · Funkcionalnosti
+
+**Na zaslonu:** Odjeljak „Usporedba”: Lepoglava uz slične jedinice, po stanovniku.
+
+**Natpis:** „Usporedba s gradovima iste veličine”
+
+**Govor:** Zatim slijedi usporedba s gradovima i općinama iste vrste i veličine u županiji.
+
+### 10. 1:01–1:06 · Funkcionalnosti
+
+**Na zaslonu:** Odjeljak „Javna nabava”: najveći dobavljači i najnoviji ugovori.
+
+**Natpis:** „Javna nabava: od koga grad kupuje”
+
+**Govor:** Javna nabava pokazuje od koga grad najviše kupuje i koji su najnoviji ugovori.
+
+### 11. 1:06–1:12 · Funkcionalnosti
+
+**Na zaslonu:** Odjeljak „Isplate”: iznosi po mjesecima i najveći primatelji.
+
+**Natpis:** „Isplate iz proračuna: kome grad plaća”
+
+**Govor:** Isplate pokazuju kome grad plaća, mjesec po mjesec. Imena privatnih osoba nikad se ne prikazuju.
+
+### 12. 1:12–1:15 · Funkcionalnosti
+
+**Na zaslonu:** Odjeljak „Ustanove”: škole, vrtići i zdravstvene ustanove.
+
+**Natpis:** „Škole, vrtići i zdravstvo u blizini”
+
+**Govor:** Tu su i škole, vrtići i ambulante u gradu.
+
+### 13. 1:15–1:20 · Funkcionalnosti, izvori
+
+**Na zaslonu:** Odjeljak „Izvori”: izdavač, poveznica, licenca i datum preuzimanja za svaki skup podataka.
+
+**Natpis:** „Svaki broj ima izvor i datum preuzimanja”
+
+**Govor:** Svaki broj ima izvor i datum preuzimanja, a podaci se osvježavaju automatski svake noći.
+
+### 14. 1:20–1:31 · Izvori podataka
+
+**Na zaslonu:** Kartica „Izvori podataka”: šest glavnih izdavača i čemu služe; ispod, kako su povezani.
+
+**Natpis:** „16 skupova otvorenih podataka”
+
+**Govor:** Podaci dolaze iz šesnaest skupova otvorenih podataka: Ministarstva financija, javne nabave, Zavoda za statistiku, Geodetske uprave, Portala otvorenih podataka i samih gradova. Povezujemo ih preko šifre općine i OIB-a.
+
+### 15. 1:31–1:47 · Tehnička arhitektura
+
+**Na zaslonu:** Kartica „Tehnička arhitektura”: Izvori → Python → JSON → Next.js → GitHub Pages.
+
+**Natpis:** „Tehnička arhitektura”
+
+**Govor:** Arhitektura je jednostavna. Svake noći program u Pythonu preuzima izvore, obrađuje ih i provjerava kvalitetu. Iz toga nastaje JSON za svaku općinu, a Next.js od njega gradi statičke stranice. Nema poslužitelja ni baze. Ako neki izvor ne radi, ostaju njegovi zadnji ispravni podaci.
+
+### 16. 1:47–1:53 · Funkcionalnosti
+
+**Na zaslonu:** Klik na „Obični jezik”, zatim na „English”: ista stranica u druga dva izdanja.
+
+**Natpis:** „Jednostavnim jezikom, i na engleskom”
+
+**Govor:** Cijela stranica postoji i na jednostavnom jeziku, za one kojima je službeni jezik težak, te na engleskom.
+
+### 17. 1:53–1:59 · Funkcionalnosti
+
+**Na zaslonu:** Dva mobitela jedan uz drugi: stranica Lepoglave u svijetlom i u tamnom načinu.
+
+**Natpis:** „Pristupačno: WCAG 2.1 AA, i na mobitelu”
+
+**Govor:** Radi na mobitelu, u svijetlom i tamnom načinu, i zadovoljava standard pristupačnosti WCAG 2.1 AA.
+
+### 18. 1:59–2:08 · Daljnji razvoj
+
+**Na zaslonu:** Kartica „Daljnji razvoj”: četiri sljedeća koraka.
+
+**Natpis:** „Daljnji razvoj”
+
+**Govor:** Sljedeći koraci su svih 556 gradova i općina u Hrvatskoj, svi ugovori od 2024. preko API-ja javne nabave, isplate za više mjesta i testiranje sa stanovnicima.
+
+### 19. 2:08–2:18 · Korisnička vrijednost
+
+**Na zaslonu:** Završna kartica: adresa stranice, opseg i licenca.
+
+**Govor:** U minuti dobijete odgovor za koji biste inače pretražili desetak stranica. Danas 28 gradova i općina Varaždinske županije, a cilj je svih 556. Otvoreni podaci, otvoreni kod.
+
+## Cijeli tekst za čitanje
+
+Koliko novca ima vaš grad ili općina i na što ga troši? Ti su podaci javni, ali razbacani po desetak službenih stranica i tablica koje je teško čitati.
+
+Moja općina u brojkama napravljena je za stanovnike koji žele znati kamo ide njihov novac, za vijećnike, novinare i udruge, i za same općine koje se žele usporediti sa sličnima.
+
+Na početnoj stranici upišete ime svog mjesta ili poštanski broj.
+
+Svaki od 28 gradova i općina Varaždinske županije ima svoju stranicu. Otvorimo Lepoglavu.
+
+Na vrhu su najvažnije brojke: koliko je grad prošle godine dobio i potrošio, i koliko je ugovora javne nabave sklopio.
+
+Uz svaku brojku je i usporedba: Lepoglava po stanovniku troši 21 posto manje od sličnih gradova.
+
+U dijelu o proračunu vidi se odakle novac dolazi i na što se troši, od obrazovanja do prometa.
+
+Uz svaki grafikon je i tablica s točnim iznosima, pa brojke može pročitati i čitač zaslona.
+
+Zatim slijedi usporedba s gradovima i općinama iste vrste i veličine u županiji.
+
+Javna nabava pokazuje od koga grad najviše kupuje i koji su najnoviji ugovori.
+
+Isplate pokazuju kome grad plaća, mjesec po mjesec. Imena privatnih osoba nikad se ne prikazuju.
+
+Tu su i škole, vrtići i ambulante u gradu.
+
+Svaki broj ima izvor i datum preuzimanja, a podaci se osvježavaju automatski svake noći.
+
+Podaci dolaze iz šesnaest skupova otvorenih podataka: Ministarstva financija, javne nabave, Zavoda za statistiku, Geodetske uprave, Portala otvorenih podataka i samih gradova. Povezujemo ih preko šifre općine i OIB-a.
 
 Arhitektura je jednostavna. Svake noći program u Pythonu preuzima izvore, obrađuje ih i provjerava kvalitetu. Iz toga nastaje JSON za svaku općinu, a Next.js od njega gradi statičke stranice. Nema poslužitelja ni baze. Ako neki izvor ne radi, ostaju njegovi zadnji ispravni podaci.
 
-**1:21–1:26** · natpis: „Jednostavnim jezikom, i na engleskom”
+Cijela stranica postoji i na jednostavnom jeziku, za one kojima je službeni jezik težak, te na engleskom.
 
-Sve je i na jednostavnom jeziku, te na engleskom.
+Radi na mobitelu, u svijetlom i tamnom načinu, i zadovoljava standard pristupačnosti WCAG 2.1 AA.
 
-**1:26–1:31** · natpis: „Pristupačno: WCAG 2.1 AA, i na mobitelu”
-
-Radi na mobitelu, u svijetlom i tamnom načinu, i zadovoljava WCAG 2.1 AA.
-
-**1:31–1:39** · natpis: „Daljnji razvoj”
-
-Sljedeći koraci: svih 556 gradova i općina, ugovori od 2024. preko API-ja javne nabave, isplate za više mjesta i testiranje sa stanovnicima.
-
-**1:39–1:49**
+Sljedeći koraci su svih 556 gradova i općina u Hrvatskoj, svi ugovori od 2024. preko API-ja javne nabave, isplate za više mjesta i testiranje sa stanovnicima.
 
 U minuti dobijete odgovor za koji biste inače pretražili desetak stranica. Danas 28 gradova i općina Varaždinske županije, a cilj je svih 556. Otvoreni podaci, otvoreni kod.

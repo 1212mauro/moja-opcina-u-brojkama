@@ -6,7 +6,7 @@ Datathon Portala otvorenih podataka 2026 · Izazov **A) Društvo i javne usluge*
 | --- | --- |
 | Radni prototip | https://1212mauro.github.io/moja-opcina-u-brojkama/ |
 | Izvorni kod | https://github.com/1212mauro/moja-opcina-u-brojkama (licenca EUPL-1.2) |
-| Video prezentacija | [predstavljanje.mp4](https://github.com/1212mauro/moja-opcina-u-brojkama/releases/download/v0.4.0/predstavljanje.mp4) (1:50), [izdanje v0.4.0](https://github.com/1212mauro/moja-opcina-u-brojkama/releases/tag/v0.4.0) |
+| Video prezentacija | [predstavljanje.mp4](https://github.com/1212mauro/moja-opcina-u-brojkama/releases/download/v0.4.0/predstavljanje.mp4) (2:18), [izdanje v0.4.0](https://github.com/1212mauro/moja-opcina-u-brojkama/releases/tag/v0.4.0) |
 | Snimke zaslona | [docs/screenshots/](screenshots/) |
 
 ## 1. Problem

@@ -100,13 +100,13 @@ async function caption(text) {
  * One scene: caption on, actions, then hold until the narration has had time to be
  * read aloud (at least `hold` ms after the actions). Timings go to the timeline.
  */
-async function scene(text, narration, actions, hold = 800) {
+async function scene(text, narration, actions, hold = 800, shows = "") {
   const start = now();
   await caption(text);
   await actions();
   const spoken = narration.split(/\s+/).length / WORDS_PER_SECOND + 0.3;
   await wait(Math.max(hold, (spoken - (now() - start)) * 1000));
-  timeline.push({ start, end: now(), caption: text, narration });
+  timeline.push({ start, end: now(), caption: text, narration, shows });
 }
 
 async function moveTo(locator) {
@@ -193,7 +193,7 @@ const items = (list) =>
 
 await scene(
   "",
-  "Koliko novca ima vaš grad i na što ga troši? Podaci su javni, ali razbacani po desetak službenih stranica.",
+  "Koliko novca ima vaš grad ili općina i na što ga troši? Ti su podaci javni, ali razbacani po desetak službenih stranica i tablica koje je teško čitati.",
   async () => {
     await titleCard("Moja općina u brojkama", [
       "Koliko novca ima vaše mjesto i na što ga troši?",
@@ -201,11 +201,12 @@ await scene(
     ]);
   },
   2500,
+  "Naslovna kartica: „Moja općina u brojkama”, s pitanjem koje aplikacija rješava.",
 );
 
 await scene(
   "Za koga je",
-  "Za stanovnike koji žele znati kamo ide njihov novac, za vijećnike, novinare i udruge, i za same općine koje se žele usporediti sa sličnima.",
+  "Moja općina u brojkama napravljena je za stanovnike koji žele znati kamo ide njihov novac, za vijećnike, novinare i udruge, i za same općine koje se žele usporediti sa sličnima.",
   async () => {
     await infoCard(
       "Za koga je?",
@@ -218,61 +219,67 @@ await scene(
     );
   },
   2000,
+  "Kartica „Za koga je?”: četiri skupine korisnika i što svaka dobiva.",
 );
 
 await page.goto(site.origin + "/");
 await scene(
   "Upišite ime mjesta ili poštanski broj",
-  "Ovdje su na jednom mjestu. Upišite ime mjesta ili poštanski broj.",
+  "Na početnoj stranici upišete ime svog mjesta ili poštanski broj.",
   async () => {
     const input = page.locator('input[type="search"]');
     await click(input);
     await page.keyboard.type("Lepo", { delay: 110 });
   },
   800,
+  "Početna stranica. Pokazivač klikne u tražilicu i upiše „Lepo”; popis se suzi na Lepoglavu.",
 );
 
 await scene(
   "Svaki grad i općina ima svoju stranicu",
-  "Svaki grad i općina ima svoju stranicu.",
+  "Svaki od 28 gradova i općina Varaždinske županije ima svoju stranicu. Otvorimo Lepoglavu.",
   async () => {
     await click(page.getByRole("link", { name: "Lepoglava" }).first());
     await page.waitForLoadState("networkidle");
   },
   800,
+  "Klik na Lepoglavu; otvara se stranica grada.",
 );
 
 await scene(
   "Najvažnije brojke odmah na vrhu",
-  "Na vrhu su prihodi, rashodi i broj ugovora javne nabave.",
+  "Na vrhu su najvažnije brojke: koliko je grad prošle godine dobio i potrošio, i koliko je ugovora javne nabave sklopio.",
   async () => {
     await moveTo(page.locator("section[aria-label] >> nth=0"));
   },
   800,
+  "Zaglavlje stranice: ime, karta županije s označenom Lepoglavom i tri ključne brojke.",
 );
 
 await scene(
   "Usporedba sa sličnim mjestima",
-  "I usporedba: Lepoglava po stanovniku troši 21 posto manje od sličnih gradova.",
+  "Uz svaku brojku je i usporedba: Lepoglava po stanovniku troši 21 posto manje od sličnih gradova.",
   async () => {
     await moveTo(page.getByRole("link", { name: /21 % manje/ }));
   },
   800,
+  "Pokazivač na poveznici „21 % manje nego slična mjesta” ispod rashoda.",
 );
 
 await scene(
   "Odakle dolazi novac i na što se troši",
-  "Proračun: odakle novac dolazi i na što se troši.",
+  "U dijelu o proračunu vidi se odakle novac dolazi i na što se troši, od obrazovanja do prometa.",
   async () => {
     await scrollToSelector("#proracun");
     await scrollBy(420);
   },
   1000,
+  "Pomicanje do odjeljka o proračunu: grafikoni prihoda po vrsti i rashoda po namjeni.",
 );
 
 await scene(
   "Uz svaki grafikon i tablica s brojkama",
-  "Uz svaki grafikon je i tablica s točnim iznosima.",
+  "Uz svaki grafikon je i tablica s točnim iznosima, pa brojke može pročitati i čitač zaslona.",
   async () => {
     const more = page.locator("#proracun details summary").first();
     await click(more);
@@ -280,58 +287,64 @@ await scene(
     await scrollBy(260);
   },
   1000,
+  "Klik otvara tablicu s točnim iznosima ispod grafikona.",
 );
 
 await scene(
   "Usporedba s gradovima iste veličine",
-  "Usporedba s gradovima iste veličine u županiji.",
+  "Zatim slijedi usporedba s gradovima i općinama iste vrste i veličine u županiji.",
   async () => {
     await scrollToSelector("#usporedba");
   },
   800,
+  "Odjeljak „Usporedba”: Lepoglava uz slične jedinice, po stanovniku.",
 );
 
 await scene(
   "Javna nabava: od koga grad kupuje",
-  "Javna nabava: najveći dobavljači i najnoviji ugovori.",
+  "Javna nabava pokazuje od koga grad najviše kupuje i koji su najnoviji ugovori.",
   async () => {
     await scrollToSelector("#javna-nabava");
     await scrollBy(380);
   },
   1000,
+  "Odjeljak „Javna nabava”: najveći dobavljači i najnoviji ugovori.",
 );
 
 await scene(
   "Isplate iz proračuna: kome grad plaća",
-  "Isplate: kome grad plaća, mjesec po mjesec. Privatne osobe su bez imena.",
+  "Isplate pokazuju kome grad plaća, mjesec po mjesec. Imena privatnih osoba nikad se ne prikazuju.",
   async () => {
     await scrollToSelector("#isplate");
     await scrollBy(320);
   },
   1500,
+  "Odjeljak „Isplate”: iznosi po mjesecima i najveći primatelji.",
 );
 
 await scene(
   "Škole, vrtići i zdravstvo u blizini",
-  "Škole, vrtići i ambulante u gradu.",
+  "Tu su i škole, vrtići i ambulante u gradu.",
   async () => {
     await scrollToSelector("#ustanove");
   },
   1000,
+  "Odjeljak „Ustanove”: škole, vrtići i zdravstvene ustanove.",
 );
 
 await scene(
   "Svaki broj ima izvor i datum preuzimanja",
-  "Svaki broj ima izvor, a podaci se osvježavaju automatski svake noći.",
+  "Svaki broj ima izvor i datum preuzimanja, a podaci se osvježavaju automatski svake noći.",
   async () => {
     await scrollToSelector("#izvori");
   },
   800,
+  "Odjeljak „Izvori”: izdavač, poveznica, licenca i datum preuzimanja za svaki skup podataka.",
 );
 
 await scene(
   "16 skupova otvorenih podataka",
-  "Podaci dolaze iz šesnaest skupova podataka: Ministarstva financija, javne nabave, Zavoda za statistiku, Geodetske uprave, Portala otvorenih podataka i samih gradova. Povezujemo ih preko šifre općine i OIB-a.",
+  "Podaci dolaze iz šesnaest skupova otvorenih podataka: Ministarstva financija, javne nabave, Zavoda za statistiku, Geodetske uprave, Portala otvorenih podataka i samih gradova. Povezujemo ih preko šifre općine i OIB-a.",
   async () => {
     await infoCard(
       "Izvori podataka",
@@ -347,6 +360,7 @@ await scene(
     );
   },
   1500,
+  "Kartica „Izvori podataka”: šest glavnih izdavača i čemu služe; ispod, kako su povezani.",
 );
 
 await scene(
@@ -368,11 +382,12 @@ await scene(
     );
   },
   2000,
+  "Kartica „Tehnička arhitektura”: Izvori → Python → JSON → Next.js → GitHub Pages.",
 );
 
 await scene(
   "Jednostavnim jezikom, i na engleskom",
-  "Sve je i na jednostavnom jeziku, te na engleskom.",
+  "Cijela stranica postoji i na jednostavnom jeziku, za one kojima je službeni jezik težak, te na engleskom.",
   async () => {
     // Back from the cards to the city page.
     await page.goto(site.origin + "/opcina/lepoglava/");
@@ -388,11 +403,12 @@ await scene(
     await caption("Jednostavnim jezikom, i na engleskom");
   },
   1000,
+  "Klik na „Obični jezik”, zatim na „English”: ista stranica u druga dva izdanja.",
 );
 
 await scene(
   "Pristupačno: WCAG 2.1 AA, i na mobitelu",
-  "Radi na mobitelu, u svijetlom i tamnom načinu, i zadovoljava WCAG 2.1 AA.",
+  "Radi na mobitelu, u svijetlom i tamnom načinu, i zadovoljava standard pristupačnosti WCAG 2.1 AA.",
   async () => {
     // Two phones side by side: the same page in light and dark mode.
     const phone = (scheme) =>
@@ -420,11 +436,12 @@ await scene(
       await frame.evaluate(() => scrollTo({ top: 260, behavior: "smooth" }));
   },
   1500,
+  "Dva mobitela jedan uz drugi: stranica Lepoglave u svijetlom i u tamnom načinu.",
 );
 
 await scene(
   "Daljnji razvoj",
-  "Sljedeći koraci: svih 556 gradova i općina, ugovori od 2024. preko API-ja javne nabave, isplate za više mjesta i testiranje sa stanovnicima.",
+  "Sljedeći koraci su svih 556 gradova i općina u Hrvatskoj, svi ugovori od 2024. preko API-ja javne nabave, isplate za više mjesta i testiranje sa stanovnicima.",
   async () => {
     await infoCard(
       "Daljnji razvoj",
@@ -437,6 +454,7 @@ await scene(
     );
   },
   2000,
+  "Kartica „Daljnji razvoj”: četiri sljedeća koraka.",
 );
 
 await scene(
@@ -450,6 +468,7 @@ await scene(
     ]);
   },
   2500,
+  "Završna kartica: adresa stranice, opseg i licenca.",
 );
 
 // --- Output ------------------------------------------------------------------------
@@ -481,25 +500,55 @@ writeFileSync(
     .join("\n"),
 );
 
+// Which part of the presentation each scene is (the topics the datathon rules list).
+const F = "Funkcionalnosti";
+const PART = [
+  "Problem",
+  "Ciljni korisnici",
+  F, F, F, F, F, F, F, F, F, F,
+  "Funkcionalnosti, izvori",
+  "Izvori podataka",
+  "Tehnička arhitektura",
+  F, F,
+  "Daljnji razvoj",
+  "Korisnička vrijednost",
+];
+if (PART.length !== timeline.length)
+  throw new Error(`PART has ${PART.length} entries for ${timeline.length} scenes`);
+
 const mmss = (s) =>
   `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 writeFileSync(
   path.join(outDir, "naracija.md"),
   [
-    "# Naracija za video predstavljanje",
+    "# Scenarij video predstavljanja",
     "",
-    `Video: \`predstavljanje.mp4\` (${mmss(timeline.at(-1).end)}, 1920×1080, bez zvuka, s natpisima). Natpisi su i u \`predstavljanje.srt\`.`,
+    `Video: \`predstavljanje.mp4\` (${mmss(timeline.at(-1).end)}, 1920×1080, s natpisima na zaslonu). Natpisi su i u \`predstavljanje.srt\`.`,
     "",
-    "Čitajte svaki odlomak od označenog vremena, normalnim tempom govora; vremena su izračunata tako da tekst stane. Glas možete snimiti mobitelom ili u bilo kojem programu za video (npr. Clipchamp, CapCut, DaVinci Resolve) i staviti ga ispod videa.",
+    "Pravila Datathona traže da video obuhvati: opis problema, ciljne korisnike, korištene izvore podataka, funkcionalnosti, tehničku arhitekturu, korisničku vrijednost i mogućnosti daljnjeg razvoja. Uz vrijeme svake scene piše koji od tih dijelova pokriva.",
     "",
-    "Video se ponovno snima iz izgrađene stranice (`web/`): `npm run build && node scripts/video.mjs ../docs/video`, pa pretvorba u MP4 (ffmpeg, H.264).",
+    "## Kako snimiti glas",
     "",
-    ...timeline.flatMap((s) => [
-      `**${mmss(s.start)}–${mmss(s.end)}**${s.caption ? ` · natpis: „${s.caption}”` : ""}`,
+    "1. Pustite video bez zvuka i čitajte uz njega; svaka scena počinje u označeno vrijeme. Vremena su izračunata za normalan tempo govora, pa tekst stane bez žurbe.",
+    "2. Snimajte mobitelom u tihoj prostoriji, oko 20 cm od usta. Na početku ostavite 2 sekunde tišine.",
+    "3. Ako jedna snimka ne ide, snimite svaku scenu kao zasebnu datoteku (`01.m4a`, `02.m4a`…); svaka se postavi na svoje vrijeme.",
+    "",
+    "Video se ponovno snima iz izgrađene stranice (`web/`): `npm run build && node scripts/video.mjs ../docs/video`, pa pretvorba u MP4 (ffmpeg, H.264). Tada se i ovaj scenarij piše iznova, sa stvarnim vremenima.",
+    "",
+    "## Scene",
+    "",
+    ...timeline.flatMap((s, i) => [
+      `### ${i + 1}. ${mmss(s.start)}–${mmss(s.end)} · ${PART[i]}`,
       "",
-      s.narration,
+      `**Na zaslonu:** ${s.shows}`,
+      "",
+      ...(s.caption ? [`**Natpis:** „${s.caption}”`, ""] : []),
+      `**Govor:** ${s.narration}`,
       "",
     ]),
+    "## Cijeli tekst za čitanje",
+    "",
+    ...timeline.flatMap((s) => [`${s.narration}`, ""]),
   ].join("\n"),
 );
 
