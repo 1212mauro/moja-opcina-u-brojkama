@@ -63,11 +63,15 @@ Two choices currently keep a name because it is a business name. **Both are open
 1. **Sole traders** (obrt "vl. …", OPG, notaries, lawyers) keep their name and OIB as payment recipients and suppliers, but an obrt's OIB is its owner's personal OIB. Where a publisher marks them GDPR (Ivanec does), they stay hidden.
 2. **Pharmacies** named after their owner (e.g. "Ljekarna <ime prezime>") keep that trade name.
 
-## When a source is down
+## Every source and table stands alone
 
-A source whose download fails does not stop the others. The build uses the files from its last successful download, and the website marks it as "zadnje preuzimanje nije uspjelo; prikazujemo prethodne podatke", with the date of those files.
+One source or table never holds back another:
 
-`opcina fetch` fails the nightly job (and so holds back the deploy) only when a failed source has no earlier successful download, or the last one is more than 7 days old (`STALE_LIMIT_DAYS` in `fetch/__init__.py`). A shorter outage shows as a "Source down" warning on the run page. Example: on 8 Nov 2026, data.gov.hr reset every connection from GitHub's runners while it answered normally elsewhere; eight sources kept their files from the day before.
+- **A source that fails to download** keeps the files of its last successful download. The build uses them, and the website marks the source as "zadnje preuzimanje nije uspjelo; prikazujemo prethodne podatke", with the date of those files. Every other source updates as usual.
+- **A table the quality gate rejects** keeps its last published version. Every table that passed is published.
+- **The website deploys after every nightly run**, whether it succeeded or failed (`deploy.yml`), so everything that did update goes live. Only a cancelled run does not deploy.
+
+A red nightly job is therefore only an alert to the maintainer (GitHub emails on a failed scheduled run). It happens when a table fails the quality gate, or when a source is overdue: it failed and has no successful download in the last 7 days (`STALE_LIMIT_DAYS` in `fetch/__init__.py`). A shorter outage shows as a "Source down" warning on the run page. Example: on 8 Nov 2026, data.gov.hr reset every connection from GitHub's runners while it answered normally elsewhere; eight sources kept their files from the day before, and the rest updated.
 
 ## Quality gate
 
@@ -77,7 +81,7 @@ A staged table is published only if all of these hold:
 - its row count is within ±20 % of the last published version;
 - its own checks pass: no duplicate keys, no missing required values, every municipality present, natural persons anonymous, facilities inside Croatia.
 
-Otherwise the last published version stays live. Every table that passed is still exported. `opcina gate` / `opcina build` then exit with an error, which makes the nightly job email the maintainer. Contract amounts may legitimately be empty (not published) or negative (annexes that lower a contract).
+Otherwise the last published version stays live. Every table that passed is still exported. `opcina gate` / `opcina build` then exit with an error, which makes the nightly job email the maintainer; the other tables still go live. Contract amounts may legitimately be empty (not published) or negative (annexes that lower a contract).
 
 When a jump in row count is expected, accept it once and let every other check still run. Examples: a municipality added to `payments.toml`, a new county, or the EOJN API backfill once a key is set.
 

@@ -1,9 +1,9 @@
-"""A source that is down must not block the others while its last files are recent."""
+"""A source that is down keeps its last files; only a long outage is reported as overdue."""
 
 import json
 from datetime import UTC, datetime, timedelta
 
-from opcina_pipeline.fetch import STALE_LIMIT_DAYS, blocking_failures, last_success
+from opcina_pipeline.fetch import STALE_LIMIT_DAYS, last_success, overdue_failures
 from opcina_pipeline.fetch.base import Outcome
 
 NOW = datetime(2026, 11, 8, 10, 40, tzinfo=UTC)
@@ -33,18 +33,18 @@ def test_last_success_ignores_failed_runs(tmp_path):
     assert last_success(tmp_path / "missing.jsonl", "minfin_budget") is None
 
 
-def test_recent_files_turn_a_failure_into_a_warning(tmp_path, capsys):
+def test_a_recent_outage_is_only_a_warning(tmp_path, capsys):
     log = tmp_path / "source_runs.jsonl"
     write_log(log, run("minfin_budget", "unchanged", NOW - timedelta(days=1)))
     outcomes = {
         "minfin_budget": Outcome("failed", message="ConnectError: reset"),
         "payments": Outcome("ok"),
     }
-    assert blocking_failures(outcomes, log, now=NOW) == {}
+    assert overdue_failures(outcomes, log, now=NOW) == {}
     assert "minfin_budget is down" in capsys.readouterr().out
 
 
-def test_old_or_missing_files_block_the_run(tmp_path):
+def test_old_or_missing_files_are_overdue(tmp_path):
     log = tmp_path / "source_runs.jsonl"
     write_log(log, run("dzs_population", "ok", NOW - timedelta(days=STALE_LIMIT_DAYS + 1)))
     outcomes = {
@@ -52,7 +52,7 @@ def test_old_or_missing_files_block_the_run(tmp_path):
         "kindergartens": Outcome("failed", message="ConnectError: reset"),
         "contracts_eojn": Outcome("skipped", message="no API key"),
     }
-    blocking = blocking_failures(outcomes, log, now=NOW)
-    assert set(blocking) == {"dzs_population", "kindergartens"}
-    assert "over 7 days" in blocking["dzs_population"]
-    assert blocking["kindergartens"] == "no earlier successful download"
+    overdue = overdue_failures(outcomes, log, now=NOW)
+    assert set(overdue) == {"dzs_population", "kindergartens"}
+    assert "over 7 days" in overdue["dzs_population"]
+    assert overdue["kindergartens"] == "no earlier successful download"

@@ -6,7 +6,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 
-- A source that is down no longer blocks the nightly data update: it keeps its last good files (the sources page says so) and only fails the run after 7 days without a successful download.
+- One source or table no longer holds back the others. A source that fails to download keeps its last good files (the sources page says so), a table the quality gate rejects keeps its last published version, and the website now deploys after every nightly run, failed or not. A red nightly run is only an alert: a rejected table, or a source with no successful download in 7 days.
 - Bar charts: all tracks in one chart now have the same length, so bars are comparable (each row used to size its own value column).
 - Home list fits a 360 px phone; source cards have inner padding; dates no longer wrap.
 

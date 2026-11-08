@@ -72,8 +72,9 @@ def run_fetch(only: list[str] | None = None) -> dict[str, Outcome]:
     return outcomes
 
 
-# A source that is down keeps its last good files (the website says so) for this long
-# before the run fails, so an outage is noticed without blocking every other source.
+# A source that is down keeps its last good files (the website says so). After this
+# many days without a successful download it also turns the nightly job red, which
+# emails the maintainer. It never holds back other sources: see deploy.yml.
 STALE_LIMIT_DAYS = 7
 
 
@@ -89,30 +90,30 @@ def last_success(log_path: Path, key: str) -> str | None:
     return last
 
 
-def blocking_failures(
+def overdue_failures(
     outcomes: dict[str, Outcome], log_path: Path, now: datetime | None = None
 ) -> dict[str, str]:
-    """Failed sources that should fail the run, with the reason.
+    """Failed sources that need the maintainer's attention, with the reason.
 
-    A source that fails but has files from a successful run in the last
-    ``STALE_LIMIT_DAYS`` does not block: the build uses those files and the website
-    marks the source as "last download failed, showing previous data". It is
-    reported as a warning instead. A source with no good files, or only old ones,
-    fails the run.
+    Every failed source keeps the files of its last successful download, the build
+    uses them, and the website marks the source as "last download failed, showing
+    previous data"; every other source still updates. A failure is only reported as
+    overdue when the source has no good files at all, or none newer than
+    ``STALE_LIMIT_DAYS``. Shorter outages are warnings on the run page.
     """
     now = now or datetime.now(UTC)
-    blocking = {}
+    overdue = {}
     for key, outcome in outcomes.items():
         if outcome.status != "failed":
             continue
         last = last_success(log_path, key)
         if last is None:
-            blocking[key] = "no earlier successful download"
+            overdue[key] = "no earlier successful download"
         elif now - datetime.fromisoformat(last) > timedelta(days=STALE_LIMIT_DAYS):
-            blocking[key] = f"last successful download {last}, over {STALE_LIMIT_DAYS} days ago"
+            overdue[key] = f"last successful download {last}, over {STALE_LIMIT_DAYS} days ago"
         else:
             warn(f"{key} is down ({outcome.message}); using the files downloaded {last}")
-    return blocking
+    return overdue
 
 
 def warn(text: str) -> None:
