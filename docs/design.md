@@ -73,6 +73,24 @@ Phone: the header card stacks (name, then key figures in two columns, then the m
 | Tables in cards | A keyboard-focusable scroll region (`role="region"`, `tabindex="0"`, labelled by the figure title). Tables with 4 or more columns get a minimum width and scroll instead of squeezing. Edge fades show the overflow. |
 | Search | Moves to the top of the home page as the main action, inside a card. |
 
+## Visual QA (H8)
+
+Every page of all three editions is checked at 360, 768 and 1280 px:
+
+- `npm run layout` fails when a page scrolls sideways or anything sticks out past the
+  screen outside a scroll region (runs in CI after the accessibility checks).
+- `npm run a11y` runs axe-core in light and dark mode.
+- `scripts/screenshots.mjs` captures full pages for review; `docs/screenshots/` holds
+  the first-screen set for the submission.
+
+Fixed in the first pass:
+
+- Bar charts: every row sized its own value column, so tracks had different lengths
+  and bars in one chart were not comparable. Rows are now a subgrid of the list.
+- The home list hid the population column on phones; it now wraps (`.table-fit`,
+  tighter cells below 30rem) and fits 360 px.
+- Stacked source cards had no inner padding; dates no longer break across lines.
+
 ## Out of scope for now
 
 - New colours, a new typeface, illustrations.

@@ -73,7 +73,7 @@ export function MunicipalitySearch({
         aria-label={caption}
         tabIndex={0}
       >
-        <table>
+        <table className="table-fit">
           <caption className={styles.caption}>{caption}</caption>
           <thead>
             <tr>

@@ -67,7 +67,7 @@ export function SourcesView({ locale }: { locale: Locale }) {
                 <td role="cell" data-label={t.publisher}>
                   {run.publisher}
                 </td>
-                <td role="cell" data-label={t.fetched}>
+                <td role="cell" className="nowrap" data-label={t.fetched}>
                   {run.status === "ok" || run.rowCount
                     ? fmt.date(run.fetchedAt)
                     : "–"}

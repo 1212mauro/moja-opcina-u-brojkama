@@ -49,7 +49,7 @@ export function SourcesTable({
               <td role="cell" data-label={cols.publisher}>
                 {run.publisher}
               </td>
-              <td role="cell" data-label={cols.fetched}>
+              <td role="cell" className="nowrap" data-label={cols.fetched}>
                 {fmt.date(run.fetchedAt)}
               </td>
               <td role="cell" data-label={cols.licence}>
