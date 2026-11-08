@@ -9,3 +9,7 @@ out/
 *.egg-info/
 web/public/data/
 data/interim/
+
+# Video recordings (large binaries; the script and narration are tracked)
+docs/video/*.mp4
+docs/video/*.webm
