@@ -72,6 +72,55 @@ def run_fetch(only: list[str] | None = None) -> dict[str, Outcome]:
     return outcomes
 
 
+# A source that is down keeps its last good files (the website says so) for this long
+# before the run fails, so an outage is noticed without blocking every other source.
+STALE_LIMIT_DAYS = 7
+
+
+def last_success(log_path: Path, key: str) -> str | None:
+    """Finish time of the last run of this source that got its files ("ok"/"unchanged")."""
+    if not log_path.exists():
+        return None
+    last = None
+    for line in log_path.read_text(encoding="utf-8").splitlines():
+        record = json.loads(line)
+        if record["source"] == key and record["status"] in ("ok", "unchanged"):
+            last = record["finished_at"]
+    return last
+
+
+def blocking_failures(
+    outcomes: dict[str, Outcome], log_path: Path, now: datetime | None = None
+) -> dict[str, str]:
+    """Failed sources that should fail the run, with the reason.
+
+    A source that fails but has files from a successful run in the last
+    ``STALE_LIMIT_DAYS`` does not block: the build uses those files and the website
+    marks the source as "last download failed, showing previous data". It is
+    reported as a warning instead. A source with no good files, or only old ones,
+    fails the run.
+    """
+    now = now or datetime.now(UTC)
+    blocking = {}
+    for key, outcome in outcomes.items():
+        if outcome.status != "failed":
+            continue
+        last = last_success(log_path, key)
+        if last is None:
+            blocking[key] = "no earlier successful download"
+        elif now - datetime.fromisoformat(last) > timedelta(days=STALE_LIMIT_DAYS):
+            blocking[key] = f"last successful download {last}, over {STALE_LIMIT_DAYS} days ago"
+        else:
+            warn(f"{key} is down ({outcome.message}); using the files downloaded {last}")
+    return blocking
+
+
+def warn(text: str) -> None:
+    """A warning on the GitHub Actions run page (plain output elsewhere)."""
+    prefix = "::warning title=Source down::" if os.environ.get("GITHUB_ACTIONS") else "warning: "
+    print(prefix + text)
+
+
 def recently_fetched(log_path: Path, key: str, refresh_days: int | None) -> str | None:
     """Finish time of the last successful run if it is newer than ``refresh_days``.
 
@@ -79,13 +128,9 @@ def recently_fetched(log_path: Path, key: str, refresh_days: int | None) -> str 
     requests) set ``refresh_days`` so the nightly run fetches them only weekly.
     Naming the source explicitly (``opcina fetch <key>``) always fetches it.
     """
-    if not refresh_days or not log_path.exists():
+    if not refresh_days:
         return None
-    last = None
-    for line in log_path.read_text(encoding="utf-8").splitlines():
-        record = json.loads(line)
-        if record["source"] == key and record["status"] in ("ok", "unchanged"):
-            last = record["finished_at"]
+    last = last_success(log_path, key)
     if last and datetime.now(UTC) - datetime.fromisoformat(last) < timedelta(days=refresh_days):
         return last
     return None

@@ -10,7 +10,7 @@ from opcina_pipeline import boundaries, master, postcodes
 from opcina_pipeline.config import config_path, load_scope, load_sources, repo_root, schema_path
 from opcina_pipeline.contract import Contract
 from opcina_pipeline.export import export
-from opcina_pipeline.fetch import run_fetch
+from opcina_pipeline.fetch import blocking_failures, run_fetch
 from opcina_pipeline.parse import PARSERS, run_parsers
 from opcina_pipeline.quality import run_gate
 
@@ -123,7 +123,11 @@ def main() -> None:
         build_boundaries()
     elif args.command == "fetch":
         outcomes = run_fetch(args.sources or None)
-        if any(o.status == "failed" for o in outcomes.values()):
+        # A source that is down but has recent good files only warns (see blocking_failures).
+        blocking = blocking_failures(outcomes, repo_root() / "data" / "raw" / "source_runs.jsonl")
+        for key, reason in blocking.items():
+            print(f"error: {key} failed and blocks the run: {reason}")
+        if blocking:
             raise SystemExit(1)
     elif args.command == "parse":
         unknown = sorted(set(args.tables) - set(PARSERS))

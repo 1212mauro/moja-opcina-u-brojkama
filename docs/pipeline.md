@@ -63,6 +63,12 @@ Two choices currently keep a name because it is a business name. **Both are open
 1. **Sole traders** (obrt "vl. …", OPG, notaries, lawyers) keep their name and OIB as payment recipients and suppliers, but an obrt's OIB is its owner's personal OIB. Where a publisher marks them GDPR (Ivanec does), they stay hidden.
 2. **Pharmacies** named after their owner (e.g. "Ljekarna <ime prezime>") keep that trade name.
 
+## When a source is down
+
+A source whose download fails does not stop the others. The build uses the files from its last successful download, and the website marks it as "zadnje preuzimanje nije uspjelo; prikazujemo prethodne podatke", with the date of those files.
+
+`opcina fetch` fails the nightly job (and so holds back the deploy) only when a failed source has no earlier successful download, or the last one is more than 7 days old (`STALE_LIMIT_DAYS` in `fetch/__init__.py`). A shorter outage shows as a "Source down" warning on the run page. Example: on 8 Nov 2026, data.gov.hr reset every connection from GitHub's runners while it answered normally elsewhere; eight sources kept their files from the day before.
+
 ## Quality gate
 
 A staged table is published only if all of these hold:
