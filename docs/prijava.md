@@ -6,7 +6,7 @@ Datathon Portala otvorenih podataka 2026 · Izazov **A) Društvo i javne usluge*
 | --- | --- |
 | Radni prototip | https://1212mauro.github.io/moja-opcina-u-brojkama/ |
 | Izvorni kod | https://github.com/1212mauro/moja-opcina-u-brojkama (licenca EUPL-1.2) |
-| Video prezentacija | `docs/video/predstavljanje.mp4` (1:50) |
+| Video prezentacija | [predstavljanje.mp4](https://github.com/1212mauro/moja-opcina-u-brojkama/releases/download/v0.4.0/predstavljanje.mp4) (1:50), [izdanje v0.4.0](https://github.com/1212mauro/moja-opcina-u-brojkama/releases/tag/v0.4.0) |
 | Snimke zaslona | [docs/screenshots/](screenshots/) |
 
 ## 1. Problem
@@ -47,7 +47,7 @@ Za svaki grad i općinu jedna stranica, na hrvatskom, na jednostavnom jeziku i n
 
 Svaki grafikon ima rečenicu koja kaže glavno i tablicu s točnim iznosima. Sve radi i bez JavaScripta, na mobitelu, u svijetlom i tamnom načinu.
 
-Opseg prototipa: **28 gradova i općina Varaždinske županije** (5 pilot-jedinica s isplatama: Varaždin, Ivanec, Ludbreg, Jalžabet, Breznički Hum). Izbor je obrazložen u [pilots.md](pilots.md).
+Opseg prototipa: **28 gradova i općina Varaždinske županije**, svaki s proračunom, nabavom i ustanovama. Isplate imaju pet pilot-jedinica (Lepoglava, Maruševec, Sveti Ilija, Jalžabet, Breznički Hum) i Grad Varaždin. Izbor pilota obrazložen je u [pilots.md](pilots.md).
 
 ## 4. Korišteni skupovi podataka
 
@@ -67,7 +67,7 @@ Rješenje koristi 16 skupova otvorenih podataka; sedamnaesti (novi EOJN API) ukl
 | Srednje škole (e-Matica) | Ministarstvo znanosti, obrazovanja i mladih | [data.gov.hr](https://data.gov.hr/ckan/dataset/srednje-skole) | Otvorena dozvola RH | Škole |
 | Dječji vrtići (e-Matica) | Ministarstvo znanosti, obrazovanja i mladih | [data.gov.hr](https://data.gov.hr/ckan/dataset/djecji-vrtici) | Otvorena dozvola RH | Vrtići |
 | OpenStreetMap | OpenStreetMap contributors | [openstreetmap.org](https://www.openstreetmap.org/copyright) | ODbL 1.0 | Zdravstvene ustanove; lokacije koje registri nemaju |
-| Informacije o trošenju sredstava (isplate) | Gradovi i općine (Varaždin, Ivanec, Ludbreg, Jalžabet, Breznički Hum) | portali gradova; obveza objave: [NN 59/2023](https://narodne-novine.nn.hr/clanci/sluzbeni/2023_06_59_1003.html) | Licencu ne navode | Isplate iz proračuna |
+| Informacije o trošenju sredstava (isplate) | Gradovi i općine (Lepoglava, Maruševec, Sveti Ilija, Jalžabet, Breznički Hum, Varaždin) | portali gradova; obveza objave: [NN 59/2023](https://narodne-novine.nn.hr/clanci/sluzbeni/2023_06_59_1003.html) | Licencu ne navode | Isplate iz proračuna |
 | Registri ugovora gradova i općina | Grad Ivanec, Grad Lepoglava, Grad Varaždinske Toplice | [data.gov.hr](https://data.gov.hr/) | Otvorena dozvola RH | Ugovori koje stari registar nema |
 | Registar ugovora, stari EOJN RH (2018.–2023.) | Narodne novine d.d. | [eojn.nn.hr](https://eojn.nn.hr/Oglasnik/) | Javno objavljeno (licenca nije navedena) | Ugovori javne nabave |
 | TED: obavijesti o dodjeli ugovora (od 2024.) | Ured za publikacije EU | [ted.europa.eu](https://ted.europa.eu/) | Ponovna uporaba uz navođenje izvora (Odluka 2011/833/EU) | Ugovori iznad EU pragova od 2024. |
@@ -144,7 +144,7 @@ Detaljnije: [pipeline.md](pipeline.md) (obrada, pravila, osobni podaci), [design
 
 ## 8. Ograničenja
 
-- Prototip pokriva jednu županiju. Isplate su dostupne za 5 jedinica, jer ih samo dio gradova objavljuje u strojno čitljivom obliku.
+- Prototip pokriva jednu županiju. Isplate su dostupne za 6 od 28 jedinica: ostale ih objavljuju iza CAPTCHA-e, na platformi koja odbija automatsko preuzimanje ili ne objavljuju u strojno čitljivom obliku.
 - Proračunski korisnici (vrtići, knjižnice) nisu konsolidirani u proračun grada jer ih izvor ne konsolidira.
 - Za dio izvora licenca nije navedena; podatke koristimo jer su javno objavljeni po zakonu, uz navođenje izvora.
 - Pristupačnost je provjerena automatski (axe-core) i ručno pregledom, ali još nije testirana s korisnicima čitača zaslona.

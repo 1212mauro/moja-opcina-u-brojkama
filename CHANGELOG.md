@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-08
+
+Datathon submission (MVP-4). Live site: https://1212mauro.github.io/moja-opcina-u-brojkama/
+
 ### Fixed
 
 - One source or table no longer holds back the others. A source that fails to download keeps its last good files (the sources page says so), a table the quality gate rejects keeps its last published version, and the website now deploys after every nightly run, failed or not. A red nightly run is only an alert: a rejected table, or a source with no successful download in 7 days.
@@ -52,3 +56,6 @@ All notable changes to this project are documented here. The format follows [Kee
 - Payments a municipality lists with itself as recipient (Kipos: everything it does not itemise) still count in totals but are no longer shown among the largest recipients.
 - Pilots are now Lepoglava, Maruševec, Sveti Ilija, Jalžabet and Breznički Hum: every source of each, payments included, is open. Varaždin, Ivanec and Ludbreg publish payments only behind a CAPTCHA or on a platform that refuses GitHub's servers; their pages keep budget, procurement and facilities. Payments from proracun.hr are a new platform.
 - Procurement: the data.gov.hr file the spec cites as national is Grad Ivanec's own register; national access goes through eojn.hr (see `docs/sources.md`).
+
+[Unreleased]: https://github.com/1212mauro/moja-opcina-u-brojkama/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/1212mauro/moja-opcina-u-brojkama/releases/tag/v0.4.0

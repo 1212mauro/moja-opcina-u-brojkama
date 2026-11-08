@@ -1,6 +1,6 @@
 [project]
 name = "opcina-pipeline"
-version = "0.1.0"
+version = "0.4.0"
 description = "Data pipeline for Moja općina u brojkama: fetches, parses and joins open data on Croatian municipalities"
 license = "EUPL-1.2"
 requires-python = ">=3.12"
