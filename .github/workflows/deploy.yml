@@ -34,10 +34,15 @@ concurrency:
 
 jobs:
   build:
-    # Only main may deploy to Pages; after a nightly run, only if that run succeeded.
+    # Only main may deploy to Pages. After a nightly run, deploy whether it succeeded
+    # or failed: sources and tables are independent. A source that failed keeps its
+    # last files and a table the quality gate rejected keeps its last published
+    # version, so everything that did update goes live. A failed run only alerts the
+    # maintainer. Not after a cancelled run, which someone stopped on purpose.
     if: >-
       github.ref == 'refs/heads/main' &&
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+      (github.event_name != 'workflow_run' ||
+       contains(fromJSON('["success", "failure", "timed_out"]'), github.event.workflow_run.conclusion))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

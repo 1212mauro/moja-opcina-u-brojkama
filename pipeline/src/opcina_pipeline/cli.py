@@ -10,7 +10,7 @@ from opcina_pipeline import boundaries, master, postcodes
 from opcina_pipeline.config import config_path, load_scope, load_sources, repo_root, schema_path
 from opcina_pipeline.contract import Contract
 from opcina_pipeline.export import export
-from opcina_pipeline.fetch import run_fetch
+from opcina_pipeline.fetch import overdue_failures, run_fetch
 from opcina_pipeline.parse import PARSERS, run_parsers
 from opcina_pipeline.quality import run_gate
 
@@ -123,7 +123,13 @@ def main() -> None:
         build_boundaries()
     elif args.command == "fetch":
         outcomes = run_fetch(args.sources or None)
-        if any(o.status == "failed" for o in outcomes.values()):
+        # Each source stands alone: one that failed keeps its last files and the others
+        # update regardless (the deploy runs after every nightly run). This exit code
+        # only turns the job red, to alert the maintainer, when a source is overdue.
+        overdue = overdue_failures(outcomes, repo_root() / "data" / "raw" / "source_runs.jsonl")
+        for key, reason in overdue.items():
+            print(f"error: {key} needs attention: {reason}")
+        if overdue:
             raise SystemExit(1)
     elif args.command == "parse":
         unknown = sorted(set(args.tables) - set(PARSERS))
