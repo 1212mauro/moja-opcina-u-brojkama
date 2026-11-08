@@ -9,7 +9,7 @@ One plain-language page for each of Croatia's 556 cities and municipalities: how
 ## Datathon Portala otvorenih podataka 2026
 
 - **Solution documentation (Croatian):** [docs/prijava.md](docs/prijava.md). It covers the problem, users, features, technical architecture, every dataset with its publisher and link, prerequisites, further development, and the tools used.
-- **Video presentation (2:18):** [predstavljanje.mp4 in the v0.4.0 release](https://github.com/1212mauro/moja-opcina-u-brojkama/releases/tag/v0.4.0), narration in [docs/video/naracija.md](docs/video/naracija.md), subtitles in [docs/video/predstavljanje.srt](docs/video/predstavljanje.srt).
+- **Video presentation (2:24):** [predstavljanje.mp4 in the v0.4.0 release](https://github.com/1212mauro/moja-opcina-u-brojkama/releases/tag/v0.4.0), narration in [docs/video/naracija.md](docs/video/naracija.md), subtitles in [docs/video/predstavljanje.srt](docs/video/predstavljanje.srt).
 - **Screenshots:** [docs/screenshots/](docs/screenshots/): every page type at 360, 768 and 1280 px, in light and dark mode.
 
 ## Documentation

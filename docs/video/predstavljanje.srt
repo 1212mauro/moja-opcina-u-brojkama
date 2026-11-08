@@ -1,67 +1,67 @@
 1
-00:00:10,303 --> 00:00:21,331
+00:00:09,231 --> 00:00:20,899
 Za koga je
 
 2
-00:00:21,481 --> 00:00:25,355
+00:00:21,041 --> 00:00:24,760
 Upišite ime mjesta ili poštanski broj
 
 3
-00:00:25,355 --> 00:00:30,308
+00:00:24,760 --> 00:00:31,962
 Svaki grad i općina ima svoju stranicu
 
 4
-00:00:30,308 --> 00:00:37,763
+00:00:31,962 --> 00:00:40,628
 Najvažnije brojke odmah na vrhu
 
 5
-00:00:37,763 --> 00:00:43,779
+00:00:40,628 --> 00:00:46,671
 Usporedba sa sličnim mjestima
 
 6
-00:00:43,779 --> 00:00:50,514
+00:00:46,671 --> 00:00:51,952
 Odakle dolazi novac i na što se troši
 
 7
-00:00:50,514 --> 00:00:56,532
+00:00:51,952 --> 00:00:57,316
 Uz svaki grafikon i tablica s brojkama
 
 8
-00:00:56,532 --> 00:01:01,481
+00:00:57,316 --> 00:01:01,122
 Usporedba s gradovima iste veličine
 
 9
-00:01:01,481 --> 00:01:06,435
+00:01:01,122 --> 00:01:05,915
 Javna nabava: od koga grad kupuje
 
 10
-00:01:06,435 --> 00:01:12,105
+00:01:05,915 --> 00:01:11,528
 Isplate iz proračuna: kome grad plaća
 
 11
-00:01:12,105 --> 00:01:15,622
+00:01:11,528 --> 00:01:14,746
 Škole, vrtići i zdravstvo u blizini
 
 12
-00:01:15,622 --> 00:01:20,931
+00:01:14,746 --> 00:01:20,300
 Svaki broj ima izvor i datum preuzimanja
 
 13
-00:01:20,931 --> 00:01:31,599
+00:01:20,300 --> 00:01:32,055
 16 skupova otvorenih podataka
 
 14
-00:01:31,599 --> 00:01:47,261
+00:01:32,055 --> 00:01:49,008
 Tehnička arhitektura
 
 15
-00:01:47,261 --> 00:01:53,643
+00:01:49,008 --> 00:01:54,621
 Jednostavnim jezikom, i na engleskom
 
 16
-00:01:53,643 --> 00:01:59,302
+00:01:54,621 --> 00:02:01,606
 Pristupačno: WCAG 2.1 AA, i na mobitelu
 
 17
-00:01:59,302 --> 00:02:08,890
+00:02:01,606 --> 00:02:12,134
 Daljnji razvoj
