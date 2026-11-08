@@ -158,6 +158,13 @@ td {
   border-bottom: 1px solid var(--border);
   vertical-align: top;
 }
+/* Narrow phones: tighter cells, so a four-column table still fits a 360 px screen. */
+@media (max-width: 30rem) {
+  th,
+  td {
+    padding-inline: var(--space-2);
+  }
+}
 th {
   color: var(--text-secondary);
   font-weight: 600;
@@ -166,6 +173,10 @@ td.num,
 th.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* Short values that read badly when broken, such as dates ("22. 10. 2026."). */
+td.nowrap {
   white-space: nowrap;
 }
 
@@ -192,7 +203,8 @@ th.num {
   /* Every scroll region sits on a card; the fades blend into this colour. */
   background-color: var(--surface-1);
 }
-.table-scroll > table:not(.stack-table):has(th:nth-child(4)) {
+/* Tables that cannot fit squeeze no further; .table-fit marks those that wrap instead. */
+.table-scroll > table:not(.stack-table, .table-fit):has(th:nth-child(4)) {
   min-width: 36rem;
 }
 
@@ -218,7 +230,7 @@ th.num {
     display: block;
   }
   .stack-table tr {
-    padding: var(--space-3) 0;
+    padding: var(--space-3);
     border-bottom: 1px solid var(--border);
   }
   .stack-table tr:last-child {

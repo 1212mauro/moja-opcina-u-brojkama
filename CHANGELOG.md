@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Fixed
+
+- Bar charts: all tracks in one chart now have the same length, so bars are comparable (each row used to size its own value column).
+- Home list fits a 360 px phone; source cards have inner padding; dates no longer wrap.
+
 ### Added
 
 - Frontend design (`docs/design.md`): the home page puts search and the list first with the map beside them; each municipality page opens with one header card (name, key figures, locator map) and a section menu (sticky sidebar on desktop, chips on phones).
@@ -12,6 +17,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Key figures in context: the revenue and expenditure tiles say how much more or less per resident the unit has than similar units on average (or than the one other similar unit), linked to the comparison section, in all three editions.
 - County map: a municipality's name appears on the map when it is hovered or focused (CSS only, no JavaScript), and a legend explains the marked unit and units without data.
 - Sources tables (on each municipality page and on the sources page) become a stacked list on phones, one card per source with each value under its column name; screen readers still get a table.
+- Layout check (`npm run layout`, in CI): every page of every edition at 360, 768 and 1280 px, failing on sideways scrolling. Submission screenshots in `docs/screenshots/`.
 - Varaždin payments, fetched nightly from the city's export access point (`/Pretraga/GetExport/`, named by the city in Nov 2026): 12 months, about 2,300 payments a month, cleaned with the same privacy rules (`docs/varazdin-payments.md`).
 - Data spot-check script (`scripts/spot_check.py`) and report (`docs/spot-check.md`): 50 figures on the pilot pages checked against their source files.
 - Spec, task tracker (`TASKS.md`) and progress script.

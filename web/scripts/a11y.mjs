@@ -6,63 +6,18 @@
  *
  *   npm run build && npm run a11y
  */
-import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
-import { createServer } from "node:http";
 import path from "node:path";
 
 import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "playwright";
 
+import { listPages, serveSite } from "./lib/static-site.mjs";
+
 const OUT = path.resolve(process.argv[2] ?? "out");
-const TYPES = {
-  ".html": "text/html; charset=utf-8",
-  ".css": "text/css",
-  ".js": "text/javascript",
-  ".json": "application/json",
-  ".txt": "text/plain; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".ico": "image/x-icon",
-  ".woff2": "font/woff2",
-};
-
-/** Every page of the export: each index.html, plus the 404 page. */
-function pages(dir = OUT, prefix = "/") {
-  const found = [];
-  for (const name of readdirSync(dir)) {
-    const full = path.join(dir, name);
-    if (name === "_next" || name === "data" || name.startsWith("__next"))
-      continue;
-    if (statSync(full).isDirectory())
-      found.push(...pages(full, `${prefix}${name}/`));
-    else if (name === "index.html") found.push(prefix);
-  }
-  return found;
-}
-
-function serve() {
-  const server = createServer((req, res) => {
-    const url = decodeURIComponent(new URL(req.url, "http://x").pathname);
-    let file = path.join(OUT, url);
-    if (url.endsWith("/")) file = path.join(file, "index.html");
-    if (!file.startsWith(OUT) || !existsSync(file)) {
-      res.writeHead(404, { "content-type": TYPES[".html"] });
-      createReadStream(path.join(OUT, "404.html")).pipe(res);
-      return;
-    }
-    res.writeHead(200, {
-      "content-type": TYPES[path.extname(file)] ?? "application/octet-stream",
-    });
-    createReadStream(file).pipe(res);
-  });
-  return new Promise((resolve) =>
-    server.listen(0, "127.0.0.1", () => resolve(server)),
-  );
-}
-
-const server = await serve();
-const origin = `http://127.0.0.1:${server.address().port}`;
+const site = await serveSite(OUT);
+const origin = site.origin;
 const browser = await chromium.launch();
-const urls = [...pages(), "/this-page-does-not-exist/"];
+const urls = [...listPages(OUT), "/this-page-does-not-exist/"];
 let failures = 0;
 
 for (const colorScheme of ["light", "dark"]) {
@@ -91,7 +46,7 @@ for (const colorScheme of ["light", "dark"]) {
 }
 
 await browser.close();
-server.close();
+site.close();
 console.log(
   `a11y: ${urls.length} pages × 2 colour schemes, ${failures} violation${failures === 1 ? "" : "s"}`,
 );
