@@ -111,7 +111,7 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 - [ ] G2 Fix the findings from G1 (~8h)
 - [x] G3 Data spot-check: compare 10 figures per pilot with the source files (~6h) — 50/50 agree (`docs/spot-check.md`, `scripts/spot_check.py`); found and fixed a municipality listed as its own top recipient
 - [x] G4 Write the video script around one resident's question and how the app answers it (~4h) — narration in `docs/video/naracija.md`
-- [ ] G5 Record and edit the video (~8h) — 🚧 1:50 with Croatian captions, covering everything the datathon rules ask for (`web/scripts/video.mjs`, `docs/video/`); voice-over still to add
+- [ ] G5 Record and edit the video (~8h) — 🚧 2:18 with Croatian captions, covering everything the datathon rules ask for (`web/scripts/video.mjs`, `docs/video/`); voice-over still to add
 - [x] G6 Submission: README, live demo link, screenshots (~4h) — `docs/prijava.md` (Croatian solution documentation) and README
 
 ### H. Frontend design — week 4 (~30 h)

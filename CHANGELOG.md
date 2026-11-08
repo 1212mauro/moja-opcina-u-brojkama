@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Changed
+
+- Video: the narration is a full script (`docs/video/naracija.md`): for each scene the time, what is on screen, the caption and the spoken text in full sentences, plus the whole text to read in one piece. The video is now 2:18.
+
 ## [0.4.0] - 2026-11-08
 
 Datathon submission (MVP-4). Live site: https://1212mauro.github.io/moja-opcina-u-brojkama/
@@ -16,7 +20,7 @@ Datathon submission (MVP-4). Live site: https://1212mauro.github.io/moja-opcina-
 
 ### Added
 
-- Video presentation (G4/G5): a 1:50 walkthrough in Croatian, recorded from the built site with on-screen captions (`web/scripts/video.mjs`), with subtitles and a timed narration to read over it (`docs/video/`). It covers what the datathon rules ask for: problem, users, data sources, features, technical architecture, value and further development.
+- Video presentation (G4/G5): a 2:18 walkthrough in Croatian, recorded from the built site with on-screen captions (`web/scripts/video.mjs`), with subtitles and a timed narration to read over it (`docs/video/`). It covers what the datathon rules ask for: problem, users, data sources, features, technical architecture, value and further development.
 - Solution documentation in Croatian for the datathon submission (`docs/prijava.md`): every dataset with publisher, link and licence, how they are linked, architecture, standards, prerequisites, limits, further development and the tools used (including AI). README links the live site, video and screenshots.
 - Frontend design (`docs/design.md`): the home page puts search and the list first with the map beside them; each municipality page opens with one header card (name, key figures, locator map) and a section menu (sticky sidebar on desktop, chips on phones).
 - Wide tables scroll inside their card on phones, with edge fades and a keyboard-focusable region.
