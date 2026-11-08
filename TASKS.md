@@ -42,7 +42,7 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 - [x] A4 Set up the Next.js + TypeScript app in `web/` with static export (`output: 'export'`) and ESLint (~3h)
 - [x] A5 GitHub Actions CI on every PR: ruff + pytest for `pipeline/`, lint + build for `web/` (~3h, needs A3, A4)
 - [x] A6 Define the JSON data contract between pipeline and frontend (per-municipality file, search index, boundaries) as TypeScript types + an example file (~4h)
-- [ ] A7 Agree on team roles, a weekly check-in, and the branch/PR convention (~2h) — conventions in CONTRIBUTING.md; roles and check-in time still to fill in
+- [x] A7 Agree on team roles, a weekly check-in, and the branch/PR convention (~2h) — branch/PR convention and versioning in README; no fixed roles or check-in (decided 8 Nov 2026)
 
 ### B. Pilot selection and raw data — week 1 (~41 h)
 
@@ -111,8 +111,8 @@ MVP architecture (SPEC → Deployment): a Python pipeline run on a laptop or in 
 - [ ] G2 Fix the findings from G1 (~8h)
 - [x] G3 Data spot-check: compare 10 figures per pilot with the source files (~6h) — 50/50 agree (`docs/spot-check.md`, `scripts/spot_check.py`); found and fixed a municipality listed as its own top recipient
 - [x] G4 Write the video script around one resident's question and how the app answers it (~4h) — narration in `docs/video/naracija.md`
-- [ ] G5 Record and edit the video (~8h) — 🚧 recorded with Croatian captions (`web/scripts/video.mjs`, `docs/video/`); voice-over still to add
-- [ ] G6 Submission: README, live demo link, screenshots (~4h)
+- [ ] G5 Record and edit the video (~8h) — 🚧 1:50 with Croatian captions, covering everything the datathon rules ask for (`web/scripts/video.mjs`, `docs/video/`); voice-over still to add
+- [x] G6 Submission: README, live demo link, screenshots (~4h) — `docs/prijava.md` (Croatian solution documentation) and README
 
 ### H. Frontend design — week 4 (~30 h)
 
